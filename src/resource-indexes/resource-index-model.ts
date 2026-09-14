@@ -73,6 +73,41 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  T01: {
+    href: { 'zh-CN': '/triton/programs-and-block-values/', en: '/en/triton/programs-and-block-values/' },
+    title: { 'zh-CN': 'T01：从 SIMT 线程到 Triton 块值', en: 'T01: From SIMT Threads to Triton Block Values' },
+    prerequisites: ['F02', 'F03', 'M02'],
+  },
+  'T01-EXERCISES': {
+    href: { 'zh-CN': '/triton/programs-and-block-values/exercises/', en: '/en/triton/programs-and-block-values/exercises/' },
+    title: { 'zh-CN': 'T01 练习', en: 'T01 Exercises' }, prerequisites: ['T01'],
+  },
+  'T01-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/programs-and-block-values/solutions/', en: '/en/triton/programs-and-block-values/solutions/' },
+    title: { 'zh-CN': 'T01 独立参考解答', en: 'T01 Reviewed Solutions' }, prerequisites: ['T01-EXERCISES'],
+  },
+  T02: {
+    href: { 'zh-CN': '/triton/masked-vector-addition/', en: '/en/triton/masked-vector-addition/' },
+    title: { 'zh-CN': 'T02：为向量加法的每个边界加上掩码', en: 'T02: Mask Every Boundary in Vector Addition' },
+    prerequisites: ['T01', 'A01'],
+  },
+  'T02-EXERCISES': {
+    href: { 'zh-CN': '/triton/masked-vector-addition/exercises/', en: '/en/triton/masked-vector-addition/exercises/' },
+    title: { 'zh-CN': 'T02 练习', en: 'T02 Exercises' }, prerequisites: ['T02'],
+  },
+  'T02-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/masked-vector-addition/solutions/', en: '/en/triton/masked-vector-addition/solutions/' },
+    title: { 'zh-CN': 'T02 独立参考解答', en: 'T02 Reviewed Solutions' }, prerequisites: ['T02-EXERCISES'],
+  },
+  EX23: {
+    href: { 'zh-CN': '/examples/triton-vector-add/', en: '/en/examples/triton-vector-add/' },
+    title: { 'zh-CN': 'EX23：Triton 带掩码向量加法', en: 'EX23: Triton Masked Vector Addition' }, prerequisites: ['T02'],
+  },
+  VIS17: {
+    href: { 'zh-CN': '/visuals/simt-triton-mapping/', en: '/en/visuals/simt-triton-mapping/' },
+    title: { 'zh-CN': 'VIS17：SIMT 与 Triton 执行归属映射', en: 'VIS17: SIMT and Triton Ownership Mapping' },
+    prerequisites: ['T01'], indexGroup: 'visuals',
+  },
   P11: {
     href: { 'zh-CN': '/frameworks/profile-led-optimization/', en: '/en/frameworks/profile-led-optimization/' },
     title: { 'zh-CN': 'P11：用性能分析指导算子优化', en: 'P11: Profile-Led Operator Optimization' },

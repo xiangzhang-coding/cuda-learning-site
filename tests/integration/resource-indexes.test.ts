@@ -15,7 +15,7 @@ import {
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
-const asOf = new Date('2026-09-13T12:00:00Z');
+const asOf = new Date('2026-09-14T12:00:00Z');
 
 async function readRoute(route: string) {
   const relativePath = route === '/' ? 'index.html' : `${route.slice(1)}index.html`;
@@ -121,7 +121,7 @@ describe('published resource indexes', () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(94);
+    expect(practiceIds).toHaveLength(96);
 
     const localeContracts = [
       {
@@ -176,7 +176,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(94);
+      expect(prompts.size).toBe(96);
     }
   });
 
@@ -184,8 +184,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 14, practice: 94, visuals: 19, glossary: currentPublication.scope.glossaryTerms, sources: 102 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(229 + currentPublication.scope.glossaryTerms);
+    expect(counts).toEqual({ labs: 14, practice: 96, visuals: 20, glossary: currentPublication.scope.glossaryTerms, sources: 103 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(233 + currentPublication.scope.glossaryTerms);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -474,7 +474,7 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]').length).toBe(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(19);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(20);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');

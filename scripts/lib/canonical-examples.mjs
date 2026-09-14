@@ -178,7 +178,24 @@ export async function validateCanonicalExample(projectRoot, exampleId) {
     if (example.compatibility?.lanes?.length !== 0 || example.compatibility?.checks !== undefined) {
       errors.push(`${exampleId} Python checks must not inherit C++ Toolkit Lanes`);
     }
-    if (!profile?.id || !/^\d+\.\d+\.\d+$/.test(profile.python?.version ?? '') ||
+    if (example.build.compilerFamily === 'triton') {
+      if (profile?.triton !== '3.7.1' || profile?.torch !== '2.13.0' ||
+          profile?.python?.version !== '3.14.7' || profile?.python?.gil !== true ||
+          profile?.python?.implementation !== 'CPython' ||
+          !example.build.contractFiles?.includes(profile?.lock)) {
+        errors.push(`${exampleId} requires its independent pinned Triton/Python environment`);
+      }
+      try {
+        const lock = (await readFile(resolveInside(exampleRoot, profile.lock), 'utf8')).replace(/\\\r?\n\s*/g, ' ');
+        const requirements = lock.split(/\r?\n/).filter((line) => line && !line.startsWith('#'));
+        const pins = requirements.map((line) => /^([a-z0-9-]+)==([0-9.]+)(?:\s+--hash=sha256:[a-f0-9]{64})+\s*$/.exec(line));
+        if (pins.some((pin) => !pin) || new Set(pins.map((pin) => pin?.[1])).size !== pins.length ||
+            !pins.some((pin) => pin?.[1] === 'triton' && pin[2] === profile.triton) ||
+            !pins.some((pin) => pin?.[1] === 'torch' && pin[2] === profile.torch)) {
+          errors.push(`${exampleId} requires a hashed transitive Triton lock`);
+        }
+      } catch { errors.push(`${exampleId} Triton lock is missing`); }
+    } else if (!profile?.id || !/^\d+\.\d+\.\d+$/.test(profile.python?.version ?? '') ||
         profile.python?.implementation !== 'CPython' || profile.python?.gil !== true ||
         !/^\d+\.\d+\.\d+$/.test(profile.toolkit ?? '') ||
         !profile.distributions?.['cuda-core'] || !profile.distributions?.['cuda-bindings'] ||

@@ -2,6 +2,11 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "examples": {
+    "EX23": {
+      "sourceCommit": "5f830b8ec77dedb42e851ff03201e4cf968d10e9",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/5f830b8ec77dedb42e851ff03201e4cf968d10e9/examples/ex23-triton-vector-add",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/5f830b8ec77dedb42e851ff03201e4cf968d10e9.zip"
+    },
     "EX22": {
       "sourceCommit": "4129723b1c284266c30696a47b5eea0828dd3921",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/4129723b1c284266c30696a47b5eea0828dd3921/examples/ex22-adjacent-energy",

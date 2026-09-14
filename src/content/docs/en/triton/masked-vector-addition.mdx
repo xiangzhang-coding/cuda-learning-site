@@ -1,0 +1,141 @@
+---
+title: 'T02: Mask Every Boundary in Vector Addition'
+description: Implement and check an original Triton vector addition, keeping logical shapes, load masks, store masks, compilation and runtime evidence separate.
+pairId: t02
+counterpart: /triton/masked-vector-addition/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, kernel, launch, correctness, comparison, practice, diagnostics, evidence, retrieval, next, sources]
+resourceKind: learning-unit
+unitId: T02
+prerequisites: [T01, A01]
+relatedUnits: [EX23, EX02, VIS17]
+exampleIds: [EX23]
+canonicalExample: EX23
+canonicalRanges:
+  - imports
+  - kernel
+  - launch
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton language memory operations', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton masked-load tests', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/language/test_core.py', version: '3.7.1', platform: 'Owner tests inspected, not executed', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t02 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/masked-vector-addition/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,kernel,launch,correctness,comparison,practice,diagnostics,evidence,retrieval,next,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T02 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T01,A01' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'EX23,EX02,VIS17' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'imports,kernel,launch' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/triton/masked-vector-addition/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Write down a masked elementwise contract, follow its canonical kernel and host launch, predict the partial block, and design checks that catch missed outputs. Allow 40 minutes for reading and paper work; environment preparation and GPU execution take additional time and are gated by EX23.
+
+## Prerequisites
+
+The exact ordered edges are **[T01, A01]**: [programs and block values](/en/triton/programs-and-block-values/) and [elementwise map](/en/algorithms/elementwise-map/). You need unique output ownership and the distinction between a logical value and a physical thread. The familiar [EX02](/en/examples/vector-addition/) provides the CUDA comparison.
+
+## A small operation exposes the language boundary
+
+Vector addition has long served as a first parallel map because every output depends on two inputs at the same index. Moving it from CUDA to Triton keeps that dependency graph but changes how the work is expressed. A block of pointers and a block mask replace scalar thread-local address expressions and their guard. No reduction, synchronization between programs, shared-memory tile, or atomic update is required.
+
+## Define the operation before the launch
+
+EX23 accepts two equal-length contiguous FP32 vectors and writes their pointwise sum. Its command accepts positive integer `N` up to 1,000,000; empty input is explicitly rejected before importing GPU libraries. `TILE=256` is a compile-time shape, and the launch uses `ceil(N/256)` programs. Input buffers have exactly `N` elements; the output has an additional 256-element NaN write guard.
+
+For `N=1003`, predict four programs and 21 masked logical positions. The logical three-vector payload is `12*N` bytes; the output guard adds 1024 bytes. These counts exclude allocator, context, compiler and library overhead. The supported runtime requires CC 8.0+ and at least 8 GB, even though this workload is small.
+
+## Read the canonical kernel
+
+<CanonicalCode exampleId="EX23" range="imports" />
+
+<CanonicalCode exampleId="EX23" range="kernel" />
+
+The stable namespaces are `triton` and `triton.language as tl`. `@triton.jit` marks device work for compilation; it does not turn the rest of the Python process into GPU work. `TILE: tl.constexpr` supplies the compile-time extent used by `tl.arange(0, TILE)`.
+
+Both loads use the same elementwise mask. A false load mask prevents the memory access and supplies `other=0.0` for that logical value. The final store also needs its own mask: zero arithmetic on an invalid position is not permission to write past the output. The masks describe memory validity; they do not shrink the block shape.
+
+Do not replace a masked load with `tl.where(valid, tl.load(pointer), 0)`. The arguments to `where` are evaluated regardless of its condition, so an unmasked load is still performed. Nor is a tensor of predicates a Python scalar `if`. Choose the memory operation's mask deliberately. This unit uses pointer tensors, not tensor descriptors or block-pointer boundary-check APIs.
+
+## Keep the host launch and completion visible
+
+<CanonicalCode exampleId="EX23" range="launch" />
+
+PyTorch 2.13.0 supplies device storage and synchronization here; its Linux wheel requires Triton 3.7.1. It is independently pinned rather than installed into EX22's environment. Device tensors passed to the kernel supply device pointers; their Python owners remain alive until checked completion. The grid tuple counts program instances, not elements or warps. `num_warps=4` is a separate launch option.
+
+The first JIT launch may compile and populate a cache before submission. A returned launch is not a completed result. EX23 synchronizes device 0 and then copies output to the CPU. Its separate `build` command uses a fixed sm_80 compiler target without launching; a GPU run uses the actual device target. Build artifacts alone cannot validate arithmetic.
+
+## Make the reference independent
+
+Inputs use `((i % 29)-14)*0.25` and `((i % 13)-6)*0.5`. Their stored FP32 values and sums are exactly representable, so this fixture requires finite exact equality for every output. It also checks independently derived literals, including index 0 → −6.5, 12 → 2.5, 256 → 4, and 1002 → −2. Arbitrary data or a different operation needs a newly justified tolerance policy.
+
+Output starts as NaN, so a missed valid store fails the finite check. The tail guard must remain NaN, catching writes beyond the logical result. An unchanged guard cannot prove that loads were safe; inspect both masks and investigate memory defects with an appropriate separately reviewed GPU sanitizer workflow. Sizes 1, 255, 256, 257 and 1003 exercise tiny, before-boundary, exact, just-after and multi-program tails.
+
+## Compare with EX02 at the model boundary
+
+| Question | EX02 CUDA model | EX23 Triton model |
+| --- | --- | --- |
+| Who computes one index? | A thread computes its scalar index | A program constructs a block of indices |
+| Tail protection | Scalar bounds guard protects the body | Elementwise masks protect both loads and the store |
+| Parallel decomposition | Grid and explicit threads per block | Program grid, logical shape and separate warp option |
+| Where is the oracle? | CPU reference after checked completion | CPU reference after checked completion |
+| What transfers as evidence? | Only evidence for the declared CUDA subject | None from EX02; separate compiler/runtime evidence required |
+
+The examples use different original fixtures. This is an ownership comparison, not a timing comparison with controlled inputs. Similar geometry or fewer lines of Python cannot establish a performance result.
+
+## Guided practice: predict, build, then check
+
+1. Use [VIS17](/en/visuals/simt-triton-mapping/) with `N=1003, B=256`. Derive the final program's valid range `768–1002` and masked range `1003–1023` before selecting it.
+2. Open [EX23](/en/examples/triton-vector-add/), check its environment gates, and follow setup, host-test, build and run in that order on matching external Linux.
+3. Inspect the kernel's two load masks and one store mask. Match them to the CPU contract and output guard.
+4. If GPU access is unavailable, submit the derivation and host-test result with the runtime blocker. If available, retain the actual exit status, complete Environment Manifest and generated reports.
+
+**Acceptance:** a complete tail derivation, all-output checking policy, unchanged-guard criterion, and accurate evidence classification. Expected output is not a substitute for logs.
+
+## Diagnose the failing layer
+
+An installation failure calls for checking Python ABI, platform, hashes and dependency versions. A compile failure calls for checking the selected target, bundled ptxas and compiler diagnostics. A launch or synchronization failure calls for device/driver and memory-access investigation. A comparison failure calls for indexing, coverage, dtype and mask inspection. Preserve the first failure and its stage; never continue to a success claim after a failed check.
+
+## Evidence boundary
+
+T02 has four empty evidence arrays. EX23 has empty compilation evidence and remains **Pending Hardware Verification**. A browser mapping, a host-test pass, interpreter behavior, an upstream test, or EX02's Compile-Checked status establishes no Triton runtime or performance result. The current project contains no captured benchmark.
+
+## Retrieval check
+
+1. Why are three masks required even though addition itself is harmless?
+2. What does `other=0.0` specify, and what does it not authorize?
+3. Why does `where` around an unmasked load fail to protect memory?
+4. Which defect does NaN initialization detect? Which defect can an unchanged tail guard miss?
+5. What is established by the sm_80 build, and what still requires a GPU run?
+
+## Continue with practice
+
+Complete the [masking Exercises](/en/triton/masked-vector-addition/exercises/) and then the [separate solutions](/en/triton/masked-vector-addition/solutions/). [PB-R5-014](/en/practice/#pb-r5-014) examines a suspicious green correctness report.
+
+## Sources and licensing
+
+Read the [canonical project](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5f830b8ec77dedb42e851ff03201e4cf968d10e9/examples/ex23-triton-vector-add) or [download its revision](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5f830b8ec77dedb42e851ff03201e4cf968d10e9.zip). Both locales import these same source ranges. [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) records exact language, tests, installation and toolchain sources. Facts and access: **2026-09-14**. Original code: Apache-2.0; original prose and Exercises: CC BY 4.0; Triton's exact MIT notice is retained without relicensing upstream work.

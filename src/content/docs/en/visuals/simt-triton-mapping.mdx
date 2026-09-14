@@ -1,0 +1,62 @@
+---
+title: 'VIS17: SIMT and Triton Ownership Mapping'
+description: Compare a fixed CUDA thread grid with Triton program instances, block values and memory masks using deterministic arithmetic.
+pairId: vis17
+counterpart: /visuals/simt-triton-mapping/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, prerequisites, explorer, interpretation, sources]
+resourceKind: visual-explainer
+unitId: VIS17
+prerequisites: [T01]
+relatedUnits: [T02, EX23]
+hardwareGate: none
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton program and memory semantics', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Browser logical model only', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis17 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/visuals/simt-triton-mapping/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,prerequisites,explorer,interpretation,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS17 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: T01 } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T02,EX23' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import TritonMappingExplorer from '../../../../components/TritonMappingExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/simt-triton-mapping/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+Change problem length and logical block shape, then trace the owner of each index. CUDA uses a fixed 32-thread comparison block; Triton's block extent is independent. This is an original deterministic Visual Explainer, not a measured GPU layout.
+
+## Prerequisites
+
+Exact prerequisite **[T01]**: [programs and block values](/en/triton/programs-and-block-values/). Continue with [T02](/en/triton/masked-vector-addition/) and [EX23](/en/examples/triton-vector-add/) for masked memory operations.
+
+## Explore the mapping
+
+<TritonMappingExplorer locale="en" />
+
+## Interpret the result
+
+For `N=37, B=16`, program 2 owns logical indices 32–47, but only 32–36 may load/store. Index 36 maps to CUDA block 1, thread/lane 4 and Triton logical position 4. The Triton position label does not identify its compiled physical lane. Set `N=1003, B=256` to match EX23's logical shape; the fixed 32-thread CUDA comparison remains illustrative rather than EX02's exact launch configuration.
+
+Keyboard controls and immediate updates require no animation. The static three-program ledger and initial table survive disabled JavaScript and print; narrow screens stack the static cards and keep wide tables keyboard-scrollable. Mask validity has text labels and does not depend on color. No settings persist, and no Evidence Status is awarded.
+
+## Sources and licensing
+
+See [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087), reviewed **2026-09-14**. Original component/model code: Apache-2.0; original explanatory prose: CC BY 4.0. No upstream image or visual is copied.

@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Triton 3.7.1 — external EX23 dependency
+
+T01/T02, VIS17 and EX23 reference Triton v3.7.1 at `f797708c0626e5f9840ca5b0a98790e2c7cb09ad`. Its [complete root MIT license](https://github.com/triton-lang/triton/blob/v3.7.1/LICENSE), copyright 2018–2020 Philippe Tillet and 2020–2022 OpenAI, is retained byte-for-byte in `examples/ex23-triton-vector-add/TRITON-LICENSE` (SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`) and protected by the file-license gate. EX23's kernel, signed fixtures, oracle, guards and host tooling are original Apache-2.0; owner tutorial code and benchmarks are not copied. The notice does not relicense bundled NVIDIA tools, PyTorch or their transitive packages. These dependencies are installed externally; no wheel or assembler is redistributed in the site. Source and rights review: 2026-09-14; see SRC-CUDA-087.
+
 # Third-Party Notices
 
 This project installs third-party packages to build and test the Learning Site. The packages remain under their own terms; the project licenses do not relicense them.

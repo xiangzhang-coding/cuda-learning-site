@@ -48,6 +48,22 @@ type PublicationPair = {
 
 const publicationPairFixtures: readonly PublicationPair[] = [
   ...[
+    { id: 'T01', slug: 'triton/programs-and-block-values', prerequisites: 'F02,F03,M02' },
+    { id: 'T02', slug: 'triton/masked-vector-addition', prerequisites: 'T01,A01' },
+  ].flatMap(({ id, slug, prerequisites }) => [
+    { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
+      factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
+    { pairId: `${id.toLowerCase()}-exercises`, unitId: `${id}-EXERCISES`, resourceKind: 'exercise-set', prerequisites: id,
+      factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/exercises/`, en: `/en/${slug}/exercises/` },
+    { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`,
+      factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
+  ]),
+  { pairId: 'ex23', unitId: 'EX23', resourceKind: 'runnable-example', prerequisites: 'T02',
+    factCheckDate: '2026-09-14', canonicalExample: 'EX23', evidenceRuntime: 'Pending Hardware Verification',
+    zh: '/examples/triton-vector-add/', en: '/en/examples/triton-vector-add/' },
+  { pairId: 'vis17', unitId: 'VIS17', resourceKind: 'visual-explainer', prerequisites: 'T01',
+    factCheckDate: '2026-09-14', hardwareGate: 'none', zh: '/visuals/simt-triton-mapping/', en: '/en/visuals/simt-triton-mapping/' },
+  ...[
     { id: 'P08', slug: 'frameworks/first-custom-operator', prerequisites: 'O04,F04,Q01,P04' },
     { id: 'P09', slug: 'frameworks/operator-registration', prerequisites: 'P08,Q01' },
     { id: 'P10', slug: 'frameworks/operator-packaging', prerequisites: 'P08,M18' },
@@ -4130,13 +4146,16 @@ const publicationPairFixtures: readonly PublicationPair[] = [
 // Explicit rolling additions keep long catalog fixtures readable without deriving
 // expected metadata from the implementation being tested.
 const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
-  if (['home', 'o01', 'about', 'labs-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-13' };
-  if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-13',
-    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,review'),
-    prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12`,
-    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,EX21') };
-  if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-13',
-    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,content-sources') };
+  if (['home', 'o01', 'about'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-14' };
+  if (pair.pairId === 'labs-index') return { ...pair, factCheckDate: '2026-09-13' };
+  if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-14',
+    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,entry-pb-r5-013,entry-pb-r5-014,review'),
+    prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12,T01,T02`,
+    relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,T01,T02,EX21') };
+  if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-14',
+    structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,content-sources') };
+  if (pair.pairId === 'glossary') return { ...pair, factCheckDate: '2026-09-14',
+    structure: pair.structure!.replace('entry-term-204,maintenance', 'entry-term-204,entry-term-205,entry-term-206,entry-term-207,maintenance') };
   return pair;
 });
 
@@ -4254,20 +4273,24 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(317);
-    expect(sourceRoutes.size).toBe(634);
+    expect(publicationPairs).toHaveLength(325);
+    expect(sourceRoutes.size).toBe(650);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['T01', 'EX23', 'LAB15']) {
+    for (const absentUnitId of ['T03', 'EX24', 'LAB15']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
 
   it('publishes the closed, acyclic prerequisite graph with exact curriculum-map edges', async () => {
     const expectedPrerequisites = new Map<string, readonly string[]>([
+      ['T01', ['F02', 'F03', 'M02']], ['T02', ['T01', 'A01']],
+      ['T01-EXERCISES', ['T01']], ['T01-SOLUTIONS', ['T01-EXERCISES']],
+      ['T02-EXERCISES', ['T02']], ['T02-SOLUTIONS', ['T02-EXERCISES']],
+      ['EX23', ['T02']], ['VIS17', ['T01']],
       ['P08', ['O04', 'F04', 'Q01', 'P04']],
       ['P09', ['P08', 'Q01']],
       ['P10', ['P08', 'M18']],

@@ -1,0 +1,109 @@
+---
+title: 'T01: From SIMT Threads to Triton Block Values'
+description: Translate ownership and indexing into program instances, logical block values and masks without assigning each value to a physical lane.
+pairId: t01
+counterpart: /triton/programs-and-block-values/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, mapping, shape, practice, evidence, retrieval, next, sources]
+resourceKind: learning-unit
+unitId: T01
+prerequisites: [F02, F03, M02]
+relatedUnits: [T02, VIS17]
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton programming model and compatibility', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/README.md', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Language operations and semantics', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Triton block-value language', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t01 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/programs-and-block-values/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,mapping,shape,practice,evidence,retrieval,next,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T01 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'F02,F03,M02' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T02,VIS17' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/triton/programs-and-block-values/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Given an elementwise indexing problem, describe which logical values one Triton program owns, compute its grid, and protect its last partial block. Explain what remains a compiler decision. Allow 30 minutes for a paper derivation and the deterministic visual activity. Reading requires no GPU; running T02's example requires the independently gated Linux environment.
+
+## Prerequisites
+
+The exact ordered edges are **[F02, F03, M02]**: [execution hierarchy](/en/foundations/execution-hierarchy/), [multidimensional indexing](/en/foundations/multidimensional-indexing/), and [coalescing](/en/memory/coalescing-transactions/). Recall scalar thread indices, row-major address formulas, and the distinction between logical accesses and actual memory transactions.
+
+## Why change the unit of expression?
+
+CUDA exposes a SIMT execution model: code describes a thread, with threads grouped into warps and blocks. Triton's 2019 work explored a tiled intermediate language and compiler for neural-network computations. Its useful shift is to express operations on blocks of values and let the compiler choose much of their distribution over threads and registers. It still generates GPU code. Ordinary Python loops outside a JIT kernel remain host work.
+
+This unit selects **Triton 3.7.1**, not whichever release a current tutorial happens to show. A higher-level language can reduce explicit indexing and layout work, but it cannot remove bounds, data types, memory traffic, or the need to measure. Use it when a block-shaped operation is a good fit; a library operation may already meet the same contract.
+
+## Four distinct objects
+
+| Object | Meaning | Not equivalent to |
+| --- | --- | --- |
+| CUDA thread / warp lane | A scalar execution participant; a lane is a position in a warp | A Triton block-value position |
+| Triton program instance | One instance of the JIT function in the launch grid | One CUDA thread |
+| Block-shaped value | A logical tensor with a compile-time shape, such as 256 values | 256 physical threads or one shared-memory allocation |
+| Compiler layout | Distribution of values over registers and lanes | Something established by the source shape alone |
+
+For the ordinary NVIDIA launch used in EX23, `num_warps=4` configures 128 threads per program's CTA. `TILE=256` describes 256 logical values. These are different dimensions of the contract; neither tells you the exact value-to-lane mapping without inspecting generated layout/code. This is a scoped comparison, not a universal assertion about advanced clustered or warp-specialized launches.
+
+## Translate the index, not the line
+
+For positive length `N`, choose a power-of-two block extent `B`. Launch `ceil(N/B)` programs. Program `p` constructs positions `j=0…B-1`, indices `i=p*B+j`, and mask `i<N`. A valid index belongs to exactly one program because quotient and remainder by `B` are unique. Masked positions are outside the problem even though they exist in the logical value shape.
+
+For `N=37, B=16`, the three programs describe indices `0–15`, `16–31`, and `32–47`. The last has five valid values and eleven masked values. A separate CUDA implementation with 32 threads per block launches two blocks; index 36 belongs to CUDA block 1, thread 4, lane 4, but Triton program 2, logical position 4. Identical output ownership does not mean identical physical scheduling.
+
+Open [VIS17](/en/visuals/simt-triton-mapping/). Its side-by-side ledger makes these two ownership assignments visible and labels positions that the CUDA comparison grid never launches. It does not guess the compiler's Triton lanes.
+
+## Shape, broadcasting, and contiguous addresses
+
+`tl.program_id(0)` is a scalar program-grid coordinate. `tl.arange(0, B)` forms a rank-one logical value; it is neither a Python list nor a thread identifier. In this selected zero-based form, use a positive compile-time power-of-two `B`. Adding the scalar `p*B` broadcasts it across the positions. Adding these element offsets to an FP32 pointer addresses elements, not raw bytes.
+
+Adjacent logical addresses are a useful input to coalescing decisions, not proof of a particular transaction count. Shape does not imply shared-memory placement. For a flattened row-major matrix of width `W`, index `i` corresponds to row `i//W`, column `i%W`; the logical problem can be multidimensional even when the launch grid is one-dimensional. Changing strides or layout requires changing that address contract.
+
+## Guided practice: trace a last program
+
+1. Before using VIS17, derive all 16 indices for `N=37, B=16, p=2` and mark valid positions.
+2. Compare index 36 and index 37 in the CUDA and Triton columns. Explain why the latter still has a CUDA thread but no authorized memory access.
+3. Change `B` to 32. Predict two Triton programs and 27 masked positions across the grid. The fixed CUDA grid stays at two blocks.
+4. Try `N=1, B=256`. Explain the distinction between a masked Triton logical position and a CUDA thread that was never launched in the comparison.
+
+**Acceptance:** provide the two ownership formulas, coverage proof, tail counts, and one statement the visual cannot establish. Use the static mapping when scripts are unavailable; keyboard and reduced-motion use have the same arithmetic.
+
+## Evidence boundary
+
+This Learning Unit has four empty evidence arrays. VIS17 is browser arithmetic, not a Triton interpreter or GPU implementation. Neither establishes compilation, runtime correctness, physical layout, bandwidth, or speedup. EX23's runtime remains **Pending Hardware Verification** until qualifying execution is reviewed.
+
+## Retrieval check
+
+1. Why does `TILE=256` not mean 256 threads?
+2. What does `program_id(0)` identify, and why does it not identify a lane?
+3. With `N=37, B=16`, which program and logical position own index 36?
+4. Why can contiguous logical addresses alone not prove memory transaction counts?
+5. What changes in a flattened matrix's coordinate recovery if its width changes?
+
+## Continue with practice
+
+Complete the [indexing Exercises](/en/triton/programs-and-block-values/exercises/) before opening their [separate solutions](/en/triton/programs-and-block-values/solutions/). [PB-R5-013](/en/practice/#pb-r5-013) asks you to review a lane-mapping claim. Continue to [T02: Masked Vector Addition](/en/triton/masked-vector-addition/).
+
+## Sources and licensing
+
+[SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) records exact release, language, owner tests and generated-toolchain sources. [Program instance](/en/glossary/#term-205), [block-shaped value](/en/glossary/#term-206), and [memory mask](/en/glossary/#term-207) define the vocabulary. Source and fact review: **2026-09-14**. Original prose and Exercises: CC BY 4.0; upstream material is linked and paraphrased.

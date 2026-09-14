@@ -1,9 +1,9 @@
 ---
 title: Glossary
-description: 204 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
+description: 207 published canonical bilingual terms and evidence boundaries for CUDA Learning Site.
 pairId: glossary
 counterpart: /glossary/
-factCheckDate: '2026-09-12'
+factCheckDate: '2026-09-14'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -32,6 +32,9 @@ structure:
   - entry-term-202
   - entry-term-203
   - entry-term-204
+  - entry-term-205
+  - entry-term-206
+  - entry-term-207
   - maintenance
 evidence:
   compilation: []
@@ -46,7 +49,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-12'
+      content: '2026-09-14'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -54,7 +57,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,entry-term-201,entry-term-202,entry-term-203,entry-term-204,maintenance'
+      content: 'use,lookup-index,entries,entry-term-183,entry-term-184,entry-term-185,entry-term-186,entry-term-187,entry-term-188,entry-term-189,entry-term-190,entry-term-191,entry-term-192,entry-term-193,entry-term-194,entry-term-195,entry-term-196,entry-term-197,entry-term-198,entry-term-199,entry-term-200,entry-term-201,entry-term-202,entry-term-203,entry-term-204,entry-term-205,entry-term-206,entry-term-207,maintenance'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -1911,7 +1914,36 @@ This Glossary records the canonical vocabulary used by CUDA Learning Site. Each 
 - **Related resources:** [Q07](/en/correctness/timeline-first-nsight-systems/), [Q08](/en/correctness/kernel-first-nsight-compute/), and [P07](/en/frameworks/python-to-cuda-profiling/).
 - **Version note:** PyTorch 2.11.0+cu128, Kineto commit 7a731b6ae01cfc2b1fc75d83a91f84e682e43fd7, CUPTI package 12.8.90, reviewed 2026-09-12 in [SRC-CUDA-083](/en/sources-and-versions/#src-cuda-083). Require real CPU/runtime/kernel activity and preserve each scheduled window; no trace is supplied by a definition.
 
+<span id="term-205" class="resource-target" aria-hidden="true"></span>
+
+### program instance · 程序实例
+
+- **Definition:** One instance of a Triton JIT function in a launch grid, identified along an axis by `program_id`.
+- **Avoid:** CUDA thread; warp lane; matrix row by definition.
+- **Related resources:** [T01](/en/triton/programs-and-block-values/), [T02](/en/triton/masked-vector-addition/).
+- **Version note:** Triton 3.7.1, reviewed 2026-09-14 in [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087). Logical ownership does not establish physical scheduling.
+
+<span id="term-206" class="resource-target" aria-hidden="true"></span>
+
+### block-shaped value · 块形值
+
+- **Definition:** A logical tensor value with a compile-time shape inside a Triton program; its elements may be distributed across threads and registers by the compiler.
+- **Avoid:** One value per physical lane; automatic shared-memory allocation; a Python list.
+- **Related resources:** [T01](/en/triton/programs-and-block-values/).
+- **Version note:** Triton 3.7.1, reviewed 2026-09-14 in [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087). Shape and launch warp count are separate choices.
+
+<span id="term-207" class="resource-target" aria-hidden="true"></span>
+
+### memory mask · 内存掩码
+
+- **Definition:** An elementwise predicate controlling whether each pointer-tensor load or store performs its memory access. A masked load's `other` supplies the value at an inactive position.
+- **Avoid:** Shape shrinking; `where` around an unmasked load; store masking repairs a load.
+- **Related resources:** [T02](/en/triton/masked-vector-addition/).
+- **Version note:** Triton 3.7.1, reviewed 2026-09-14 in [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087). This definition concerns pointer tensors, not descriptor boundary semantics.
+
 ## Maintenance rule
+
+Issue #46 adds TERM-205 through TERM-207 on 2026-09-14, bringing the current total to **207**. Earlier entries keep their individual review dates. Definitions and browser mappings create no GPU evidence.
 
 The 2026-09-12 issue #43 increment adds TERM-201 through TERM-204, bringing the current total to **204**. Issue #42's TERM-197 through TERM-200 and all earlier item-level dates remain unchanged. Storage lifetime tracking, autocast, gradient scaling and profiler correlation add distinct contracts rather than duplicate existing stream or precision terms. Both locales and catalog records share the review date; no Evidence Status changes.
 

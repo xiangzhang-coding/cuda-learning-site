@@ -1,0 +1,109 @@
+---
+title: 'T01：从 SIMT 线程到 Triton 块值'
+description: 用程序实例、逻辑块值和掩码描述执行归属与索引，不把每个值直接指派给物理通道。
+pairId: t01
+counterpart: /en/triton/programs-and-block-values/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, model, mapping, shape, practice, evidence, retrieval, next, sources]
+resourceKind: learning-unit
+unitId: T01
+prerequisites: [F02, F03, M02]
+relatedUnits: [T02, VIS17]
+hardwareGate: none
+estimatedMinutes: 30
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton programming model and compatibility', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/README.md', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Language operations and semantics', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Triton block-value language', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t01 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/programs-and-block-values/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,model,mapping,shape,practice,evidence,retrieval,next,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T01 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'F02,F03,M02' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T02,VIS17' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/programs-and-block-values/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+给定一个逐元素索引问题，说明一个 Triton 程序实例（program instance）负责哪些逻辑值，计算它的网格，并保护最后一个不完整块。解释哪些选择仍由编译器决定。预留 30 分钟完成纸面推导和确定性可视化活动。阅读不需要 GPU；运行 T02 的示例需要单独检查 Linux 环境门槛。
+
+## 前置知识
+
+精确且有序的依赖是 **[F02, F03, M02]**：[执行层级](/foundations/execution-hierarchy/)、[多维索引](/foundations/multidimensional-indexing/)和[合并访问](/memory/coalescing-transactions/)。回顾标量线程索引、行主序地址公式，以及逻辑访问与实际内存事务的区别。
+
+## 为什么改变表达工作的单位？
+
+CUDA 暴露单指令多线程（SIMT）执行模型：代码描述一个线程，线程组成线程束和线程块。Triton 在 2019 年的工作探索了面向神经网络计算的分块中间语言与编译器。这里值得学习的变化，是对一块值表达运算，让编译器决定它们在线程和寄存器上的许多分配细节。它仍然生成 GPU 代码。即时编译（JIT）内核外的普通 Python 循环仍在主机执行。
+
+本单元选定 **Triton 3.7.1**，不能随当前教程的版本漂移。更高层的语言可以减少显式索引与布局工作，但不能取消边界、数据类型、内存流量和测量要求。块形运算适合问题时可以考虑它；现成库操作也可能已经满足相同契约。
+
+## 四个不同的对象
+
+| 对象 | 含义 | 不等同于 |
+| --- | --- | --- |
+| CUDA 线程 / 线程束通道（warp lane） | 标量执行参与者；通道是在线程束中的位置 | Triton 块值中的位置 |
+| Triton 程序实例 | 启动网格中 JIT 函数的一个实例 | 一个 CUDA 线程 |
+| 块形值（block-shaped value） | 带编译期形状的逻辑张量，例如 256 个值 | 256 个物理线程或一块共享内存分配 |
+| 编译器布局（compiler layout） | 值在寄存器和通道上的分布 | 单凭源代码形状就能确定的分配 |
+
+对于 EX23 使用的普通 NVIDIA 启动，`num_warps=4` 为一个程序实例的 CTA 配置 128 个线程。`TILE=256` 描述 256 个逻辑值。这是契约的两个不同维度；如果不检查生成的布局或代码，两者都不能告诉你精确的值到通道映射。这个比较只针对当前范围，不是对高级集群或线程束专用化启动的一般断言。
+
+## 转换索引模型，不逐行替换语法
+
+对正长度 `N`，选择二次幂块范围 `B`，启动 `ceil(N/B)` 个程序实例。实例 `p` 构造位置 `j=0…B-1`、索引 `i=p*B+j` 和掩码（mask）`i<N`。有效索引恰好属于一个实例，因为除以 `B` 的商和余数唯一。掩码为假的位置虽然存在于逻辑值形状中，却不属于问题范围。
+
+`N=37, B=16` 时，三个实例分别描述 `0–15`、`16–31` 和 `32–47`。最后一个含五个有效值和十一个屏蔽值。独立的 CUDA 对照采用每块 32 个线程，启动两个线程块；索引 36 属于 CUDA 块 1、线程 4、通道 4，却属于 Triton 实例 2、逻辑位置 4。输出归属相同，不代表物理调度相同。
+
+打开 [VIS17](/visuals/simt-triton-mapping/)。并排表会展示这两种归属，并标记 CUDA 对照网格根本没有启动的位置。它不会猜测编译器给 Triton 分配的通道。
+
+## 形状、广播与连续地址
+
+`tl.program_id(0)` 是标量程序网格坐标。`tl.arange(0, B)` 形成一维逻辑值，既不是 Python 列表，也不是线程标识。在这里选定的零起点形式中，使用正的编译期二次幂 `B`。与标量 `p*B` 相加，会将标量广播到所有位置。将这些元素偏移加到 FP32 指针上，按元素寻址，而不是按原始字节寻址。
+
+相邻逻辑地址有助于编译器安排合并访问，但不能证明某个事务数量。形状也不意味着共享内存存放。对宽度为 `W` 的展平行主序矩阵，索引 `i` 对应行 `i//W`、列 `i%W`；启动网格是一维时，逻辑问题仍可以是多维的。改变步长或布局，就必须改变地址契约。
+
+## 引导实践：跟踪最后一个程序实例
+
+1. 使用 VIS17 前，推导 `N=37, B=16, p=2` 的全部 16 个索引，标出有效位置。
+2. 比较 CUDA 与 Triton 两栏中的索引 36 和 37。解释为什么后者仍对应一个 CUDA 线程，却无权访问内存。
+3. 将 `B` 改为 32。预测两个 Triton 实例以及整个网格的 27 个屏蔽位置。固定的 CUDA 网格仍是两个块。
+4. 尝试 `N=1, B=256`。解释被屏蔽的 Triton 逻辑位置与 CUDA 对照中根本未启动的线程之间的区别。
+
+**验收条件：** 提交两种归属公式、覆盖证明、尾部计数，以及可视化无法证明的一项结论。无脚本时使用静态映射；键盘与减少动态效果模式遵循相同算术。
+
+## 证据边界
+
+本学习单元（Learning Unit）的四个证据数组都为空。VIS17 只做浏览器算术，不是 Triton 解释器或 GPU 实现。它不能建立编译、运行正确性、物理布局、带宽或加速比证据。EX23 在合格执行得到审查前，仍为**待硬件验证（Pending Hardware Verification）**。
+
+## 回忆检查
+
+1. 为什么 `TILE=256` 不等于 256 个线程？
+2. `program_id(0)` 标识什么，为什么它不标识通道？
+3. `N=37, B=16` 时，哪个实例的哪个逻辑位置负责索引 36？
+4. 为什么仅凭连续逻辑地址不能证明内存事务数量？
+5. 展平矩阵的宽度改变后，恢复坐标的哪部分会变化？
+
+## 继续练习
+
+先完成[索引练习](/triton/programs-and-block-values/exercises/)，再看[独立解答](/triton/programs-and-block-values/solutions/)；[PB-R5-013](/practice/#pb-r5-013) 要求审查一项通道映射断言。接着学习 [T02：带掩码的向量加法](/triton/masked-vector-addition/)。
+
+## 来源与许可
+
+[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 记录精确版本、语言、上游测试与生成工具链来源。[程序实例](/glossary/#term-205)、[块形值](/glossary/#term-206)和[内存掩码](/glossary/#term-207)给出术语定义。来源与事实核查日期：**2026-09-14**。原创正文和练习采用 CC BY 4.0；上游资料仅链接与转述。

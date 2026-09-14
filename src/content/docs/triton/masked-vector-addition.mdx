@@ -1,0 +1,141 @@
+---
+title: 'T02：为向量加法的每个边界加上掩码'
+description: 实现并检查原创 Triton 向量加法，区分逻辑形状、读取掩码、写入掩码以及编译和运行证据。
+pairId: t02
+counterpart: /en/triton/masked-vector-addition/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, kernel, launch, correctness, comparison, practice, diagnostics, evidence, retrieval, next, sources]
+resourceKind: learning-unit
+unitId: T02
+prerequisites: [T01, A01]
+relatedUnits: [EX23, EX02, VIS17]
+exampleIds: [EX23]
+canonicalExample: EX23
+canonicalRanges:
+  - imports
+  - kernel
+  - launch
+hardwareGate: none
+estimatedMinutes: 40
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton language memory operations', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton masked-load tests', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/language/test_core.py', version: '3.7.1', platform: 'Owner tests inspected, not executed', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t02 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/masked-vector-addition/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,kernel,launch,correctness,comparison,practice,diagnostics,evidence,retrieval,next,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T02 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T01,A01' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'EX23,EX02,VIS17' } }
+  - { tag: meta, attrs: { name: 'cuda:example-ids', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX23 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'imports,kernel,launch' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/masked-vector-addition/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+写出带掩码（mask）的逐元素契约，读懂规范内核与主机启动过程，预测不完整块，并设计能发现输出漏写的检查。预留 40 分钟阅读和纸面练习；环境准备与 GPU 执行需要额外时间，并遵守 EX23 的门槛。
+
+## 前置知识
+
+精确且有序的依赖是 **[T01, A01]**：[程序实例与块值](/triton/programs-and-block-values/)和[逐元素映射](/algorithms/elementwise-map/)。需要理解唯一输出归属，以及逻辑值与物理线程的区别。熟悉的 [EX02](/examples/vector-addition/) 提供 CUDA 对照。
+
+## 一个小运算就能暴露语言边界
+
+向量加法常被用作第一个并行映射，因为每个输出只依赖相同索引处的两个输入。从 CUDA 转到 Triton，依赖图不变，表达工作的方式却改变了。一块指针和一块掩码取代了线程局部的标量地址表达式及其保护条件。不需要归约、程序实例间同步、共享内存分块或原子更新。
+
+## 启动前先定义运算
+
+EX23 接收两个等长连续 FP32 向量，写出逐点和。命令接受不超过 1,000,000 的正整数 `N`；空输入会在导入 GPU 库前明确拒绝。`TILE=256` 是编译期形状，启动 `ceil(N/256)` 个程序实例（program instance）。输入缓冲区恰好有 `N` 个元素；输出额外带有 256 个 NaN 写保护哨兵。
+
+`N=1003` 时，预测四个实例和 21 个屏蔽逻辑位置。三个逻辑向量的载荷是 `12*N` 字节，输出保护区再增加 1024 字节。这不包含分配器、上下文、编译器和库的开销。尽管问题很小，受支持运行仍要求计算能力（compute capability）8.0+ 和至少 8 GB。
+
+## 阅读规范内核
+
+<CanonicalCode exampleId="EX23" range="imports" />
+
+<CanonicalCode exampleId="EX23" range="kernel" />
+
+稳定命名空间是 `triton` 与 `triton.language as tl`。`@triton.jit` 标记要编译的设备工作，不会把剩下的 Python 进程转为 GPU 工作。`TILE: tl.constexpr` 提供 `tl.arange(0, TILE)` 使用的编译期范围。
+
+两次读取使用同一个逐元素掩码。读取掩码为假时，不访问内存，并用 `other=0.0` 填充该逻辑值。最后的写入还需要自己的掩码：无效位置上的零值运算，不意味着有权写到输出之外。掩码描述内存访问是否有效，不会缩小块形状。
+
+不要用 `tl.where(valid, tl.load(pointer), 0)` 代替带掩码读取。无论条件真假，`where` 的参数都会求值，因此未加掩码的读取仍会发生。一组谓词也不是 Python 的标量 `if`。应明确使用内存操作自己的掩码。本单元使用指针张量，不使用张量描述符或块指针的边界检查接口。
+
+## 明确主机启动与完成边界
+
+<CanonicalCode exampleId="EX23" range="launch" />
+
+这里由 PyTorch 2.13.0 提供设备存储与同步，其 Linux wheel 要求 Triton 3.7.1。它单独固定，不安装进 EX22 的环境。传给内核的设备张量提供设备指针；在检查执行完成前，Python 所有者始终存活。网格元组计算程序实例数，而不是元素数或线程束数。`num_warps=4` 是独立的启动选项。
+
+第一次 JIT 启动可能先编译并填充缓存，再提交工作。启动返回不代表结果完成。EX23 同步设备 0，再把输出复制到 CPU。独立的 `build` 命令使用固定 sm_80 编译目标而不启动内核；GPU 运行使用实际设备目标。构建产物本身无法验证算术结果。
+
+## 让参考结果保持独立
+
+输入分别为 `((i % 29)-14)*0.25` 和 `((i % 13)-6)*0.5`。这些存储的 FP32 值及其和都能精确表示，因此本测试数据要求每个输出有限且精确相等。还会核对独立推导的字面结果，包括索引 0 → −6.5、12 → 2.5、256 → 4、1002 → −2。任意输入或不同运算都需要重新论证容差策略。
+
+输出初始化为 NaN，所以有效位置漏写会在有限性检查中失败。尾部保护区必须保持 NaN，用于发现逻辑输出之外的写入。保护区不变不能证明读取安全；仍需审查两个掩码，调查内存缺陷时使用经过单独核查的适当 GPU sanitizer 流程。尺寸 1、255、256、257、1003 分别覆盖极小输入、边界之前、恰好整除、刚越过边界和多实例尾部。
+
+## 在模型边界与 EX02 比较
+
+| 问题 | EX02 CUDA 模型 | EX23 Triton 模型 |
+| --- | --- | --- |
+| 谁计算一个索引？ | 线程计算自己的标量索引 | 程序实例构造一块索引 |
+| 尾部保护 | 标量边界条件保护执行体 | 逐元素掩码保护两次读取和一次写入 |
+| 并行分解 | 网格与显式每块线程数 | 程序实例网格、逻辑形状和独立线程束选项 |
+| 参考结果在哪里？ | 检查完成后使用 CPU 参考 | 检查完成后使用 CPU 参考 |
+| 哪些证据可以转移？ | 只对声明的 CUDA 对象有效 | 不能从 EX02 转移；需要独立编译与运行证据 |
+
+两者使用不同的原创输入。这是在比较归属模型，不是在控制输入后比较时间。相似几何或更少的 Python 行数不能建立性能结果。
+
+## 引导实践：先预测，再构建与检查
+
+1. 在 [VIS17](/visuals/simt-triton-mapping/) 中设置 `N=1003, B=256`。选中最后一个实例前，推导其有效范围 `768–1002` 与屏蔽范围 `1003–1023`。
+2. 打开 [EX23](/examples/triton-vector-add/)，检查环境门槛，在匹配的外部 Linux 环境中依次执行 setup、host-test、build、run。
+3. 审查内核中的两个读取掩码和一个写入掩码，逐一对应 CPU 契约与输出保护区。
+4. 没有 GPU 时，提交推导与主机测试结果，并记录运行阻塞。有 GPU 时，保留实际退出状态、完整环境清单（Environment Manifest）与生成报告。
+
+**验收条件：** 完整的尾部推导、全输出检查策略、保护区不变条件，以及准确的证据分类。预期输出不能代替日志。
+
+## 按失败层定位问题
+
+安装失败时检查 Python ABI、平台、哈希与依赖版本。编译失败时检查目标、随包 ptxas 和编译器诊断。启动或同步失败时调查设备、驱动与内存访问。比较失败时检查索引、覆盖、数据类型和掩码。保留首个失败及其阶段；检查失败后不能继续声称成功。
+
+## 证据边界
+
+T02 的四个证据数组都为空。EX23 的编译证据为空，仍为**待硬件验证（Pending Hardware Verification）**。浏览器映射、主机测试通过、解释器行为、上游测试或 EX02 的编译已检查（Compile-Checked）状态，都不能建立 Triton 运行或性能结果。当前项目没有采集的基准测试。
+
+## 回忆检查
+
+1. 加法本身无害，为什么仍需要三个掩码？
+2. `other=0.0` 规定什么，又没有授权什么？
+3. 为什么在无掩码读取外包一层 `where` 不能保护内存？
+4. NaN 初始化能发现什么缺陷？不变的尾部保护区会漏掉什么缺陷？
+5. sm_80 构建能建立什么结论，什么仍需要 GPU 运行？
+
+## 继续练习
+
+先完成[掩码练习](/triton/masked-vector-addition/exercises/)，再看[独立解答](/triton/masked-vector-addition/solutions/)。[PB-R5-014](/practice/#pb-r5-014) 要求审查一份可疑的绿色正确性报告。
+
+## 来源与许可
+
+阅读[规范项目](https://github.com/xiangzhang-coding/cuda-learning-site/tree/5f830b8ec77dedb42e851ff03201e4cf968d10e9/examples/ex23-triton-vector-add)或[下载对应修订](https://github.com/xiangzhang-coding/cuda-learning-site/archive/5f830b8ec77dedb42e851ff03201e4cf968d10e9.zip)。两种语言导入相同源码区间。[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 记录精确语言、测试、安装和工具链来源。事实与访问日期：**2026-09-14**。原创代码采用 Apache-2.0，原创正文与练习采用 CC BY 4.0；保留 Triton 的精确 MIT 通知，不更改上游许可。

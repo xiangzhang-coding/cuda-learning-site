@@ -1,0 +1,118 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import { mapTritonPositions, TRITON_MAPPING_TILES } from '../visuals/triton-mapping-model';
+import { tritonMappingCopy } from '../visuals/triton-mapping-copy';
+interface Props { locale: 'zh-CN' | 'en' }
+const { locale } = Astro.props;
+const copy = tritonMappingCopy[locale];
+const initial = mapTritonPositions(37, 16, 2);
+---
+<triton-mapping data-locale={locale} data-visual-id="VIS17">
+  <h3>{copy.title}</h3>
+  <p>{copy.notice}</p>
+  <p>{copy.instructions}</p>
+  <fieldset>
+    <legend>{copy.controls}</legend>
+    <label>{copy.size}<select data-size>{[1, 17, 32, 37, 64, 1003].map((n) => <option selected={n === 37}>{n}</option>)}</select></label>
+    <label>{copy.tile}<select data-tile>{TRITON_MAPPING_TILES.map((n) => <option selected={n === 16}>{n}</option>)}</select></label>
+    <label>{copy.program}<select data-program>{[0, 1, 2].map((n) => <option selected={n === 2}>{n}</option>)}</select></label>
+    <button type="button" data-previous>{copy.previous}</button>
+    <button type="button" data-next disabled>{copy.next}</button>
+    <button type="button" data-reset>{copy.reset}</button>
+  </fieldset>
+  <p role="status" aria-live="polite" aria-atomic="true" data-summary>{copy.grid}: 3 · {copy.cuda}: 2 · {copy.masked}: 11</p>
+  <div class="mapping-scroll" tabindex="0" role="region" aria-label={copy.title}>
+    <table>
+      <caption>N = 37, B = 16, {copy.programLabel} = 2</caption>
+      <thead><tr><th scope="col">{copy.position}</th><th scope="col">{copy.index}</th><th scope="col">{copy.owner}</th><th scope="col">{copy.mask}</th></tr></thead>
+      <tbody data-positions>{initial.positions.map((p) => <tr data-valid={String(p.valid)}><th scope="row">{p.position}</th><td>{p.index}</td><td>{p.cudaBlock} / {p.cudaThread} / {p.cudaThread}</td><td>{p.valid ? copy.yes : copy.no}</td></tr>)}</tbody>
+    </table>
+  </div>
+  <h3>{copy.static}</h3>
+  <p>N = 37, B = 16. CUDA: 2 × 32; Triton: 3 × 16.</p>
+  <div class="static-map">
+    {[0, 1, 2].map((program) => {
+      const model = mapTritonPositions(37, 16, program);
+      const first = model.positions[0];
+      const last = model.positions[model.positions.length - 1];
+      const valid = model.positions.filter((position) => position.valid);
+      return <section><h4>{copy.programLabel} {program}</h4>
+        <p>{copy.local}: 0–15</p>
+        <p>{copy.range}: {first.index}–{last.index}</p>
+        <p>{copy.valid}: {first.index}–{valid[valid.length - 1].index}</p>
+        <p>{copy.cudaRange}: {first.cudaBlock} / {first.cudaThread}–{last.cudaThread}</p>
+        <p>{copy.maskLabel}: {valid.length} true / {model.tile - valid.length} false</p>
+      </section>;
+    })}
+  </div>
+  <p>{copy.boundary}</p>
+</triton-mapping>
+
+<script>
+  import { mapTritonPositions } from '../visuals/triton-mapping-model';
+  import { tritonMappingCopy } from '../visuals/triton-mapping-copy';
+  class TritonMapping extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return;
+      this.dataset.ready = 'true';
+      const copy = tritonMappingCopy[this.dataset.locale === 'en' ? 'en' : 'zh-CN'];
+      const size = this.querySelector<HTMLSelectElement>('[data-size]')!;
+      const tile = this.querySelector<HTMLSelectElement>('[data-tile]')!;
+      const program = this.querySelector<HTMLSelectElement>('[data-program]')!;
+      const previous = this.querySelector<HTMLButtonElement>('[data-previous]')!;
+      const next = this.querySelector<HTMLButtonElement>('[data-next]')!;
+      const update = (resetProgram = false) => {
+        const count = Math.ceil(Number(size.value) / Number(tile.value));
+        const selected = resetProgram ? 0 : Math.min(Number(program.value), count - 1);
+        program.replaceChildren(...Array.from({ length: count }, (_, n) => new Option(String(n), String(n), false, n === selected)));
+        const model = mapTritonPositions(Number(size.value), Number(tile.value), selected);
+        previous.disabled = selected === 0;
+        next.disabled = selected === count - 1;
+        this.querySelector('[data-summary]')!.textContent = `${copy.grid}: ${model.programs} · ${copy.cuda}: ${model.cudaBlocks} · ${copy.masked}: ${model.masked}`;
+        this.querySelector('caption')!.textContent = `N = ${model.size}, B = ${model.tile}, ${copy.programLabel} = ${model.program}`;
+        this.querySelector('[data-positions]')!.replaceChildren(...model.positions.map((position) => {
+          const row = document.createElement('tr');
+          row.dataset.valid = String(position.valid);
+          const fields = [position.position, position.index,
+            position.cudaLaunched ? `${position.cudaBlock} / ${position.cudaThread} / ${position.cudaThread}` : copy.absent,
+            position.valid ? copy.yes : copy.no];
+          fields.forEach((value, index) => {
+            const cell = document.createElement(index === 0 ? 'th' : 'td');
+            if (index === 0) cell.setAttribute('scope', 'row');
+            cell.textContent = String(value);
+            row.append(cell);
+          });
+          return row;
+        }));
+      };
+      size.addEventListener('change', () => update(true));
+      tile.addEventListener('change', () => update(true));
+      program.addEventListener('change', () => update());
+      previous.addEventListener('click', () => { program.value = String(Number(program.value) - 1); update(); });
+      next.addEventListener('click', () => { program.value = String(Number(program.value) + 1); update(); });
+      this.querySelector('[data-reset]')!.addEventListener('click', () => {
+        size.value = '37'; tile.value = '16'; update(true); program.value = '2'; update();
+      });
+    }
+  }
+  if (!customElements.get('triton-mapping')) customElements.define('triton-mapping', TritonMapping);
+</script>
+
+<style>
+  triton-mapping { display: block; border: 1px solid var(--sl-color-gray-4); padding: 1rem; margin-block: 1.5rem; }
+  fieldset { display: flex; flex-wrap: wrap; gap: 1rem; border: 1px solid var(--sl-color-gray-4); padding: 1rem; }
+  label { display: grid; gap: .4rem; }
+  select, button { font: inherit; padding: .5rem; min-height: 44px; color: var(--sl-color-text); background: var(--sl-color-bg); border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; }
+  button:disabled { opacity: .6; }
+  :is(select, button, .mapping-scroll):focus-visible { outline: 3px solid var(--sl-color-text-accent); outline-offset: 3px; }
+  .mapping-scroll { max-width: 100%; overflow-x: auto; }
+  table { width: 100%; font-variant-numeric: tabular-nums; }
+  .mapping-scroll :global(tr[data-valid='false']) { border-inline-start: 4px dashed var(--sl-color-gray-3); }
+  .static-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; }
+  .static-map section { margin: 0; border-block-start: 3px solid var(--sl-color-text-accent); padding: .5rem; overflow-wrap: anywhere; }
+  .static-map h4 { margin: 0; }
+  .static-map p { margin-block: .5rem; }
+  @media (max-width: 42rem) { .static-map { grid-template-columns: 1fr; } fieldset { flex-direction: column; } }
+  @media print { fieldset { display: none; } .mapping-scroll { overflow: visible; } table { font-size: .75rem; } }
+  @media (forced-colors: active) { .mapping-scroll :global(tr[data-valid='false']) { border-color: CanvasText; } }
+</style>
