@@ -52,7 +52,7 @@ import kernel from '../../../../scripts/softmax-verification/kernel.py?raw';
 
 ## 为什么融合归约流水线？
 
-Softmax 将逻辑值（logits）转换为归一化分布。库张量操作序列容易表达规格，但逐一物化中间结果会增加启动和数据搬移。Triton 以行为单位，对块值（block value）表达归约（reduction），使编译器在资源允许时将中间结果保留在片上。这延续了内核融合（kernel fusion）的动机，并不保证 Python 函数越短越快。官方 Softmax 教程展示了一种特化设计；本实验采用每行一个程序实例（program instance），不引入其持久化调度和依赖占用率的启动策略。
+Softmax 将未归一化分数（logits）转换为归一化分布。库张量操作序列容易表达规格，但逐一物化中间结果会增加启动和数据搬移。Triton 以行为单位，对块值（block value）表达归约（reduction），使编译器在资源允许时将中间结果保留在片上。这延续了内核融合（kernel fusion）的动机，并不保证 Python 函数越短越快。官方 Softmax 教程展示了一种特化设计；本实验采用每行一个程序实例（program instance），不引入其持久化调度和依赖占用率的启动策略。
 
 ## 先稳定化，再求指数
 
