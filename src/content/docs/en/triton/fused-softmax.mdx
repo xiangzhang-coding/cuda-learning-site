@@ -1,0 +1,131 @@
+---
+title: 'T03: Fuse Softmax Without Losing the Contract'
+description: Derive stable row normalization, protect padding, account for logical traffic and compare a bounded Triton kernel fairly.
+pairId: t03
+counterpart: /triton/fused-softmax/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, normalization, masks, kernel, movement, correctness, compilation, comparison, practice, diagnostics, retrieval, sources]
+resourceKind: learning-unit
+unitId: T03
+prerequisites: [T02, A10, Q05]
+relatedUnits: [LAB15]
+hardwareGate: none
+estimatedMinutes: 50
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton reductions and softmax', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/standard.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton benchmark implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py', version: '3.7.1', platform: 'Device events and benchmark cache', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t03 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/fused-softmax/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,normalization,masks,kernel,movement,correctness,compilation,comparison,practice,diagnostics,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T03 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,A10,Q05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: LAB15 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import kernel from '../../../../../scripts/softmax-verification/kernel.py?raw';
+
+<a class="locale-pair" data-locale-counterpart href="/triton/fused-softmax/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Implement finite row-wise softmax, explain every invalid lane, derive a traffic ledger, and reject an unfair performance comparison. Allow 50 minutes plus the 90-minute [LAB15](/en/labs/verify-fused-softmax/). Reading and derivation need no GPU; the website never executes CUDA.
+
+## Prerequisites
+
+The exact ordered prerequisites are **[T02, A10, Q05]**: [masked vector addition](/en/triton/masked-vector-addition/), [stable softmax](/en/algorithms/numerically-stable-softmax/) and [timing](/en/correctness/timing-asynchronous-gpu-work/). T02 supplies pointer masks and program ownership; A10 supplies normalization and numerical order; Q05 supplies completion boundaries. LAB15 shares these edges and develops this unit's implementation step by step.
+
+## Why fuse a reduction pipeline?
+
+Softmax converts logits into a normalized distribution. A sequence of library tensor operations is a useful specification, but materializing every intermediate can add launches and data movement. Triton's row-oriented formulation expresses reductions over block values, allowing the compiler to keep intermediates on chip when resources permit. This is the same motivation behind older kernel-fusion techniques, not a promise that a shorter Python function is faster. The owner's softmax tutorial demonstrates one specialized design; our bounded one-program-per-row activity avoids its persistent scheduling and occupancy-dependent launch policy.
+
+## Normalize before exponentiating
+
+For a nonempty finite row, let `m = max(x)`, `w[j] = exp(x[j] - m)` and `y[j] = w[j] / sum(w)`. Subtracting the same maximum preserves the real-valued ratio, prevents positive exponent overflow, and leaves at least one weight equal to one. Small probabilities may underflow; subtraction cannot eliminate rounding or recover detail lost when inputs were stored.
+
+`[1000,1000]` should yield `[0.5,0.5]`, while directly forming its exponentials overflows in common floating-point formats. The Lab accepts contiguous rank-2 **FP32** input/output, FP32 intermediate arithmetic, 1–4096 rows and 1–2048 columns, forward only. Empty axes, nonfinite values, strided layouts, FP16/BF16, attention masks and gradients are rejected or outside this contract. It does not replace general `torch.softmax`.
+
+## Padding is not a probability
+
+Use `TILE = triton.next_power_of_2(width)`. For width 33, the logical tile has 64 positions and 31 are invalid. Masked loads fill invalid positions with negative infinity, so they neither change the maximum nor contribute to the exponent sum. A zero fill can change an all-negative row's normalization. The store independently masks invalid columns.
+
+A memory mask is not a semantic attention mask. An all-masked row of negative infinities would form `-inf - -inf` and produce NaNs. Our nonempty finite contract excludes that case; supporting it requires an explicit semantic policy. `tl.where` around an unmasked load cannot prevent that load.
+
+## Read the shared Lab kernel
+
+<figure class="canonical-code">
+  <figcaption><code>LAB15 · scripts/softmax-verification/kernel.py</code></figcaption>
+  <pre tabindex="0"><code class="language-python">{kernel}</code></pre>
+</figure>
+
+Both locales render `scripts/softmax-verification/kernel.py` directly. `tl.program_id(0)` owns one row; `tl.arange` builds columns; `tl.max(..., axis=0)` and `tl.sum(..., axis=0)` reduce that program's block value. The launch is `normalize_rows[(rows,)](x, y, WIDTH=width, TILE=tile, num_warps=4)`. The warp count is a launch option, separate from logical shape. No program communicates with another row. Compiler-selected lane layout and register use still require artifact inspection.
+
+## Count movement with units
+
+For `R` rows, `C` columns, and four-byte FP32 elements, a materialized max → subtract → exp → sum → divide specification has this **logical** ledger:
+
+| Stage | Element reads | Element writes |
+| --- | --- | --- |
+| Row maximum | RC | R |
+| Subtract row maximum | RC + R | RC |
+| Exponentiate | RC | RC |
+| Row sum | RC | R |
+| Divide by row sum | RC + R | RC |
+
+Total: `4*(8*R*C + 4*R)` bytes, versus `8*R*C` bytes for one logical fused input read and output write. The row-vector reads are counted once per row in this abstract materialization ledger. This is not a transaction-level cache model, and it does not describe `torch.softmax`'s implementation. The quotient is a logical-byte ratio, **not a speedup**. Cache reuse, spills, repeated transactions, launch overhead, resource pressure and already-fused baselines can change the outcome. Any “effective GB/s” using that numerator must be labeled logical throughput; actual DRAM traffic requires separately qualified counters.
+
+## Make correctness independent of the candidate
+
+LAB15 constructs binary-exact stored inputs covering equal large logits, all-negative shifted rows, a dominant last column and mixed values. The CPU oracle uses Python double-precision `math.exp` and `math.fsum` on those stored values. Its pinned Linux CPU gate also checks `torch.softmax` in FP64. The GPU result and native FP32 baseline each compare to that oracle, not merely to each other.
+
+Require all outputs finite and within `[0,1]`, `abs(actual-reference) <= 2e-6 + 2e-5*abs(reference)`, and absolute row-sum error at most `2e-5`. These fixed FP32 teaching tolerances accommodate approximate `tl.exp` and reduction order while catching normalization defects; they are not universal bounds. NaN initialization catches omitted stores, and an unchanged trailing guard checks some out-of-range writes. It cannot prove load safety. Never widen tolerances after seeing a failure without a separately justified contract revision.
+
+## Separate compilation, tuning and warm-up
+
+The explicit `compile` phase targets sm_80 with the compiler-only lock and saves compiler artifacts without driver initialization. A GPU run uses its actual target and a fresh owned JIT cache. `normalize_rows.warmup(..., grid=(rows,))` requests compilation; despite its name, it is **not device warm-up**. Its host wall time is recorded separately and may include compiler/cache work. Changing width, tile, dtype, target or warp options can introduce a new specialization.
+
+There is no autotuner here. Four warps is a declared baseline candidate, not a selected best configuration. An optional eight-warp trial must repeat compilation, correctness and measurement in another output directory. Any future tuning must preserve search cost and selection criteria separately from steady-state timing, and validate the chosen configuration again.
+
+## Compare matched workloads
+
+The fixture matrix is `(1,1), (3,31), (7,32), (5,33), (17,257), (257,1003), (512,2048)`. It spans tiny, exact-tile, padded, many-row and wider-row cases. It is a teaching sample, not a universal shape distribution. More columns can increase resource pressure; few rows can underutilize a GPU. Report regressions as well as gains.
+
+Compare Triton to native `torch.softmax(..., dim=1, out=...)` with identical preallocated inputs/outputs, dtype and forward-only scope. After every correctness case passes, do 20 device warm-up calls per provider and synchronize. The pinned `do_bench` then uses `warmup=25`, `rep=100` **milliseconds**, `return_mode='all'`, device events and its cache-clearing policy. Three rounds alternate provider order; retain raw samples, median and min/max. Calls include host submission effects visible on the device timeline, not transfers, allocations, JIT, oracle work or profiler overhead. A graph-replay or allocation-inclusive run would be a different experiment. Match clocks, power and competing load before interpreting a ratio.
+
+## Guided practice and evidence
+
+Predict width 33's mask and the `[1000,1000]` output, then follow [LAB15](/en/labs/verify-fused-softmax/) from environment gates through checks and reports. Write the [implementation and evidence Exercises](/en/triton/fused-softmax/exercises/) before opening the [separate solutions](/en/triton/fused-softmax/solutions/). Audit [PB-R5-015](/en/practice/#pb-r5-015) and [PB-R5-016](/en/practice/#pb-r5-016).
+
+Acceptance requires derivations, complete numerical checks and a manifest tied to actual execution. T03's four evidence arrays remain empty; LAB15 is **Pending Hardware Verification**. No timings, selected winner, observed traffic or speedup are published. A CPU test, compiler artifact, upstream test or browser pass cannot establish a GPU result.
+
+## Diagnose by phase
+
+Installation failures: check ABI and locked package hashes. Compilation failures: inspect the exact target, tile and bundled ptxas. Numerical failures: inspect the neutral fill, maximum subtraction, reduction axis and output coverage. Preserve the first failed phase. `tl.static_assert` runs at compile time; `tl.device_assert` requires `TRITON_DEBUG=1`. `TRITON_INTERPRET=1` simulates operations sequentially and is not GPU execution. Diagnostic copies can use these reviewed interfaces; the evidence harness rejects environment overrides so interpreted or debug runs cannot masquerade as benchmarks. The selected interpreter also has BF16 and indirect-access limitations.
+
+## Retrieval check
+
+1. Why must padding be negative infinity before the maximum and exponential, but contribute zero to the sum?
+2. What fails for an all-masked row, and why is that excluded here?
+3. Why are equal large logits and a dominant last column useful tests?
+4. Does the traffic ratio predict a speedup over native `torch.softmax`?
+5. How do compiler warmup, device warm-up and tuning differ?
+6. Which evidence would justify reporting an eight-warp winner for a specific shape?
+
+## Primary sources and rights
+
+[SRC-CUDA-088](/en/sources-and-versions/#src-cuda-088) records Context7 discovery, exact 3.7.1 reduction/memory/JIT/benchmark/debugging source and owner tests. [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) fixes installation and toolchain coordinates. Facts checked **2026-09-14**. Original Lab code is Apache-2.0; prose and Exercises are CC BY 4.0. The exact upstream MIT notice remains in EX23; no tutorial benchmark, plot, output or performance conclusion is reproduced as project evidence.

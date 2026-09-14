@@ -73,6 +73,24 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  T03: {
+    href: { 'zh-CN': '/triton/fused-softmax/', en: '/en/triton/fused-softmax/' },
+    title: { 'zh-CN': 'T03：在保留数值合同的前提下融合 Softmax', en: 'T03: Fuse Softmax Without Losing the Contract' },
+    prerequisites: ['T02', 'A10', 'Q05'],
+  },
+  'T03-EXERCISES': {
+    href: { 'zh-CN': '/triton/fused-softmax/exercises/', en: '/en/triton/fused-softmax/exercises/' },
+    title: { 'zh-CN': 'T03 练习', en: 'T03 Exercises' }, prerequisites: ['T03'],
+  },
+  'T03-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/fused-softmax/solutions/', en: '/en/triton/fused-softmax/solutions/' },
+    title: { 'zh-CN': 'T03 独立参考解答', en: 'T03 Reviewed Solutions' }, prerequisites: ['T03-EXERCISES'],
+  },
+  LAB15: {
+    href: { 'zh-CN': '/labs/verify-fused-softmax/', en: '/en/labs/verify-fused-softmax/' },
+    title: { 'zh-CN': 'LAB15：验证并测量融合 Softmax', en: 'LAB15: Verify and Measure Fused Softmax' },
+    prerequisites: ['T02', 'A10', 'Q05'], indexGroup: 'labs',
+  },
   T01: {
     href: { 'zh-CN': '/triton/programs-and-block-values/', en: '/en/triton/programs-and-block-values/' },
     title: { 'zh-CN': 'T01：从 SIMT 线程到 Triton 块值', en: 'T01: From SIMT Threads to Triton Block Values' },

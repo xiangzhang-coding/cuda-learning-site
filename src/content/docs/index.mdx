@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-截至 **2026-09-14**，当前发布在 R4 基础上扩展至 P01-P12 和 T01-T02，共 89 个学习单元（Learning Unit）、325 个双语发布对（Publication Pair）、650 条源路由和 440 条目录记录。[T01](/triton/programs-and-block-values/) 介绍 Triton 程序实例与块值，[T02](/triton/masked-vector-addition/) 展开带掩码向量加法。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
+截至 **2026-09-14**，当前发布在 R4 基础上扩展至 P01-P12 和 T01-T03，共 90 个学习单元（Learning Unit）、329 个双语发布对（Publication Pair）、658 条源路由和 444 条目录记录。[T01](/triton/programs-and-block-values/) 介绍 Triton 程序实例与块值，[T02](/triton/masked-vector-addition/) 展开带掩码向量加法，[T03](/triton/fused-softmax/) 与 [LAB15](/labs/verify-fused-softmax/) 介绍稳定的融合 Softmax。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
 
 [P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含完整练习与独立解答。[EX22](/examples/adjacent-energy/)、[LAB13](/labs/build-custom-operator/)都依赖 `[P08,P09]`，扩展 Toolkit 独立固定为 12.8.1，匹配 torch 2.11.0+cu128。编译与运行证据保持独立。
 
@@ -92,21 +92,21 @@ EX15 与 EX11-EX14 一样，在 11.8.0、12.9.2 和 13.3.1 三条 Toolkit Lane �
 
 EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component matrix 只是声明的 non-evidentiary build gate；本站不声称 CI 已运行。EX17 的 compilation evidence 与 recorded observations 为空、没有 observed runtime evidence，runtime 为 Pending Hardware Verification。
 
-当前 14 个实验（Lab）为 LAB01-LAB14。[LAB10](/labs/optimize-canonical-transpose/)依赖 Q11；[LAB11](/labs/compare-custom-reduction-with-cub/)依赖 Q12/L03，比较 EX11 与 EX17；[LAB12](/labs/compare-gemm-with-cublas/)依赖 Q13/L06，比较 EX15 与 EX18。LAB13 构建并验证 EX22；[LAB14](/labs/profile-custom-operator/)依赖 P11，分析该算子。五者已记录观察为空，运行待硬件验证。
+当前 15 个实验（Lab）为 LAB01-LAB15。[LAB10](/labs/optimize-canonical-transpose/)依赖 Q11；[LAB11](/labs/compare-custom-reduction-with-cub/)依赖 Q12/L03，比较 EX11 与 EX17；[LAB12](/labs/compare-gemm-with-cublas/)依赖 Q13/L06，比较 EX15 与 EX18。LAB13 构建并验证 EX22；[LAB14](/labs/profile-custom-operator/)依赖 P11，分析该算子；[LAB15](/labs/verify-fused-softmax/)依赖 T02/A10/Q05，验证和测量融合 Softmax。六者已记录观察为空，运行待硬件验证。
 
 正式可视化讲解共 20 项：独立 VIS01-VIS14、[VIS17 SIMT/Triton 映射](/visuals/simt-triton-mapping/)与 [VIS18 注意力内存流量](/visuals/attention-memory-traffic/)，加上内嵌 VIS19-VIS22。VIS17 依赖 T01，比较逻辑归属，不猜测 Triton 物理通道。VIS18 依赖 A11。这些浏览器模型不提供 GPU 或性能证据。
 
 A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS、cuDNN、cuFFT 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
 
-当前资源目录有 14 个实验、96 个练习题库（Practice Bank）条目、20 项可视化讲解（Visual Explainer）、207 个术语表（Glossary）词条、103 条来源，共 440 条记录。源文件形成 325 个双语发布对 / 650 条路由，含 88 组练习与 88 组独立解答。本增量增加 PB-R5-013/014。R4 历史的 82 道题、196 个词条、92 条来源、401 条记录不变；其八道库与算法选择题及 R3 十道 Nsight 报告分析题仍列于[练习题库](/practice/)。
+当前资源目录有 15 个实验、98 个练习题库（Practice Bank）条目、20 项可视化讲解（Visual Explainer）、207 个术语表（Glossary）词条、104 条来源，共 444 条记录。源文件形成 329 个双语发布对 / 658 条路由，含 89 组练习与 89 组独立解答。本增量增加 PB-R5-015/016。R4 历史的 82 道题、196 个词条、92 条来源、401 条记录不变；其八道库与算法选择题及 R3 十道 Nsight 报告分析题仍列于[练习题库](/practice/)。
 
-只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 22 个示例和 14 个实验共 36 个主体待硬件验证（Pending Hardware Verification）。P01-P12 和 T01-T02 四个证据数组为空。EX21-EX23 与 LAB13/LAB14 编译、已记录观察为空。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量为零。六份分析器计划只有预期内容；来源和主机检查不授予 GPU 证据。
+只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 22 个示例和 15 个实验共 37 个主体待硬件验证（Pending Hardware Verification）。P01-P12 和 T01-T03 四个证据数组为空。EX21-EX23 与 LAB13/LAB14/LAB15 编译、已记录观察为空。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量为零。六份分析器计划只有预期内容；来源和主机检查不授予 GPU 证据。
 
 [L12](/libraries/cufft-plans-layouts-startup/)完整有序先修为 `[Q05,M07]`。[L12 练习](/libraries/cufft-plans-layouts-startup/exercises/)依赖 `[L12]`，[独立解答](/libraries/cufft-plans-layouts-startup/solutions/)依赖 `[L12-EXERCISES]`。L12 的四个证据数组仍为空；归档的 12.9.2 cuFFT 指南是教学基线，当前 13.3 参考访问于 2026-09-08，因为精确的 13.3.1 API 与发布说明归档不可用。
 
 [L13](/libraries/cusparse-descriptors-spmv-spmm/)完整有序先修为 `[A12,A13,L01]`。[L13 练习](/libraries/cusparse-descriptors-spmv-spmm/exercises/)依赖 `[L13]`，[独立解答](/libraries/cusparse-descriptors-spmv-spmm/solutions/)依赖 `[L13-EXERCISES]`。L01-L13 均已发布。L13 的四个证据数组仍为空；EX20 没有保留的编译证据，运行仍待硬件验证。其三项 C++17 非执行构建门槛固定 Toolkit/cuSPARSE 组合为 11.8.0/11.7.5.86、12.9.2/12.5.10.65 与 13.3.1/12.8.2.51。[SRC-CUDA-075/076 复核](/sources-and-versions/#src-cuda-075)于 2026-09-09 记录了可访问的精确 cuSPARSE 归档，包括 13.3.1；这与 EX19 较早的归档访问失败记录分开。来源审查与构建门槛不是 GPU 证据。
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43)提供 [P04](/frameworks/queued-work-timing/) `[M07,Q05]`、[P05](/frameworks/streams-and-storage-lifetime/) `[P04,M08]`、[P06](/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`、[P07](/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`。十二对页面含练习和独立解答。[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、CUDA 元包 12.8.1/runtime 12.8.90、cuDNN 9.19.0.56、native 分配器，不要求系统 Toolkit。P08-P10 增加独立设门槛的扩展项目。T01/T02 现已发布，分别依赖 `[F02,F03,M02]` 与 `[T01,A01]`；后续 Triton 单元尚未发布。
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43)提供 [P04](/frameworks/queued-work-timing/) `[M07,Q05]`、[P05](/frameworks/streams-and-storage-lifetime/) `[P04,M08]`、[P06](/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`、[P07](/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`。十二对页面含练习和独立解答。[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、CUDA 元包 12.8.1/runtime 12.8.90、cuDNN 9.19.0.56、native 分配器，不要求系统 Toolkit。P08-P10 增加独立设门槛的扩展项目。T01/T02 分别依赖 `[F02,F03,M02]` 与 `[T01,A01]`；T03/LAB15 均依赖 `[T02,A10,Q05]`。更后续 Triton 单元尚未发布。
 
 ## 边界先说清
 
@@ -738,7 +738,7 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 96 道原创题练习证据、环境、架构、内核、库、PyTorch 和 Triton。</small>
+    <small>用 98 道原创题练习证据、环境、架构、内核、库、PyTorch 和 Triton。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 103 条接口与上游来源记录，以及各自复核日期。</small>
+    <small>查看当前发布依据的 104 条接口与上游来源记录，以及各自复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

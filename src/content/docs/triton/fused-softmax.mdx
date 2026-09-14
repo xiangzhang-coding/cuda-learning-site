@@ -1,0 +1,131 @@
+---
+title: 'T03：在保留数值合同的前提下融合 Softmax'
+description: 推导稳定的逐行归一化，保护填充位置，核算逻辑流量，并公平比较有边界的 Triton 内核。
+pairId: t03
+counterpart: /en/triton/fused-softmax/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, normalization, masks, kernel, movement, correctness, compilation, comparison, practice, diagnostics, retrieval, sources]
+resourceKind: learning-unit
+unitId: T03
+prerequisites: [T02, A10, Q05]
+relatedUnits: [LAB15]
+hardwareGate: none
+estimatedMinutes: 50
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton reductions and softmax', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/standard.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton benchmark implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py', version: '3.7.1', platform: 'Device events and benchmark cache', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t03 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/fused-softmax/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,normalization,masks,kernel,movement,correctness,compilation,comparison,practice,diagnostics,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T03 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,A10,Q05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: LAB15 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import kernel from '../../../../scripts/softmax-verification/kernel.py?raw';
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/fused-softmax/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+实现有限输入的逐行 Softmax，解释每个无效位置，推导流量账本，并识别不公平的性能比较。学习单元（Learning Unit）预计 50 分钟，[LAB15](/labs/verify-fused-softmax/) 另需 90 分钟。阅读和推导不需要 GPU；网站不执行 CUDA。
+
+## 先修条件
+
+精确有序前置为 **[T02, A10, Q05]**：[带掩码向量加法](/triton/masked-vector-addition/)、[稳定 Softmax](/algorithms/numerically-stable-softmax/) 和[计时](/correctness/timing-asynchronous-gpu-work/)。T02 提供指针掩码与程序归属，A10 提供归一化与数值顺序，Q05 提供完成边界。LAB15 共享这些前置，并逐步落实本单元的实现。
+
+## 为什么融合归约流水线？
+
+Softmax 将未归一化分数（logits）转换为归一化分布。库张量操作序列容易表达规格，但逐一物化中间结果会增加启动和数据搬移。Triton 以行为单位，对块值（block value）表达归约（reduction），使编译器在资源允许时将中间结果保留在片上。这延续了内核融合（kernel fusion）的动机，并不保证 Python 函数越短越快。官方 Softmax 教程展示了一种特化设计；本实验采用每行一个程序实例（program instance），不引入其持久化调度和依赖占用率的启动策略。
+
+## 先稳定化，再求指数
+
+对非空有限行，令 `m = max(x)`、`w[j] = exp(x[j] - m)`、`y[j] = w[j] / sum(w)`。减去相同最大值保留实数比值，避免正指数溢出，且至少有一个权重为一。小概率仍可能下溢；减最大值无法消除舍入，也不能恢复输入存储时已丢失的细节。
+
+`[1000,1000]` 应得到 `[0.5,0.5]`，直接计算指数则会在常用浮点格式中溢出。实验接受连续二维 **FP32** 输入/输出，使用 FP32 中间算术，行数 1–4096、列数 1–2048，仅前向。空维度、非有限值、跨步布局、FP16/BF16、注意力掩码和梯度被拒绝或不在合同内。它不能代替通用 `torch.softmax`。
+
+## 填充位置不是概率
+
+使用 `TILE = triton.next_power_of_2(width)`。列数 33 对应 64 个逻辑位置，其中 31 个无效。带掩码加载将无效位置填为负无穷，因此既不改变最大值，也不贡献指数和。填零可能改变全负行的归一化。存储操作必须单独屏蔽无效列。
+
+内存掩码（memory mask）不等于语义上的注意力掩码。全被屏蔽的负无穷行会计算 `-inf - -inf`，产生 NaN。本实验的非空有限合同排除了该情况；若要支持，必须另定语义策略。对无掩码加载套 `tl.where` 不能阻止该加载。
+
+## 阅读两种语言共用的实验内核
+
+<figure class="canonical-code">
+  <figcaption><code>LAB15 · scripts/softmax-verification/kernel.py</code></figcaption>
+  <pre tabindex="0"><code class="language-python">{kernel}</code></pre>
+</figure>
+
+双语页面直接呈现 `scripts/softmax-verification/kernel.py`。`tl.program_id(0)` 负责一行；`tl.arange` 构造列；`tl.max(..., axis=0)` 和 `tl.sum(..., axis=0)` 归约本程序的块值。启动为 `normalize_rows[(rows,)](x, y, WIDTH=width, TILE=tile, num_warps=4)`。线程束（warp）数量是独立于逻辑形状的启动选项。不同程序之间不交换行数据；编译器选择的通道布局和寄存器用量仍需检查产物。
+
+## 带单位核算数据搬移
+
+对 `R` 行、`C` 列、每元素四字节的 FP32，物化 max → subtract → exp → sum → divide 规格有如下**逻辑**账本：
+
+| 阶段 | 读取元素数 | 写入元素数 |
+| --- | --- | --- |
+| 行最大值 | RC | R |
+| 减行最大值 | RC + R | RC |
+| 求指数 | RC | RC |
+| 行求和 | RC | R |
+| 除以行和 | RC + R | RC |
+
+合计 `4*(8*R*C + 4*R)` 字节；融合后一次逻辑输入读取和输出写入为 `8*R*C` 字节。这个抽象物化账本将行向量读取按每行一次计数，并非事务级缓存模型，也不描述 `torch.softmax` 的实现。商是逻辑字节比，**不是加速比**。缓存复用、溢出到局部内存、重复事务、启动开销、资源压力和已融合的基线都可能改变结果。以该分子计算的“有效 GB/s”须标为逻辑吞吐量；实际 DRAM 流量需要另行合格的计数器证据。
+
+## 让正确性参考独立于候选
+
+LAB15 构造存储后可二进制精确表示的输入，覆盖相等的大值、全负平移行、最后一列占优以及混合值。CPU 参考对这些已存储值使用 Python 双精度 `math.exp` 和 `math.fsum`。固定 Linux CPU 门禁还以 FP64 检查 `torch.softmax`。GPU 结果和原生 FP32 基线分别与独立参考比较，而非只相互比较。
+
+要求所有输出有限且位于 `[0,1]`，`abs(actual-reference) <= 2e-6 + 2e-5*abs(reference)`，行和绝对误差不超过 `2e-5`。固定 FP32 教学容差为近似 `tl.exp` 和归约顺序留出空间，同时捕获归一化缺陷；它不是通用误差界。NaN 初始化用于捕获漏写，尾部保护区不变可检查部分越界写，但不能证明加载安全。不要在看到失败后擅自放宽容差；修改合同需另给理由。
+
+## 分开编译、调优和预热
+
+显式 `compile` 阶段使用编译器专用锁定环境，以 sm_80 为目标保存编译产物，不初始化驱动。GPU 运行使用实际目标和新建的自有即时编译（JIT）缓存。`normalize_rows.warmup(..., grid=(rows,))` 请求编译；虽然叫 warmup，**它不是设备预热**。其主机墙钟时间单独记录，可能包含编译器和缓存工作。列数、tile、dtype、目标和线程束选项改变时可能产生新的特化。
+
+这里没有自动调优器。四线程束是声明的基线候选，不是选出的最佳配置。可选八线程束试验必须在另一个输出目录重复编译、正确性和测量。以后若引入调优，应将搜索成本和选择标准与稳态计时分开保留，并重新验证所选配置。
+
+## 比较匹配的工作负载
+
+夹具矩阵为 `(1,1), (3,31), (7,32), (5,33), (17,257), (257,1003), (512,2048)`，覆盖微小、整 tile、填充、多行和较宽行情况。这是教学样本，不是通用形状分布。更多列可能增加资源压力，行太少可能无法充分利用 GPU。回退与收益都要报告。
+
+与原生 `torch.softmax(..., dim=1, out=...)` 比较，保持相同的预分配输入/输出、dtype 和仅前向范围。全部正确性用例通过后，每个实现做 20 次设备预热并同步。随后固定版本 `do_bench` 使用 `warmup=25`、`rep=100` **毫秒**、`return_mode='all'`、设备事件和其缓存清理策略。三轮交替执行实现；保留原始样本、中位数与最小/最大值。时间可能包含设备时间线上可见的主机提交影响，但不包含传输、分配、JIT、参考计算和分析器开销。图重放或包含分配的运行属于另一项实验。解释比值前还须匹配时钟、功耗和竞争负载。
+
+## 引导练习与证据
+
+先预测列数 33 的掩码及 `[1000,1000]` 的输出，再按 [LAB15](/labs/verify-fused-softmax/) 完成环境门禁、检查和报告。先做[实现与证据练习](/triton/fused-softmax/exercises/)，再打开[独立解答](/triton/fused-softmax/solutions/)。审查 [PB-R5-015](/practice/#pb-r5-015) 和 [PB-R5-016](/practice/#pb-r5-016)。
+
+验收要求推导、完整数值检查和对应实际执行的环境清单（Environment Manifest）。T03 四个证据数组为空；LAB15 为**待硬件验证（Pending Hardware Verification）**。不发布计时、获胜配置、观察到的流量或加速比。CPU 测试、编译产物、上游测试或浏览器通过均不能建立 GPU 结果。
+
+## 按阶段诊断
+
+安装失败检查 ABI 与锁定包哈希；编译失败检查精确目标、tile 和捆绑 ptxas；数值失败检查中性填充值、减最大值、归约轴与输出覆盖。保留首个失败阶段。`tl.static_assert` 在编译期执行；`tl.device_assert` 需要 `TRITON_DEBUG=1`。`TRITON_INTERPRET=1` 顺序模拟操作，不是 GPU 执行。诊断副本可使用这些已核查接口；证据工具拒绝环境覆盖，避免把解释器或调试运行当成基准测试。所选解释器还有 BF16 和间接访问限制。
+
+## 提取式复习
+
+1. 为什么最大值与指数前的填充应是负无穷，但对求和的贡献应是零？
+2. 全被屏蔽的行会发生什么，为什么这里排除它？
+3. 相等大值和最后一列占优为什么是有用的测试？
+4. 流量比能预测相对原生 `torch.softmax` 的加速比吗？
+5. 编译 warmup、设备预热与调优有何不同？
+6. 哪些证据足以支持“八线程束在某个形状上胜出”的结论？
+
+## 一手来源与权利
+
+[SRC-CUDA-088](/sources-and-versions/#src-cuda-088) 记录 Context7 发现、精确 3.7.1 归约/内存/JIT/基准/调试源码和上游测试。[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 固定安装与工具链坐标。事实核查日期 **2026-09-14**。原创实验代码为 Apache-2.0，正文与练习为 CC BY 4.0。精确上游 MIT 声明保留在 EX23；不将官方教程计时、图表、输出或性能结论作为项目证据。

@@ -168,13 +168,13 @@ describe('Cloudflare assets-only deployment contract', () => {
       reviewDate: '2026-09-14',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: {
-        publicationPairs: 325,
-        sourceRoutes: 650,
-        exerciseSetPublicationPairs: 88,
-        solutionSetPublicationPairs: 88,
-        practiceBankEntries: 96,
+        publicationPairs: 329,
+        sourceRoutes: 658,
+        exerciseSetPublicationPairs: 89,
+        solutionSetPublicationPairs: 89,
+        practiceBankEntries: 98,
         glossaryTerms: 207,
-        sourceRecords: 103,
+        sourceRecords: 104,
       },
       compatibility: {
         componentBoundaries: {
@@ -229,7 +229,7 @@ describe('Cloudflare assets-only deployment contract', () => {
         ]),
         capturedProfilerReports: [],
         r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
-        r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02'],
+        r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03'],
       },
     });
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('Q11');
@@ -249,18 +249,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L12');
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('L13');
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L13');
-    expect(publication.scope.learningUnits).toHaveLength(89);
+    expect(publication.scope.learningUnits).toHaveLength(90);
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']));
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13']));
     expect(publication.scope.runnableExamples).toHaveLength(23);
     expect(publication.scope.runnableExamples).toEqual(expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21']));
-    expect(publication.scope.labs).toHaveLength(14);
+    expect(publication.scope.labs).toHaveLength(15);
     expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']));
     expect(publication.scope.visualExplainers).toHaveLength(20);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
     expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
-      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(440);
-    expect(publication.evidence.pendingHardwareVerification).toHaveLength(36);
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(444);
+    expect(publication.evidence.pendingHardwareVerification).toHaveLength(37);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
@@ -324,9 +324,9 @@ describe('Cloudflare assets-only deployment contract', () => {
       '92 source records', '401 catalog records', '277 Publication Pairs', '554 source routes']) {
       expect(historicalInventory, `historical ${value}`).toContain(value);
     }
-    for (const value of ['2026-09-14', '89 Learning Units', '23 Runnable Examples', '96 Practice Bank entries',
-      '207 Glossary terms', '103 source records', '440 catalog records', '325 Publication Pairs', '650 source routes',
-      '88 Exercise-set and 88 solution-set Publication Pairs']) {
+    for (const value of ['2026-09-14', '90 Learning Units', '23 Runnable Examples', '98 Practice Bank entries',
+      '207 Glossary terms', '104 source records', '444 catalog records', '329 Publication Pairs', '658 source routes',
+      '89 Exercise-set and 89 solution-set Publication Pairs']) {
       expect(currentInventory, `current ${value}`).toContain(value);
     }
     expect(deployment).not.toMatch(/share the same inventory|both currently containing|currently has the same inventory/i);
@@ -334,7 +334,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/closed \[issue #41\]/i);
     expect(deployment).not.toMatch(/records those dynamic results later|Issue #41 must record R4 acceptance|not a claim that R4 has passed a remote gate/i);
     expect(deployment).toContain('No new deployment or infrastructure inspection is claimed');
-    expect(deployment).toContain('36 Pending Hardware Verification subjects');
+    expect(deployment).toContain('37 Pending Hardware Verification subjects');
     expect(deployment).toContain('Historical R4 remains 31');
     for (const pin of ['CPython 3.14.7', 'cuda-core 1.2.0', 'cuda-bindings 13.4.1', 'Toolkit 13.3.1',
       'cuda-pathfinder 1.8.1', 'NumPy 2.5.3', 'NVRTC 13.3.33', 'nvJitLink 13.3.33',
@@ -343,8 +343,8 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/no kernel module[^\n]*no GPU[^\n]*no `cuInit`/i);
     expect(deployment).toMatch(/not a stub/i);
     expect(deployment).toContain('scripts/run-ex21-python-check.mjs');
-    expect(deployment).toContain('EX21/EX22 and LAB13 retain empty compilation/recorded observations');
-    expect(deployment).toContain('all 650 routes');
+    expect(deployment).toContain('EX21-EX23 and LAB13-LAB15 retain empty compilation/recorded observations');
+    expect(deployment).toContain('all 658 routes');
     expect(deployment).toContain('P08-P10, EX22 and LAB13');
     expect(deployment).toMatch(/EX21[^\n]*archive[^\n]*requirements\.lock[^\n]*environment-manifest\.json/i);
     expect(deployment).toContain('62 Learning Units');
