@@ -65,3 +65,21 @@ export async function settlePublicationPage(page: Page) {
   // failure collector strict rather than hiding NS_BINDING_ABORTED globally.
   await page.waitForLoadState('networkidle');
 }
+
+export async function expectSearchReadyForNavigation(
+  page: Page,
+  { label, query, href }: { label: string; query: string; href: string },
+) {
+  await page.waitForLoadState('domcontentloaded');
+  await page.getByRole('banner').getByRole('button', { name: label, exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: label, exact: true });
+  const input = dialog.getByRole('textbox', { name: label, exact: true });
+  await expect(input).toBeVisible();
+  await expect(input).toBeEditable();
+  await input.fill(query);
+  // Match the existing ranked-search budget: editable input and a result count
+  // precede fetching/rendering result fragments on a cold browser.
+  await expect(dialog.locator(`a[href="${href}"]`).first()).toBeVisible({ timeout: 15_000 });
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+}
