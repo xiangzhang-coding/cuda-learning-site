@@ -2,7 +2,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { THEME_IDS } from '../../src/theme-contract';
-import { collectBrowserFailures, settlePublicationPage } from '../helpers/browser-contract';
+import { collectBrowserFailures, expectSearchReadyForNavigation, settlePublicationPage } from '../helpers/browser-contract';
 
 const units = [
   { id: 'P04', slug: 'frameworks/queued-work-timing', prerequisites: 'M07,Q05', practice: 'pb-r5-004', source: '081' },
@@ -39,17 +39,9 @@ for (const locale of ['', 'en/']) {
       const failures = collectBrowserFailures(page, baseURL!);
       async function expectLoadedPage() {
         // A real result proves the focus-triggered search worker is ready before navigating away.
-        await page.waitForLoadState('domcontentloaded');
-        const name = locale ? 'Search' : '搜索';
-        await page.getByRole('banner').getByRole('button', { name, exact: true }).click();
-        const dialog = page.getByRole('dialog', { name, exact: true });
-        const input = dialog.getByRole('textbox', { name, exact: true });
-        await expect(input).toBeVisible();
-        await expect(input).toBeEditable();
-        await input.fill(unit.id);
-        await expect(dialog.locator(`a[href="/${locale}${unit.slug}/"]`).first()).toBeVisible();
-        await page.keyboard.press('Escape');
-        await expect(dialog).not.toBeVisible();
+        await expectSearchReadyForNavigation(page, {
+          label: locale ? 'Search' : '搜索', query: unit.id, href: `/${locale}${unit.slug}/`,
+        });
       }
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(`/${locale}${units[0].slug}/`, { waitUntil: 'domcontentloaded' });

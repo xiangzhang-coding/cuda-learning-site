@@ -2,6 +2,35 @@
 
 # Maintenance Source Record
 
+## Post-merge PyTorch navigation search check — 2026-09-14
+
+The #45 PR checks passed, but main Web Quality run `34783041801` reported
+six flaky Firefox navigation cases. Each first attempt found the entered unit
+ID and a result count on the Practice Bank page, while result-detail fragments
+were still loading; the exact target-link assertion exhausted its generic
+five-second timeout. Retries passed, but the existing fail-on-flaky policy
+correctly kept the run red. Other jobs passed.
+
+The navigation readiness operation is now shared with a regression test that
+delays real Pagefind `.pf_fragment` responses by six seconds after navigating
+from P04 to its Practice Bank anchor. Both locales failed at the original
+target-link assertion before the fix. The readiness assertion now uses the
+same bounded 15-second result budget already used by ranked-search checks.
+It still requires the actual target link and closes the dialog before further
+navigation; input readiness or a result count is not substituted for a result.
+The original 30-second journey budget, strict browser-error collection and
+fail-on-flaky policy are retained. No production search behavior, curriculum,
+dependency or GPU evidence is changed.
+
+Context7 `/microsoft/playwright` confirmed the distinction between assertion
+and whole-test deadlines, using current owner
+[`test-timeouts-js.md`](https://github.com/microsoft/playwright/blob/main/docs/src/test-timeouts-js.md)
+and [`class-testconfig.md`](https://github.com/microsoft/playwright/blob/main/docs/src/test-api/class-testconfig.md)
+documentation as discovery. The installed Playwright
+1.62.1 regression is the executable check of the selected behavior. Four-browser
+navigation and delayed-result checks passed locally (78 passes, 50 designed
+skips); this local record does not certify a later PR or main workflow run.
+
 ## Issue #45 optimization and dispatch increment — 2026-09-13
 
 P11 requires `[P07,P09,Q06]`, P12 requires `[A11,L11,P06,P07]`, and LAB14
