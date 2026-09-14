@@ -1,0 +1,23 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "exampleId": "EX23",
+  "status": "template-not-observed",
+  "referenceEnvironment": null,
+  "gpu": null,
+  "computeCapability": null,
+  "gpuCount": null,
+  "memoryBytes": null,
+  "driver": null,
+  "operatingSystem": null,
+  "kernel": null,
+  "hostCompiler": null,
+  "python": null,
+  "packages": null,
+  "ptxasVersionAndHash": null,
+  "sourceCommit": null,
+  "command": null,
+  "exitStatus": null,
+  "logs": [],
+  "measurement": "Correctness only; no timing or performance result. Complete this record alongside generated reports before requesting evidence review."
+}

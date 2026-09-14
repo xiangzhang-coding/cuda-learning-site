@@ -1,0 +1,72 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX23",
+  "title": "Triton masked vector addition",
+  "purpose": "Translate scalar CUDA ownership into block-shaped Triton values and verify every output and tail guard independently.",
+  "root": "examples/ex23-triton-vector-add",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "hostLanguage": "python",
+    "compilerFamily": "triton",
+    "inputs": ["ex23.py", "kernel.py"],
+    "hostTestInputs": ["ex23.py"],
+    "contractFiles": ["scripts/setup.sh", "requirements.in", "requirements.lock", "compiler.lock"],
+    "additionalContractInputs": ["environment-manifest.json"],
+    "commands": {
+      "setup": "bash scripts/setup.sh",
+      "hostTest": "python3 ex23.py host-test",
+      "checkEnvironment": ".venv/bin/python ex23.py check-environment",
+      "build": ".venv/bin/python ex23.py build",
+      "run": ".venv/bin/python ex23.py run --size 1003"
+    },
+    "artifacts": ["build/compile/ex23.ttir", "build/compile/ex23.ttgir", "build/compile/ex23.llir", "build/compile/ex23.ptx", "build/compile/ex23.cubin", "build/compile/report.json"],
+    "gpuExecutionInBuild": false,
+    "driverInitializationInBuild": false
+  },
+  "correctness": {
+    "cpuReference": "ex23.py",
+    "inputType": "float32",
+    "defaultSize": 1003,
+    "blockSize": 256,
+    "maximumSize": 1000000,
+    "hostTestSizes": [1, 255, 256, 257, 1003],
+    "comparisonRule": "Check every finite output with exact equality for these binary-exact quarter/half inputs only. Reject changed NaN tail guards, mismatches, invalid sizes, and incomplete outputs."
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Modern Single-GPU Capability Tier",
+    "minimumComputeCapability": "8.0",
+    "maximumProblemMemoryBytes": 8000000000,
+    "lanes": [],
+    "pythonEnvironment": {
+      "id": "cpython-3-14-7-triton-3-7-1",
+      "supportedEnvironment": "Native Linux",
+      "operatingSystem": "Ubuntu 24.04 x86_64",
+      "python": {"implementation": "CPython", "version": "3.14.7", "gil": true},
+      "triton": "3.7.1",
+      "torch": "2.13.0",
+      "lock": "requirements.lock",
+      "compilerLock": "compiler.lock",
+      "extras": [],
+      "generatedToolchain": {"ptxas": "12.8.93", "ptxasBlackwell": "13.1.80", "nvccInvoked": false},
+      "hostCuda": "13.0.3 package family from torch dependencies; exact components are locked independently",
+      "minimumDriver": "580.65.06",
+      "reviewedOn": "2026-09-14"
+    },
+    "pythonChecks": [{"id": "ex23-triton-3-7-1-sm80", "environment": "cpython-3-14-7-triton-3-7-1", "kind": "compilation-artifact-inspection", "command": ".venv/bin/python ex23.py build", "gpuExecuted": false, "driverInitialized": false, "allowedResults": ["pass"]}]
+  },
+  "ranges": {
+    "imports": {"file": "kernel.py", "startMarker": "# [ex23-imports-start]", "endMarker": "# [ex23-imports-end]", "language": "python"},
+    "kernel": {"file": "kernel.py", "startMarker": "# [ex23-kernel-start]", "endMarker": "# [ex23-kernel-end]", "language": "python"},
+    "reference": {"file": "ex23.py", "startMarker": "# [ex23-reference-start]", "endMarker": "# [ex23-reference-end]", "language": "python"},
+    "launch": {"file": "ex23.py", "startMarker": "# [ex23-launch-start]", "endMarker": "# [ex23-launch-end]", "language": "python"}
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": ["1003 values use four programs of 256 logical positions with 21 masked positions.", "All finite outputs should equal the CPU reference; all output guard values should remain NaN.", "The explicit sm_80 build should produce five nonempty compiler artifacts without GPU execution."],
+    "recordedObservations": []
+  }
+}
