@@ -49,6 +49,33 @@ const representativeThemeRoutes = [
   '/en/visuals/attention-memory-traffic/',
 ] as const;
 
+const representativeVisualScans = [
+  {
+    label: 'VIS01 memory state',
+    route: '/en/visuals/kernel-journey/',
+    prepare: async (page: Page) => page.locator('[data-action="scrub"]').fill('5'),
+  },
+  {
+    label: 'VIS02 out-of-bounds state',
+    route: '/en/visuals/indexing/',
+    prepare: async (page: Page) => {
+      await page.locator('[data-dimension-picker]').selectOption('3');
+      await page.locator('[data-index-field="extent.x"]').fill('9');
+    },
+  },
+  {
+    label: 'VIS08 alternating migration state',
+    route: '/en/visuals/page-migration/',
+    prepare: async (page: Page) => {
+      const migration = page.locator('cuda-page-migration[data-visual-id="VIS08"]');
+      await expect(migration).toHaveAttribute('data-ready', 'true');
+      await migration.locator('[data-page-migration-scenario]').selectOption('alternating-hot-page');
+      await migration.locator('[data-page-migration-action="step"]').click();
+      await expect(migration).toHaveAttribute('data-step-index', '1');
+    },
+  },
+] as const;
+
 const releaseVisualStateScans = [
   {
     theme: 'silicon-light',
@@ -196,36 +223,31 @@ for (const locale of ['zh-CN', 'en'] as const) {
   });
 }
 
-test('@accessibility representative pages and visual states have no tagged violations across themes', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
-  test.setTimeout(420_000);
-
-  for (const theme of THEME_IDS) {
-    await setTheme(page, theme);
-    for (const route of representativeThemeRoutes) {
+// One scan per test bounds cumulative time and retry trace size as the inventory grows.
+// Keep strict flaky-test failure, trace capture and the artifact-size policy unchanged.
+for (const theme of THEME_IDS) {
+  for (const route of representativeThemeRoutes) {
+    test(`@accessibility representative page ${theme}: ${route}`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
+      test.setTimeout(60_000);
+      await setTheme(page, theme);
       await page.goto(route);
       await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
       await expectNoAxeViolations(page, `${theme}: ${route}`);
-    }
-
-    await page.goto('/en/visuals/kernel-journey/');
-    await page.locator('[data-action="scrub"]').fill('5');
-    await expectNoAxeViolations(page, `${theme}: VIS01 memory state`);
-
-    await page.goto('/en/visuals/indexing/');
-    await page.locator('[data-dimension-picker]').selectOption('3');
-    await page.locator('[data-index-field="extent.x"]').fill('9');
-    await expectNoAxeViolations(page, `${theme}: VIS02 out-of-bounds state`);
-
-    await page.goto('/en/visuals/page-migration/');
-    const migration = page.locator('cuda-page-migration[data-visual-id="VIS08"]');
-    await expect(migration).toHaveAttribute('data-ready', 'true');
-    await migration.locator('[data-page-migration-scenario]').selectOption('alternating-hot-page');
-    await migration.locator('[data-page-migration-action="step"]').click();
-    await expect(migration).toHaveAttribute('data-step-index', '1');
-    await expectNoAxeViolations(page, `${theme}: VIS08 alternating migration state`);
+    });
   }
-});
+  for (const scenario of representativeVisualScans) {
+    test(`@accessibility representative visual ${theme}: ${scenario.label}`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
+      test.setTimeout(60_000);
+      await setTheme(page, theme);
+      await page.goto(scenario.route);
+      await expect(page.locator('html')).toHaveAttribute('data-learning-theme', theme);
+      await scenario.prepare(page);
+      await expectNoAxeViolations(page, `${theme}: ${scenario.label}`);
+    });
+  }
+}
 
 test('@accessibility release visual non-default and empty states have no tagged axe violations', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Automated axe coverage is pinned to Chromium.');
