@@ -157,6 +157,7 @@ const exampleSlugs = [
   'cuda-python-launch',
 ] as const;
 const labSlugs = [
+  'verify-fused-softmax',
   'profile-custom-operator',
   'build-custom-operator',
   'record-cuda-environment',
