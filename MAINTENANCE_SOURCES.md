@@ -1,5 +1,27 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Blocked GEMM and autotuning — 2026-09-14
+
+Issue #48 publishes T04 `[T02,A08,Q10]`, T05 `[T04,Q05,Q06]`, LAB16
+`[T04,T05]`, two Exercise/solution sets, PB-R5-017/018 and SRC-CUDA-089.
+Current inventory: 336 pairs / 672 routes, 92 Learning Units, 23 Runnable
+Examples, 16 Labs, 20 Visual Explainers, 91 Exercise sets and 91 solution
+sets, 100 Practice Bank entries, 207 terms, 105 sources and 448 catalog records.
+LAB16 adds one Pending Hardware Verification subject (38 total). Earlier
+increments below retain historical counts. No performance or selection is published.
+
+Context7 `/triton-lang/triton` query covered blocked dot, FP16/FP32 precision,
+Config/autotune and callback/cache behavior; returned main-branch examples were
+discovery only. `/websites/pytorch_2_13` covered mm out and FP16 reduction flags.
+Exact Triton v3.7.1 core.py, semantic.py, autotuner.py, jit.py, cache.py,
+testing.py, test_core.py::test_dot and test_autotuner.py govern the source record.
+PyTorch 2.13 mm/CUDA notes and v2.13.0 backend source govern the native baseline.
+The custom callback returns a scalar median while retaining every sample; its
+pinned ordered-candidate assumption is checked against configs_timings.
+Source readings are reference-only. Original code uses Apache-2.0, prose CC BY 4.0;
+the exact EX23 MIT notice/hash remains unchanged. No upstream tests/results are
+adopted as project runtime evidence, and ordinary Toolkit Lanes are not inherited.
+
 ## Fused softmax — 2026-09-14
 
 Issue #47 publishes T03 and LAB15 with ordered prerequisites `[T02,A10,Q05]`,

@@ -1,0 +1,115 @@
+---
+title: 'T04: Build a Blocked Matrix Product'
+description: Derive tile ownership, three independent masks and the FP16-to-FP32 precision contract before tuning.
+pairId: t04
+counterpart: /triton/blocked-matrix-multiplication/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, ownership, masks, kernel, precision, correctness, resources, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T04
+prerequisites: [T02, A08, Q10]
+relatedUnits: [T05, LAB16]
+hardwareGate: none
+estimatedMinutes: 55
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton matrix and memory semantics', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton autotuner and configuration', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/autotuner.py', version: '3.7.1', platform: 'Pinned release implementation', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t04 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/blocked-matrix-multiplication/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,ownership,masks,kernel,precision,correctness,resources,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T04 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,A08,Q10' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T05,LAB16' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import kernel from '../../../../../scripts/gemm-verification/kernel.py?raw';
+
+<a class="locale-pair" data-locale-counterpart href="/triton/blocked-matrix-multiplication/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Implement `C = A @ B`, explain who writes every output and why each load is safe, then test precision before selecting a configuration. Allow 55 minutes; [LAB16](/en/labs/autotune-triton-gemm/) adds 120 minutes plus installation. Reading needs no GPU. The website never executes CUDA.
+
+## Exact prerequisites
+
+**[T02, A08, Q10]**: [masked pointers](/en/triton/masked-vector-addition/), [tiled GEMM](/en/algorithms/tiled-gemm-correctness/) and [Roofline arithmetic intensity](/en/correctness/roofline-arithmetic-intensity/). T02 supplies block values; A08 supplies correctness and reuse over K; Q10 supplies the operation/byte ledger. [T05](/en/triton/autotuning/) adds measurement prerequisites rather than hiding them here.
+
+## Why blocking survived new programming models
+
+Classical blocked GEMM reuses A and B fragments for many output products. CUDA exposes threads and shared-memory cooperation; Triton expresses tile values and leaves their physical layout to the compiler. Tensor Cores make supported matrix instructions valuable, but `tl.dot` is an operation contract, not proof of a particular instruction or speedup. Inspect generated artifacts for the exact target. This original Lab uses a two-dimensional grid; it does not reproduce the owner's grouped-program tutorial or its performance claims.
+
+## Give every output tile one owner
+
+For contiguous row-major A of shape `(M,K)` and B of shape `(K,N)`, addresses in elements are `A[m*K+k]`, `B[k*N+n]` and `C[m*N+n]`. The launch grid is `(ceil(M/BM), ceil(N/BN))`. Program `(pm,pn)` owns rows `pm*BM + [0,BM)` and columns `pn*BN + [0,BN)`.
+
+Each K iteration loads a `(BM,BK)` block and a `(BK,BN)` block, then updates a `(BM,BN)` accumulator. There are `ceil(K/BK)` iterations. Broadcasting `rows[:,None]` and `inner[None,:]` constructs A's pointer matrix; B uses `inner[:,None]` and `columns[None,:]`. Logical positions are not individual CUDA threads. Each valid output has one owner, so no atomic operation or inter-program barrier is needed.
+
+## Three masks solve different boundaries
+
+| Operation | Required validity | Invalid contribution |
+| --- | --- | --- |
+| A load | row less than M AND inner less than K | zero |
+| B load | inner less than K AND column less than N | zero |
+| C store | row less than M AND column less than N | no write |
+
+Zero is neutral for the product sum, unlike softmax's maximum padding. A store mask cannot protect an earlier load. `tl.where` around an unmasked load cannot make it safe. Do not wrap invalid output coordinates modulo M or N: that can duplicate ownership. With `(M,N,K)=(65,97,63)` and `(BM,BN,BK)=(32,64,32)`, grid `(3,2)` has six programs and two K iterations. The last tile has one valid row and 33 valid columns; the final K position 63 must not be loaded.
+
+## Read the shared Lab kernel
+
+<figure class="canonical-code">
+  <figcaption><code>LAB16 · scripts/gemm-verification/kernel.py</code></figcaption>
+  <pre tabindex="0"><code class="language-python">{kernel}</code></pre>
+</figure>
+
+Both locales render this exact source. `M,N,K,BM,BN,BK` are compile-time constants in this bounded activity. A fixed launch supplies these plus `num_warps` and `num_stages`; the latter are compiler launch options, not tensor dimensions. Increasing stages can overlap work but also increases resource demand. The default teaching candidate is `(32,32,32,4,2)` in that order, not a measured winner.
+
+## State precision at every boundary
+
+LAB16 accepts finite, contiguous rank-2 **FP16 inputs**, values with magnitude at most 4, dimensions 1–512, and compatible inner dimensions. It performs forward-only multiplication with no bias, activation, gradients, batches, transpose or arbitrary strides. `tl.zeros(..., tl.float32)` and `tl.dot(a,b,accumulator)` keep the accumulator FP32; the final store explicitly rounds to FP16.
+
+Input storage rounding, accumulation order and output rounding are separate. FP32 accumulation cannot recover values lost at the FP16 input boundary. `input_precision` governs FP32 dot inputs on supported targets; setting it does not improve FP16 inputs here. TF32, BF16, FP8 and FP32 input variants require separate contracts. Compare against the **stored FP16 values** promoted to double, not the original random draws.
+
+## Test every candidate before timing
+
+The Lab uses `(M,N,K) = (1,1,1), (17,19,33), (32,32,32), (65,97,63), (128,128,128), (256,192,257)`. They cover tiny work, exact tiles, each tail and a longer reduction. Deterministic signed inputs include cancellation; repeated rows/columns reduce oracle cost without skipping any output check.
+
+The independent scalar oracle uses `math.fsum` of double products of stored values. Require every output finite and `abs(actual-reference) <= 0.02 + 0.002*abs(reference)`. This fixed teaching tolerance accommodates FP16 output rounding; it is not a universal GEMM error bound. The Linux CPU gate checks that oracle against FP64 `torch.mm` with absolute error at most `1e-10`. Every GPU candidate and the native FP16 baseline must separately pass. NaN initialization catches missing stores; a 2048-element NaN tail and unchanged inputs catch some write defects, not all unsafe loads. Never widen tolerance to make a failed candidate win.
+
+## Relate logical reuse to resources
+
+One full K tile logically reads `2*(BM*BK + BK*BN)` FP16 bytes and performs `2*BM*BN*BK` arithmetic operations under the conventional multiply-plus-add count. Its FP32 accumulator holds `4*BM*BN` logical bytes. These are ledgers, not observed DRAM traffic or a per-thread register allocation. Larger BM/BN increase reuse and accumulator pressure together; larger BK changes padding and pipeline resources. Grid size, occupancy, compiler layout and the workload distribution all affect the outcome.
+
+## Practice and diagnose
+
+Complete the [Exercises](/en/triton/blocked-matrix-multiplication/exercises/) before the [separate solutions](/en/triton/blocked-matrix-multiplication/solutions/). [PB-R5-017](/en/practice/#pb-r5-017) presents a different broken tail. Then follow [T05](/en/triton/autotuning/) and [LAB16](/en/labs/autotune-triton-gemm/).
+
+Compile failure: inspect block shapes, target and resource limits. Errors only at the edge: inspect all three masks. Errors everywhere: check row-major strides and reduction coordinates. Small widespread differences: inspect stored dtype and output rounding before changing acceptance. T04 has no evidence claims; LAB16 remains **Pending Hardware Verification** with no recorded output, configuration or timing.
+
+## Retrieval check
+
+1. Which dimensions do A, B and C masks each protect?
+2. Why does a two-dimensional grid avoid atomics in this design?
+3. What is the difference between a `(BM,BN)` block value and a warp count?
+4. Why does FP32 accumulation not make this an FP32-input experiment?
+5. Can an unchanged tail guard establish that all loads were safe?
+6. What changes when BK grows while K stays 63?
+
+## Primary sources and rights
+
+Facts checked **2026-09-14**. [SRC-CUDA-089](/en/sources-and-versions/#src-cuda-089) records Context7 discovery and exact Triton 3.7.1 source/tests; [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) fixes the environment and MIT notice. Original Lab code is Apache-2.0; instructional prose is CC BY 4.0. No upstream kernel listing, plot or measurement is reproduced.

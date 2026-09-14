@@ -1,0 +1,162 @@
+---
+title: 'LAB16：实现并自动调优 Triton GEMM'
+description: 验证所有分块乘法候选，保留分阶段的配置与测量记录。
+pairId: lab16
+counterpart: /en/labs/autotune-triton-gemm/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, implement, compile, verify, tune, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB16
+prerequisites: [T04, T05]
+relatedUnits: [T04, T05]
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.'
+estimatedMinutes: 120
+difficulty: intermediate
+toolkitLanes: []
+tritonProfile: cpython-3-14-7-triton-3-7-1
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions: ['Install hash-locked wheels in an owned virtual environment', 'Access one NVIDIA CUDA device and read driver identity', 'Write owned compiler artifacts and reports; no profiler counters required']
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Every candidate should satisfy the stored-input oracle and unchanged-input/write-guard contract.', 'Shape 65x97x63 with tile 32x64x32 should launch six programs with two reduction iterations.', 'A repeated same-key autotuner call should reuse selection without another candidate search; no winner is predicted.']
+  recordedObservations: []
+sources:
+  - { title: 'Triton matrix and autotuner source', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/autotuner.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'PyTorch matrix product', url: 'https://docs.pytorch.org/docs/2.13/generated/torch.mm.html', version: '2.13.0', platform: 'FP16 CUDA forward-only out interface', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab16 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/labs/autotune-triton-gemm/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,implement,compile,verify,tune,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB16 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T04,T05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T04,T05' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:triton-profile', content: cpython-3-14-7-triton-3-7-1 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/labs/autotune-triton-gemm/" lang="en">Read the English counterpart</a>
+
+## 实验合同
+
+实现分块矩阵乘法，验证所有候选，再按形状保留配置选择及公平的原生比较。实验（Lab）预计 120 分钟，另加安装时间。工作在外部 Linux 上执行，网站不执行 CUDA。本实验为**待硬件验证（Pending Hardware Verification）**。
+
+## 前置与工作负载
+
+精确有序依赖为 **[T04, T05]**：[分块索引/精度](/triton/blocked-matrix-multiplication/) 与[分阶段调优](/triton/autotuning/)，没有额外隐藏前置。
+
+合同：`C=A@B`，连续行主序 `(M,K)` 和 `(K,N)`，FP16 输入/输出、FP32 Triton 累加器，仅前向。各维度 1–512，内维度相同，所有存储输入有限且绝对值不超过 4。不含批次、转置、偏置、激活、自动求导、任意步长或其他类型。固定 `(M,N,K)` 为 `(1,1,1), (17,19,33), (32,32,32), (65,97,63), (128,128,128), (256,192,257)`。种子 `1600+K` 生成带符号混合行列并舍入到 FP16；第零行交替为 ±4，第零列为 0.25。重复行列降低独立标量参考的成本，但仍检查每个结果。
+
+## 精确环境与内存
+
+| 坐标 | 要求 |
+| --- | --- |
+| 主机 | 原生 Ubuntu 24.04 x86-64；记录发行版、内核和 glibc |
+| 解释器 | 普通 GIL CPython 3.14.7，cp314，不使用自由线程 ABI |
+| 完整运行环境 | Triton 3.7.1、torch 2.13.0 及 EX23 requirements.lock 中每个版本/哈希 |
+| CUDA 包 | torch CUDA 13.0.3 系列；传递依赖精确锁定；无需系统 nvcc |
+| 编译器 | 随包 ptxas 12.8.93；Blackwell 分支为 13.1.80；精确目标须受支持 |
+| 设备 | 恰好一个可见 NVIDIA GPU，CC >= 8.0，总内存 >= 8 GB，空闲 >= 2 GB |
+| 驱动 | 580.65.06 或更新 |
+| 权限 | 自有 venv/缓存/报告目录、GPU 访问及驱动身份；无需计数器 |
+
+独立配置不继承普通工具包通道（Toolkit Lane）。单个最大允许形状需要 `2*(M*K+K*N+2*M*N+2048)` 字节设备张量，在 512 立方时最多 2,101,248 字节；所有固定用例合计保留仍低于 2 MiB。数字不含框架上下文、编译器、库工作区、CPU 参考对象及基准缓存。2 GB 空闲门禁提供余量，不是实测峰值内存；分配失败必须停止。
+
+## 准备并保留源码身份
+
+使用包含 `scripts/gemm-verification/` 的干净检出，保留 `git rev-parse HEAD`、`git status --short` 及学习者差异。用 CPython 3.14.7 安装**完整**哈希锁定的 [EX23 环境](/examples/triton-vector-add/)。可复用其 venv；仅有 `compiler.lock` 无法执行 CPU torch 或 GPU 阶段。命令从仓库根目录运行：
+
+```sh
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+RUN_ROOT=$(mktemp -d)
+export CUDA_VISIBLE_DEVICES=0
+"$PYTHON" -I examples/ex23-triton-vector-add/ex23.py check-environment
+"$PYTHON" -m unittest discover -s scripts/gemm-verification -p 'test_*.py'
+"$PYTHON" -I scripts/gemm-verification/check.py --mode cpu --output "$RUN_ROOT/cpu"
+```
+
+每阶段保存命令输出与退出状态。移除继承的 Triton/ptxas 覆盖项及 `CUDA_LAUNCH_BLOCKING`；门禁在导入 GPU 库前拒绝调试/解释器/缓存覆盖。CPU 模式用 FP64 `torch.mm` 核对标量 `math.fsum` 乘积，绝对误差 ≤ `1e-10`，不查询 CUDA。CPU 通过只代表部分进展。
+
+## 实现与预测
+
+在学习者副本中实现 `kernel.py` 的 `blocked_product`，保持签名。推导 A/B 指针矩阵、K 循环更新、FP32 累加器及独立掩码的 FP16 写入。先做 [T04 练习](/triton/blocked-matrix-multiplication/exercises/)，再看其呈现的实现。
+
+严格保留四个 `(BM,BN,BK,num_warps,num_stages)` 候选：`(32,32,32,4,2)`、`(32,64,32,4,3)`、`(64,32,32,4,3)`、`(64,64,32,4,3)`。均使用一个 CTA，无剪枝或 split-K。预测形状 `65x97x63`、块 `32x64x32` 有六个程序和两次 K 迭代。解释最后输出块为什么只有 33 个有效输出，以及为什么只有写掩码不能保护读取。逐形状写性能假设，不预先选优胜者。
+
+## 单独编译所有候选
+
+```sh
+"$PYTHON" -I scripts/gemm-verification/check.py --mode compile --output "$RUN_ROOT/compile"
+```
+
+仅编译子集门禁对明确的 sm_80 构建六种形状乘四个配置，保存 TTIR、TTGIR、LLVM IR、PTX、cubin 及哈希：24 个特化、120 个产物文件。不初始化或执行 GPU。公开编译证据为空；本地命令成功属于构建门禁，不自动授予证据状态（Evidence Status）。GPU 运行会单独请求实际设备编译，并记录每候选墙钟时间与 PTX 哈希。
+
+## 选择之前先验证
+
+```sh
+"$PYTHON" -I scripts/gemm-verification/check.py --mode verify --output "$RUN_ROOT/verify"
+```
+
+每种形状/配置及原生 `torch.mm(a,b,out=native)` 必须符合独立存储输入参考：输出有限且 `abs(error) <= 0.02 + 0.002*abs(reference)`。失败后不要放宽容差。FP32 累加和最终 FP16 舍入是有意设定。原生 FP16 低精度归约禁用。每候选前将输出填 NaN；输入须不变，2048 元素 NaN 尾部须未写。主机观察前同步。保护区能发现部分写入问题，不能证明没有不安全读取。
+
+错误 ABI/版本/目标、不受支持输入、缺失编译产物、数值或资源失败，会返回非零状态，并把首个失败阶段写入 `report.json`。修复学习者副本后使用新输出目录，保留失败尝试。
+
+## 搜索、记录缓存复用并测量稳态
+
+```sh
+"$PYTHON" -I scripts/gemm-verification/check.py --mode benchmark --output "$RUN_ROOT/benchmark"
+```
+
+基准模式在自己的进程中重新执行环境、实际目标编译及全部正确性门禁。搜索前，每候选启动 20 次后同步。每形状新建调优器，使用 `key=['M','N','K']`、精确列表、禁用磁盘调优缓存，以及返回中位数的回调。回调保留 `do_bench(..., warmup=25, rep=100, return_mode='all')` 的所有样本，预算单位是毫秒。工具验证候选顺序、重算最小中位数；精确相同时选择首个。候选必须齐全且有限，任何失败都会阻止选择。
+
+单独记录同步包围的预编译搜索加最终启动墙钟时间，与编译请求分开。第二次相同键调用不得增加基准回调，另外记录缓存命中加启动墙钟时间。这是内存**选择**复用，不是 GPU 数据缓存观察。新的 JIT 目录不证明操作系统/驱动缓存冷态。
+
+再次验证选中输出后，直接启动选中 JIT 配置和原生实现，各预热 20 次并同步，再做三轮：Triton/原生、原生/Triton、Triton/原生。保留每个原始毫秒样本、中位数、最小/最大值及未完成轮次。辅助函数使用当前流设备事件，估算重复次数，每次计时前清理基准缓存，返回前同步。两实现使用预分配输出及相同常驻输入；排除传输、分配、JIT、搜索、参考、分析器和图重放，提交空隙仍可能可见。测后复查输出、输入和尾部。在可比时钟/功耗/负载下，用新目录重复完整进程后再保留结论。搜索选中结果本身不是独立性能确认。
+
+## 环境清单与保留包
+
+被拒绝样本仍保留在对应候选/实现记录中，带有 `status: rejected` 和拒绝原因。非有限观察使用 JSON 字符串 `nan`、`inf`、`-inf`；有限的零/负值仍是数字。它们是失败观察，不是有效统计。若实现返回样本前就失败，记录保持未完成。原生正确性与原生测后检查失败有独立阶段标签。
+
+| 记录 | 必填字段 |
+| --- | --- |
+| 源码/构建 | 提交和未提交差异；Python 源码哈希；完整锁哈希；编译产物、ptxas 身份及实际目标 PTX |
+| 设备 | GPU 名称/UUID、CC、可见数量、总/空闲内存、驱动、torch CUDA 系列、已加载库路径/哈希 |
+| 工作负载 | M/N/K、行主序步长、FP16/FP32/FP16 精度、种子/模式、容差、仅前向范围 |
+| 选择 | 四个 Config 记录、候选检查/原始样本、中位数目标、选中 Config、搜索墙钟、缓存策略/命中 |
+| 测量 | 编译与预热墙钟、同步、实现顺序、全部轮次/原始样本/统计、事后检查 |
+| 手工补充 | OS/内核/glibc、精确命令/退出码、时钟/功耗策略、竞争负载、基准环境（Reference Environment）身份或缺失、逐形状保留/拒绝/不明确决定 |
+
+工具观察机器事实，不能推断环境清单（Environment Manifest）的手工补充。公开前审查/删去报告中的主机路径，不盲目上传缓存或二进制。本地通过仍须维护者在声明的基准环境（Reference Environment）中审查，才能成为运行已验证（Runtime-Verified）。任何选中配置或比值都不能跨形状/设备推广。
+
+## 预期与已记录观察
+
+预期：全部候选通过参考和保护区检查；声明的尾部用例有六个程序、两次 K 迭代；重复键复用选择而不搜索。**已记录观察：无。**编译证据为空；运行为**待硬件验证**。没有发布选中配置、计时、吞吐量或加速比。
+
+## 验收检查点
+
+提交实现/差异、掩码/形状/精度推导、完整候选正确性、独立阶段记录、所有搜索及稳态样本、完整环境清单。正确但更慢或差异不明确都是有效结果。缺少硬件时保留 CPU/编译进展及运行阻塞。先尝试任务，再看 [T05 练习](/triton/autotuning/exercises/) 与独立 [T04 解答](/triton/blocked-matrix-multiplication/solutions/)/[T05 解答](/triton/autotuning/solutions/)。
+
+## 清理
+
+先保留源码身份及审查后的成功/失败报告。仅在不再需要时删除自有临时 venv、学习者副本和 RUN_ROOT 输出。共享设备状态和系统驱动交由所有者管理。
+
+## 来源与许可
+
+核查于 **2026-09-14**：[SRC-CUDA-089](/sources-and-versions/#src-cuda-089) 记录 dot/配置/缓存/基准/原生接口及测试；[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 固定精确环境与权利。原创代码采用 Apache-2.0，正文 CC BY 4.0。EX23 保留上游 MIT 声明；官方测试和网页 CI 不构成实验运行证据。

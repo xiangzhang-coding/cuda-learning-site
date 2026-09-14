@@ -49,3 +49,9 @@ jobs:
           PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
           "$PYTHON" -I scripts/softmax-verification/check.py --mode compile --warps 4 --output "$RUNNER_TEMP/lab15-compile-4"
           "$PYTHON" -I scripts/softmax-verification/check.py --mode compile --warps 8 --output "$RUNNER_TEMP/lab15-compile-8"
+      - name: Check LAB16 numerical and configuration contracts in pinned Linux
+        run: |
+          PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+          "$PYTHON" -m unittest discover -s scripts/gemm-verification -p 'test_*.py'
+          "$PYTHON" -I scripts/gemm-verification/check.py --mode cpu --output "$RUNNER_TEMP/lab16-cpu"
+          "$PYTHON" -I scripts/gemm-verification/check.py --mode compile --output "$RUNNER_TEMP/lab16-compile"

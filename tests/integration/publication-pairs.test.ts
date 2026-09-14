@@ -51,6 +51,8 @@ const publicationPairFixtures: readonly PublicationPair[] = [
     { id: 'T01', slug: 'triton/programs-and-block-values', prerequisites: 'F02,F03,M02' },
     { id: 'T02', slug: 'triton/masked-vector-addition', prerequisites: 'T01,A01' },
     { id: 'T03', slug: 'triton/fused-softmax', prerequisites: 'T02,A10,Q05' },
+    { id: 'T04', slug: 'triton/blocked-matrix-multiplication', prerequisites: 'T02,A08,Q10' },
+    { id: 'T05', slug: 'triton/autotuning', prerequisites: 'T04,Q05,Q06' },
   ].flatMap(({ id, slug, prerequisites }) => [
     { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
       factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
@@ -59,6 +61,9 @@ const publicationPairFixtures: readonly PublicationPair[] = [
     { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`,
       factCheckDate: '2026-09-14', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
   ]),
+  { pairId: 'lab16', unitId: 'LAB16', resourceKind: 'lab', prerequisites: 'T04,T05',
+    factCheckDate: '2026-09-14', evidenceRuntime: 'Pending Hardware Verification',
+    zh: '/labs/autotune-triton-gemm/', en: '/en/labs/autotune-triton-gemm/' },
   { pairId: 'lab15', unitId: 'LAB15', resourceKind: 'lab', prerequisites: 'T02,A10,Q05',
     factCheckDate: '2026-09-14', evidenceRuntime: 'Pending Hardware Verification',
     zh: '/labs/verify-fused-softmax/', en: '/en/labs/verify-fused-softmax/' },
@@ -4277,14 +4282,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(329);
-    expect(sourceRoutes.size).toBe(658);
+    expect(publicationPairs).toHaveLength(336);
+    expect(sourceRoutes.size).toBe(672);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['T04', 'EX24', 'LAB16']) {
+    for (const absentUnitId of ['T06', 'EX24', 'LAB17']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

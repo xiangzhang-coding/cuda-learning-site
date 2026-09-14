@@ -92,11 +92,11 @@ describe('R4 release review', () => {
         .toBe('2026-09-14');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /329 (?:Publication Pairs|个双语发布对)/, /658 (?:source routes|routes|条源路由|条路由)/,
-        /90 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
-        /89 (?:Exercise sets|组练习)/, /89 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
-        /98 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
-        /104 (?:source records|条来源(?:记录)?)/, /444 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /37 (?:subjects|个主体)/,
+        /336 (?:Publication Pairs|个双语发布对)/, /672 (?:source routes|routes|条源路由|条路由)/,
+        /92 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
+        /91 (?:Exercise sets|组练习)/, /91 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
+        /100 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
+        /105 (?:source records|条来源(?:记录)?)/, /448 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /38 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
       expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '98'], ['glossary', '207'], ['sources-and-versions', '104']]) {
+        for (const [slug, count] of [['practice', '100'], ['glossary', '207'], ['sources-and-versions', '105']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -518,7 +518,7 @@ describe('R4 release review', () => {
         .map(([, doc]) => metadata(doc, 'unit-id')!);
       expectExactMembers(idsOfKind('learning-unit'), current.scope.learningUnits);
       expectExactMembers(idsOfKind('runnable-example'), current.scope.runnableExamples);
-      expectExactMembers(idsOfKind('lab'), [...labs, 'LAB13', 'LAB14', 'LAB15']);
+      expectExactMembers(idsOfKind('lab'), [...labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16']);
       expect(idsOfKind('exercise-set')).toHaveLength(current.scope.exerciseSetPublicationPairs);
       expect(idsOfKind('solution-set')).toHaveLength(current.scope.solutionSetPublicationPairs);
       const units = new Map(localPages.filter(([, doc]) => metadata(doc, 'unit-id'))
@@ -558,7 +558,7 @@ describe('R4 release review', () => {
 
       const catalogIds: string[] = [];
       for (const [slug, group, count] of [
-        ['labs', 'labs', 15], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 20],
+        ['labs', 'labs', 16], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 20],
         ['glossary', 'glossary', current.scope.glossaryTerms], ['sources-and-versions', 'sources', current.scope.sourceRecords],
       ] as const) {
         const route = `${locale === 'en' ? '/en' : ''}/${slug}/`;
@@ -616,19 +616,19 @@ describe('R4 release review', () => {
       expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), current.evidence.pendingHardwareVerification);
       expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
       expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
-      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016']);
-      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T0[4-9]|^PB-R[6-9]-|^(?:EX24|LAB16)$/.test(id))).toBe(false);
+      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018']);
+      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T0[6-9]|^PB-R[6-9]-|^(?:EX24|LAB17)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(
-      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition', 'fused-softmax']
+      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition', 'fused-softmax', 'blocked-matrix-multiplication', 'autotuning']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}triton/${slug}/${suffix}`))).sort());
     expect(routes.filter((route) => /\/frameworks(?:\/|$)/.test(route)).sort()).toEqual(
       ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling', 'first-custom-operator', 'operator-registration', 'operator-packaging', 'profile-led-optimization', 'sdpa-dispatch-verification']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}frameworks/${slug}/${suffix}`))).sort(),
     );
     expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P|T)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
-    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB16');
+    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB17');
   }, 30_000);
 });

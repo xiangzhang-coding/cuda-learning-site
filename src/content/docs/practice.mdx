@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 98 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 当前已发布的 100 个跨单元原创练习，包含先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-09-14'
@@ -4315,7 +4315,57 @@ NVRTC create 返回 `(status, program)`，compile/destroy 返回 `(status,)`，�
 
 **来源依据：** 原创基准审计；[SRC-CUDA-088](/sources-and-versions/#src-cuda-088)。**来源日期：** 2026-09-14。无性能观察。
 
+<span id="pb-r5-017" class="resource-target"></span>
+
+## PB-R5-017：输出整块不等于归约整块
+
+**ID：** PB-R5-017 · 原创双语发布对（Publication Pair）。
+- **直接先修条件：** [T04](/triton/blocked-matrix-multiplication/)，精确为 `[T04]`。
+- **相关学习单元与资源：** [T04](/triton/blocked-matrix-multiplication/)、[LAB16](/labs/autotune-triton-gemm/)。
+- **硬件门槛：** 无。
+- **最近复核：** 2026-09-14。
+
+**难度：** 中级。**版本：** Triton 3.7.1。
+
+**题目：** GEMM 候选取 M=N=32、K=33、BM=BN=BK=32。作者因输出正好一个块而删除两组 K 掩码；唯一通过的测试为 K=32。推理成立吗？
+
+**约束：** 纸面审查，不执行不安全启动。**预期证据：** 归约迭代、有效内坐标及两组修正掩码。**验收条件：** 区分输出覆盖和归约覆盖，解释零填充，并要求非整除 K 的参考用例。
+
+<details><summary>提示 1：独立列举 K</summary><p>M/N 网格整除不能说明最后一次 K 迭代的情况。</p></details>
+<details><summary>提示 2：两个操作数都有 K</summary><p>A 的列和 B 的行共享归约坐标。</p></details>
+<details><summary>独立参考解答：尝试后再打开</summary><p>查看 [T04 解答](/triton/blocked-matrix-multiplication/solutions/#练习题库复核)。</p></details>
+
+**参考解答：** [独立推导](/triton/blocked-matrix-multiplication/solutions/#练习题库复核)指出 33–63 是无效坐标。
+
+**来源依据：** 原创尾部审查；[SRC-CUDA-089](/sources-and-versions/#src-cuda-089)。**来源日期：** 2026-09-14。无已记录观察。
+
+<span id="pb-r5-018" class="resource-target"></span>
+
+## PB-R5-018：相同调优键不等于相同设备
+
+**ID：** PB-R5-018 · 原创双语发布对。
+- **直接先修条件：** [T05](/triton/autotuning/)，精确为 `[T05]`。
+- **相关学习单元与资源：** [T05](/triton/autotuning/)、[LAB16](/labs/autotune-triton-gemm/)。
+- **硬件门槛：** 无。
+- **最近复核：** 2026-09-14。
+
+**难度：** 中级。**版本：** Triton 3.7.1；torch 2.13.0。
+
+**题目：** 长期运行的进程把形状/类型相同的工作移到第二块 GPU，复用内存中的调优器。没有新增基准回调，报告就宣称第一块 GPU 的 Config 在两者都最优。两个设备都没有合格环境清单。
+
+**约束：** 不虚构替代计时。**预期证据：** 缓存键解释及设备隔离的重跑计划。**验收条件：** 拒绝推广选择，每设备重新记录环境/正确性/搜索/选后测量，保持待硬件验证。
+
+<details><summary>提示 1：看键的实际字段</summary><p>M/N/K 与张量类型字符串不构成设备身份。</p></details>
+<details><summary>提示 2：缓存复用不是新证据</summary><p>两个实验不要复用选择状态。</p></details>
+<details><summary>独立参考解答：尝试后再打开</summary><p>查看 [T05 解答](/triton/autotuning/solutions/#练习题库复核)。</p></details>
+
+**参考解答：** [独立解答](/triton/autotuning/solutions/#练习题库复核)要求独立环境清单与选择记录。
+
+**来源依据：** 原创缓存/证据审查；[SRC-CUDA-089](/sources-and-versions/#src-cuda-089)。**来源日期：** 2026-09-14。无性能观察。
+
 ## 复核记录
+
+Issue #48 于 2026-09-14 增加 PB-R5-017/018，精确前置为 T04/T05。当前 100 个原创条目；LAB16 将待硬件验证主体增至 38。以下所有较早增量总数均为历史，R5 聚合复核待完成。
 
 Issue #47 于 2026-09-14 增加 PB-R5-015/016，精确前置均为 T03。当前共 98 个原创条目；LAB15 将待硬件验证主体增至 37 个。以下旧增量总数属于历史记录。
 

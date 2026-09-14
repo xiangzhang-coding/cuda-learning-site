@@ -1,0 +1,162 @@
+---
+title: 'LAB16: Implement and Autotune Triton GEMM'
+description: Verify all blocked-product candidates and retain phase-separated configuration and measurement records.
+pairId: lab16
+counterpart: /labs/autotune-triton-gemm/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [contract, prerequisites, environment, prepare, implement, compile, verify, tune, manifest, observations, acceptance, cleanup, sources]
+resourceKind: lab
+unitId: LAB16
+prerequisites: [T04, T05]
+relatedUnits: [T04, T05]
+hardwareGate: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.'
+estimatedMinutes: 120
+difficulty: intermediate
+toolkitLanes: []
+tritonProfile: cpython-3-14-7-triton-3-7-1
+minimumComputeCapability: '8.0'
+maximumProblemMemoryBytes: 8000000000
+gpuCount: 1
+permissions: ['Install hash-locked wheels in an owned virtual environment', 'Access one NVIDIA CUDA device and read driver identity', 'Write owned compiler artifacts and reports; no profiler counters required']
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Every candidate should satisfy the stored-input oracle and unchanged-input/write-guard contract.', 'Shape 65x97x63 with tile 32x64x32 should launch six programs with two reduction iterations.', 'A repeated same-key autotuner call should reuse selection without another candidate search; no winner is predicted.']
+  recordedObservations: []
+sources:
+  - { title: 'Triton matrix and autotuner source', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/autotuner.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'PyTorch matrix product', url: 'https://docs.pytorch.org/docs/2.13/generated/torch.mm.html', version: '2.13.0', platform: 'FP16 CUDA forward-only out interface', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: lab16 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/labs/autotune-triton-gemm/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'contract,prerequisites,environment,prepare,implement,compile,verify,tune,manifest,observations,acceptance,cleanup,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: lab } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: LAB16 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T04,T05' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T04,T05' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: 'Native Ubuntu 24.04 x86-64; CPython 3.14.7; Triton 3.7.1; torch 2.13.0; one CC 8.0+ NVIDIA GPU with at least 8 GB and 2 GB free; driver 580.65.06 or newer.' } }
+  - { tag: meta, attrs: { name: 'cuda:toolkit-lanes', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:triton-profile', content: cpython-3-14-7-triton-3-7-1 } }
+  - { tag: meta, attrs: { name: 'cuda:minimum-compute-capability', content: '8.0' } }
+  - { tag: meta, attrs: { name: 'cuda:maximum-problem-memory-bytes', content: '8000000000' } }
+  - { tag: meta, attrs: { name: 'cuda:gpu-count', content: '1' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '3 declared expectations' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/labs/autotune-triton-gemm/" lang="zh-CN">阅读中文对应页</a>
+
+## Lab contract
+
+Implement a blocked matrix product, validate every candidate, then retain a configuration choice and fair native comparison per shape. Allow 120 minutes plus installation. Work runs externally on Linux, never inside the website. This Lab is **Pending Hardware Verification**.
+
+## Prerequisites and workload
+
+Exact ordered edges: **[T04, T05]** — [blocked indexing/precision](/en/triton/blocked-matrix-multiplication/) and [phase-separated tuning](/en/triton/autotuning/). No additional hidden prerequisite is needed.
+
+Contract: `C=A@B`, contiguous row-major `(M,K)` and `(K,N)`, FP16 input/output, FP32 Triton accumulator, forward-only. Each dimension is 1–512, inner dimensions match, all stored inputs are finite with magnitude at most 4. No batching, transpose, bias, activation, autograd, arbitrary strides or other dtype. Fixed shapes `(M,N,K)` are `(1,1,1), (17,19,33), (32,32,32), (65,97,63), (128,128,128), (256,192,257)`. Seed `1600+K` produces signed mixed rows/columns rounded into FP16; row zero alternates ±4 and column zero contains 0.25. Repeated rows/columns make an independent scalar oracle affordable; every result remains checked.
+
+## Exact environment and memory
+
+| Coordinate | Requirement |
+| --- | --- |
+| Host | Native Ubuntu 24.04 x86-64; record release, kernel and glibc |
+| Interpreter | Ordinary GIL CPython 3.14.7, cp314, no free-threaded ABI |
+| Full runtime | Triton 3.7.1, torch 2.13.0 and every version/hash from EX23 requirements.lock |
+| CUDA packages | torch CUDA 13.0.3 family; exact transitive packages in the lock; no system nvcc required |
+| Compiler | Bundled ptxas 12.8.93; Blackwell branch 13.1.80; exact target must be supported |
+| Device | Exactly one visible NVIDIA GPU, CC >= 8.0, total >= 8 GB, free >= 2 GB |
+| Driver | 580.65.06 or newer |
+| Permissions | Owned venv/cache/report directories, GPU access and driver identity; no counters required |
+
+The independent profile inherits no ordinary Toolkit Lane. A maximum allowed single shape needs `2*(M*K+K*N+2*M*N+2048)` device tensor bytes, at most 2,101,248 bytes at 512 cubed; fixed cases retained together remain below 2 MiB. These figures exclude framework context, compiler, library workspaces, CPU oracle objects and benchmark cache. The 2 GB free gate provides headroom, not a measured peak-memory claim; stop on allocation failure.
+
+## Prepare and preserve source identity
+
+Use a clean checkout containing `scripts/gemm-verification/`; retain `git rev-parse HEAD`, `git status --short` and the learner diff. Install the **full** hash-locked [EX23 environment](/en/examples/triton-vector-add/) with CPython 3.14.7. Reusing that venv is supported; `compiler.lock` alone cannot run CPU torch or GPU phases. Commands run from the repository root:
+
+```sh
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+RUN_ROOT=$(mktemp -d)
+export CUDA_VISIBLE_DEVICES=0
+"$PYTHON" -I examples/ex23-triton-vector-add/ex23.py check-environment
+"$PYTHON" -m unittest discover -s scripts/gemm-verification -p 'test_*.py'
+"$PYTHON" -I scripts/gemm-verification/check.py --mode cpu --output "$RUN_ROOT/cpu"
+```
+
+Keep command output and exit status for each phase. Remove inherited Triton/ptxas overrides and `CUDA_LAUNCH_BLOCKING`; the gate rejects debug/interpreter/cache overrides before importing GPU libraries. CPU mode checks scalar `math.fsum` products against FP64 `torch.mm` with absolute error ≤ `1e-10`, without querying CUDA. A CPU pass is partial progress.
+
+## Implement and predict
+
+In a learner copy, implement `blocked_product` in `kernel.py`, preserving its signature. Derive A/B pointer matrices, K-loop updates, FP32 accumulator and independently masked FP16 store. Do the [T04 Exercises](/en/triton/blocked-matrix-multiplication/exercises/) before consulting its rendered implementation.
+
+Keep exactly four `(BM,BN,BK,num_warps,num_stages)` candidates: `(32,32,32,4,2)`, `(32,64,32,4,3)`, `(64,32,32,4,3)`, `(64,64,32,4,3)`. All use one CTA; no pruning or split-K. Predict six programs and two K iterations for shape `65x97x63`, tile `32x64x32`. Explain why its last output tile has only 33 valid outputs and why a store mask alone cannot protect loads. Write a per-shape performance hypothesis without choosing a winner in advance.
+
+## Compile every candidate separately
+
+```sh
+"$PYTHON" -I scripts/gemm-verification/check.py --mode compile --output "$RUN_ROOT/compile"
+```
+
+The compiler-only subset gate builds all six shapes times four configurations for explicit sm_80, saving TTIR, TTGIR, LLVM IR, PTX and cubin hashes: 24 specializations, 120 artifact files. No GPU is initialized or executed. Published compilation evidence remains empty; a successful local command is a build gate, not an automatic Evidence Status. GPU runs request compilation separately for the actual device and record per-candidate wall times and PTX hashes.
+
+## Verify before any selection
+
+```sh
+"$PYTHON" -I scripts/gemm-verification/check.py --mode verify --output "$RUN_ROOT/verify"
+```
+
+Every shape/configuration and native `torch.mm(a,b,out=native)` must match the independent stored-input oracle: finite outputs and `abs(error) <= 0.02 + 0.002*abs(reference)`. Do not loosen this tolerance after a failure. FP32 accumulation and final FP16 rounding are intentional. Native FP16 reduced-precision reduction is disabled. Outputs are NaN-filled before each candidate, inputs must remain unchanged and a 2048-element NaN tail must remain untouched. Synchronize before host observation. Guards detect some writes, not all unsafe reads.
+
+Wrong ABI/version/target, unsupported input, missing compilation artifact, numerical failure or resource failure produces a nonzero exit and `report.json` with the first failed phase. Repair a learner copy and use a fresh output directory; preserve failed attempts.
+
+## Search, record cache reuse and measure steady state
+
+```sh
+"$PYTHON" -I scripts/gemm-verification/check.py --mode benchmark --output "$RUN_ROOT/benchmark"
+```
+
+Benchmark mode reruns environment, actual-target compilation and every correctness gate in its own process. Before search it performs 20 launches per candidate and synchronizes. It creates a new autotuner per shape with `key=['M','N','K']`, the exact list, no disk tuning cache and a median-returning callback. The callback preserves all samples from `do_bench(..., warmup=25, rep=100, return_mode='all')`; budgets are milliseconds. The tool verifies candidate order and recomputes the selected minimum median, with first-candidate tie breaking. All candidates must be present and finite; any failure blocks selection.
+
+Record precompiled search plus final-launch synchronized wall time separately from compile requests. A second same-key call must add no benchmark callbacks; record its cache-hit-plus-launch wall time separately too. That is in-memory **selection** reuse, not a GPU data-cache observation. The fresh JIT directory does not prove cold OS/driver caches.
+
+After validating the selected output again, warm the direct selected JIT launch and native provider for 20 calls each, synchronize, then run three rounds in orders Triton/native, native/Triton, Triton/native. Preserve every raw millisecond sample, median, min/max and incomplete round. The helper uses current-stream device events, estimates repetitions, clears its benchmark cache before each measured call and synchronizes before returning samples. Both providers use preallocated outputs and identical resident inputs. Transfers, allocations, JIT, search, oracle, profiler and graphs are excluded; submission gaps may remain visible. Recheck outputs, inputs and tail after measurement. Repeat the full process into another directory under comparable clocks/power/load before retaining a claim. The selected search result is not itself independent performance confirmation.
+
+## Environment Manifest and retained bundle
+
+Rejected samples remain in their candidate/provider record with `status: rejected` and a rejection reason. Nonfinite observations use the JSON strings `nan`, `inf`, `-inf`; finite zero/negative values remain numbers. They are failed observations, never valid statistics. A provider that fails before returning samples remains incomplete. Native correctness and native post-benchmark failures have their own phase labels.
+
+| Record | Required fields |
+| --- | --- |
+| Source/build | Commit and dirty diff; Python source hashes; full lock hash; compiler artifacts, ptxas identity and actual-target PTX |
+| Device | GPU name/UUID, CC, visible count, total/free memory, driver, torch CUDA family, loaded library paths/hashes |
+| Workload | M/N/K, row-major strides, FP16/FP32/FP16 precision, seed/pattern, tolerance, forward-only scope |
+| Selection | All four Config records, candidate checks/raw samples, median objective, selected Config, search wall time, cache policy/hit |
+| Measurement | Compile and warm-up wall times, synchronization, provider order, all rounds/raw samples/statistics, postchecks |
+| Manual supplement | OS/kernel/glibc, exact commands/exits, clock/power policy, competing load, Reference Environment identity or absence, per-shape retain/reject/inconclusive decision |
+
+The tool observes machine facts but cannot infer the manual supplement. Review/redact host paths before publishing reports; do not blindly upload caches or binaries. A passing local report requires maintainer review in a declared Reference Environment before it becomes Runtime-Verified. No selected configuration or ratio may be generalized across shapes/devices.
+
+## Expected versus recorded observations
+
+Expected: all candidates should pass oracle and guards; the declared tail case should have six programs/two K iterations; a repeated key should reuse selection without search. **Recorded observations: none.** Compilation evidence is empty; runtime is **Pending Hardware Verification**. There is no published selected configuration, timing, throughput or speedup.
+
+## Acceptance checkpoint
+
+Submit implementation/diff, mask/shape/precision derivation, complete candidate correctness, separate phase records, all search and steady-state samples and the complete manifest. A correct but slower implementation or an inconclusive comparison is valid. Without hardware, retain CPU/compiler progress and the runtime blocker. Consult the [T05 Exercises](/en/triton/autotuning/exercises/) and separate [T04 solutions](/en/triton/blocked-matrix-multiplication/solutions/)/[T05 solutions](/en/triton/autotuning/solutions/) only after attempting the work.
+
+## Cleanup
+
+Preserve source identities and reviewed success/failure reports first. Remove only owned disposable venvs, learner copies and RUN_ROOT outputs when no longer needed. Leave shared device state and system drivers to their owner.
+
+## Sources and licensing
+
+Checked **2026-09-14**: [SRC-CUDA-089](/en/sources-and-versions/#src-cuda-089) for dot/configuration/cache/benchmark/native interfaces and tests; [SRC-CUDA-087](/en/sources-and-versions/#src-cuda-087) for the exact environment and rights. Original code is Apache-2.0, prose CC BY 4.0. EX23 retains the upstream MIT notice. Upstream tests and web CI are not Lab runtime evidence.

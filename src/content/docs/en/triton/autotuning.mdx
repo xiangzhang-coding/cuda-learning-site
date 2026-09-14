@@ -1,0 +1,110 @@
+---
+title: 'T05: Autotune Without Timing the Search'
+description: Keep compilation, candidate selection, caches, warm-up and steady-state evidence separate.
+pairId: t05
+counterpart: /triton/autotuning/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, candidates, phases, caches, selection, comparison, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T05
+prerequisites: [T04, Q05, Q06]
+relatedUnits: [LAB16]
+hardwareGate: none
+estimatedMinutes: 50
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton autotuner implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/autotuner.py', version: '3.7.1', platform: 'Pinned release implementation', accessDate: '2026-09-14' }
+  - { title: 'Triton benchmark implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py', version: '3.7.1', platform: 'Device events and benchmark cache', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t05 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/autotuning/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,candidates,phases,caches,selection,comparison,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T05 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T04,Q05,Q06' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: LAB16 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/triton/autotuning/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Produce a shape-local configuration record whose search cost cannot be mistaken for kernel execution time. Explain how the first call differs from repeated use and how to reject an unsupported winner. Allow 50 minutes, followed by [LAB16](/en/labs/autotune-triton-gemm/). Reading requires no GPU; runtime evidence requires the Lab's external Linux environment.
+
+## Exact prerequisites
+
+**[T04, Q05, Q06]**: [blocked multiplication](/en/triton/blocked-matrix-multiplication/), [asynchronous timing](/en/correctness/timing-asynchronous-gpu-work/) and [APOD optimization](/en/correctness/apod-optimization-loop/). A correct tile is the input to tuning; completion boundaries and a declared hypothesis are the input to a performance claim.
+
+## Why empirical selection exists
+
+Blocked linear-algebra libraries have long selected kernels according to workload and hardware. Triton's autotuner makes a bounded empirical search convenient, but cannot know your production distribution or correctness contract. A larger candidate list buys more opportunities at a cost in compilation, search time and statistical selection bias. An observed minimum among candidates is not a portable optimum.
+
+## Declare a small candidate space
+
+LAB16 uses exactly four `(BM,BN,BK,num_warps,num_stages)` tuples: `(32,32,32,4,2)`, `(32,64,32,4,3)`, `(64,32,32,4,3)`, `(64,64,32,4,3)`. All use `num_ctas=1`; no pruning, split-K, persistent scheduling or architecture-specific descriptors. `triton.Config({'BM':32,'BN':32,'BK':32}, num_warps=4, num_stages=2)` illustrates the exact constructor; a Config is a proposal, not a result.
+
+The Lab wraps the same JIT function with `triton.autotune(configs=candidates, key=['M','N','K'], do_bench=bench_candidate, cache_results=False)`. A launch grid callable reads BM and BN from the chosen metadata. Do not also pass BM/BN/BK at that autotuned call: those conflict with the configuration. The kernel fully overwrites C, so repeated candidates do not accumulate output. A kernel that adds into C needs an explicit reset/restore contract; the autotuner's `reset_to_zero` and `restore_value` hooks can implement one, but are outside this Lab's measurement scope.
+
+## Separate the phases
+
+| Phase | Boundary and retained record |
+| --- | --- |
+| Environment/inputs | Exact locks, target, stored input dtype and independent oracle |
+| Compile requests | Each candidate's `kernel.warmup` host wall time and actual-target PTX hash |
+| Correctness | All shapes and candidates plus native baseline, before any search |
+| Candidate device warm-up | 20 launches per candidate, then synchronize; separate wall time |
+| Autotune search | New autotuner; every candidate's raw event samples and objective; synchronized search plus final-launch wall time |
+| Same-key cache call | No new benchmark callback; synchronized cache-hit-plus-launch wall time |
+| Selected/native warm-up | 20 calls per provider, synchronize; separate wall time |
+| Steady state | Direct selected JIT launch versus native `torch.mm`, three alternating-order rounds |
+| Final validation | Recheck outputs, input immutability and write guard |
+
+`kernel.warmup` requests compilation; it does not warm the GPU by executing that kernel. An ordinary first autotuned launch can include compilation, all candidate benchmarks and the final chosen launch. LAB16 precompiles and verifies candidates first, so its recorded search is a **precompiled search**, not cold end-to-end latency. Keep setup, compile and search costs if evaluating a one-shot application. Do not sum overlapping measurements such as the outer search wall time and its inner event samples.
+
+## Name the cache you mean
+
+The JIT artifact cache avoids repeating compiler work. Each Lab process uses a fresh owned cache directory, but cannot promise a cold OS or driver cache. The autotuner has a separate in-memory selection cache: in 3.7.1 the key combines declared argument values and tensor dtype strings. It is not a universal environment identity; this Lab uses one device and a new tuner per shape. Cross-device reuse, changed strides or semantic modes require deliberate separation/key design.
+
+Disk autotune caching is another mechanism. `cache_results=False` disables it unless the release's global tuning-cache knob overrides it; the environment gate rejects inherited Triton overrides and the harness checks the effective value. None of those compiler/selection caches is the **GPU data cache**. `do_bench` clears its benchmark cache before each measured call; this policy does not certify that every operand always misses every hardware cache. Warm-data and graph-replay experiments would be distinct comparisons.
+
+## Preserve selection, including failures
+
+The custom `do_bench(fn, quantiles)` adapter accepts the autotuner callback signature, collects `triton.testing.do_bench(fn, warmup=25, rep=100, return_mode='all')`, retains raw milliseconds and returns their scalar median. The callback deliberately does not use the requested quantiles. Here warmup/rep are **millisecond budgets**, not iteration counts. The helper estimates repetition counts, records device events and synchronizes before returning samples.
+
+The pinned unpruned autotuner visits the declared list in order; the harness checks `configs_timings` order and matches `best_config` to the independently recomputed minimum median. Exact ties retain the first candidate. Missing candidates, nonpositive/nonfinite samples, disagreement, numerical failure or resource failure stop the run. An incomplete attempt keeps its first failed phase and completed records; it cannot establish a winner. This deliberately fails closed rather than silently dropping an inconvenient candidate.
+
+## Compare the selected implementation fairly
+
+Both providers use identical resident FP16 inputs and preallocated FP16 outputs, forward-only, no gradients. The native baseline disables FP16 reduced-precision reductions. Device event samples exclude allocation, transfer, compilation, search, oracle and profiler work; host submission gaps visible on the device timeline may still matter. Three rounds run Triton/native, native/Triton, Triton/native. Retain all samples, median and min/max per provider and shape; repeat the whole process under comparable load before a decision.
+
+Do not select a minimum and then present that same minimum as independent confirmation. LAB16's post-selection rounds are new measurements; the search objective remains separately visible. For conventional operation throughput, divide `2*M*N*K` by seconds and label the numerator as logical operations, not measured instruction count. Report regressions and inconclusive differences too. A one-shot application must account for setup/search amortization; a smaller steady-state median alone cannot settle that decision.
+
+## Exercises and evidence
+
+Complete [implementation and report Exercises](/en/triton/autotuning/exercises/), then the [separate solutions](/en/triton/autotuning/solutions/). Audit [PB-R5-018](/en/practice/#pb-r5-018) and execute [LAB16](/en/labs/autotune-triton-gemm/). T05's evidence arrays are empty. LAB16 is **Pending Hardware Verification**; no configuration, timing or speedup is published. A selected configuration is interpretable only with shape, dtype, candidate list, exact source, device/toolchain, clock/power/load policy, all phases and a qualifying Environment Manifest. Never generalize it to another shape or device.
+
+## Retrieval check
+
+1. What does `kernel.warmup` do, and which phase actually executes it?
+2. Which four different caches can affect this experiment?
+3. Why do M/N/K belong in the tuning key, and why is that key not a manifest?
+4. Why can a fully overwriting C kernel be benchmarked repeatedly without reset?
+5. What must survive if candidate three fails?
+6. Why must post-selection timing be distinct from the search objective?
+
+## Primary sources and rights
+
+Facts checked **2026-09-14**. [SRC-CUDA-089](/en/sources-and-versions/#src-cuda-089) links exact 3.7.1 autotuner, JIT, cache, benchmark and owner tests plus PyTorch 2.13 precision controls. Original explanations/Exercises use CC BY 4.0; Lab tooling uses Apache-2.0. The exact upstream MIT notice is retained under EX23; no upstream benchmark is project evidence.

@@ -199,6 +199,8 @@ export default defineConfig({
             { slug: 'triton/programs-and-block-values' },
             { slug: 'triton/masked-vector-addition' },
             { slug: 'triton/fused-softmax' },
+            { slug: 'triton/blocked-matrix-multiplication' },
+            { slug: 'triton/autotuning' },
           ],
         },
         {

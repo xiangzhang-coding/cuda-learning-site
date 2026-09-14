@@ -1,0 +1,115 @@
+---
+title: 'T04：构造分块矩阵乘法'
+description: 在调优前推导块归属、三组独立掩码，以及 FP16 到 FP32 的精度合同。
+pairId: t04
+counterpart: /en/triton/blocked-matrix-multiplication/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, ownership, masks, kernel, precision, correctness, resources, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T04
+prerequisites: [T02, A08, Q10]
+relatedUnits: [T05, LAB16]
+hardwareGate: none
+estimatedMinutes: 55
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton matrix and memory semantics', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py', version: '3.7.1', platform: 'Native Linux; NVIDIA CC 8.0+', accessDate: '2026-09-14' }
+  - { title: 'Triton autotuner and configuration', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/autotuner.py', version: '3.7.1', platform: 'Pinned release implementation', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t04 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/blocked-matrix-multiplication/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,ownership,masks,kernel,precision,correctness,resources,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T04 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,A08,Q10' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T05,LAB16' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+import kernel from '../../../../scripts/gemm-verification/kernel.py?raw';
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/blocked-matrix-multiplication/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+实现 `C = A @ B`，解释每个输出由谁写入、每次读取为何安全，然后先检查精度，再选择配置。学习单元（Learning Unit）预计 55 分钟；[LAB16](/labs/autotune-triton-gemm/) 另需 120 分钟及安装时间。阅读无需 GPU；网站不执行 CUDA。
+
+## 精确前置
+
+**[T02, A08, Q10]**：[带掩码指针](/triton/masked-vector-addition/)、[分块 GEMM](/algorithms/tiled-gemm-correctness/) 与 [Roofline 算术强度](/correctness/roofline-arithmetic-intensity/)。T02 提供块值（block value），A08 提供正确性与沿 K 的复用，Q10 提供运算/字节账本。[T05](/triton/autotuning/) 会显式引入测量前置，不在此隐藏依赖。
+
+## 为什么编程模型变了，分块仍然有用
+
+经典分块 GEMM 让多个输出乘积复用 A、B 片段。CUDA 显式呈现线程与共享内存协作；Triton 表达块值，由编译器决定物理布局。张量核心（Tensor Core）让受支持的矩阵指令很有价值，但 `tl.dot` 只表达运算合同，不能证明生成了某条指令或获得加速。必须检查目标架构的实际编译产物。本原创实验（Lab）采用二维网格，不复刻官方教程的分组程序排列及性能结论。
+
+## 每个输出块只有一个所有者
+
+连续行主序 A 的形状为 `(M,K)`，B 为 `(K,N)`，元素地址分别为 `A[m*K+k]`、`B[k*N+n]` 和 `C[m*N+n]`。启动网格为 `(ceil(M/BM), ceil(N/BN))`。程序 `(pm,pn)` 拥有行 `pm*BM + [0,BM)` 与列 `pn*BN + [0,BN)`。
+
+每次 K 迭代读取 `(BM,BK)` 与 `(BK,BN)` 两个块，更新 `(BM,BN)` 累加器（accumulator）。总计 `ceil(K/BK)` 次迭代。`rows[:,None]` 与 `inner[None,:]` 广播出 A 的指针矩阵；B 使用 `inner[:,None]` 与 `columns[None,:]`。逻辑位置不等于单独的 CUDA 线程。每个有效输出只归一个程序，不需要原子操作或程序间屏障。
+
+## 三组掩码处理不同边界
+
+| 操作 | 必要有效条件 | 无效位置的作用 |
+| --- | --- | --- |
+| A 读取 | 行小于 M 且归约坐标小于 K | 填零 |
+| B 读取 | 归约坐标小于 K 且列小于 N | 填零 |
+| C 写入 | 行小于 M 且列小于 N | 不写入 |
+
+零对乘积求和是中性值，与 Softmax 最大值填充不同。写入掩码不能保护之前的读取；用 `tl.where` 包住无掩码读取也不能让它安全。不要把无效输出坐标对 M 或 N 取模，这可能造成重复归属。取 `(M,N,K)=(65,97,63)`、`(BM,BN,BK)=(32,64,32)`，网格 `(3,2)` 有六个程序和两次 K 迭代。最后一个块只有一行、33 列有效；最后的 K 坐标 63 不得读取。
+
+## 阅读共用的实验内核
+
+<figure class="canonical-code">
+  <figcaption><code>LAB16 · scripts/gemm-verification/kernel.py</code></figcaption>
+  <pre tabindex="0"><code class="language-python">{kernel}</code></pre>
+</figure>
+
+双语页面呈现同一份源文件。在本有限范围活动中，`M,N,K,BM,BN,BK` 都是编译期常量。固定配置启动还需传入 `num_warps` 与 `num_stages`；后两者是编译器启动选项，不是张量维度。增加流水级数可能重叠工作，也会增加资源需求。教学起始候选按此顺序为 `(32,32,32,4,2)`，不是实测优胜配置。
+
+## 逐个边界声明精度
+
+LAB16 接受有限、连续、二维 **FP16 输入**，绝对值不超过 4，维度 1–512，内维度相容。只做前向乘法，不含偏置、激活、梯度、批次、转置或任意步长。`tl.zeros(..., tl.float32)` 和 `tl.dot(a,b,accumulator)` 保持 FP32 累加器，最后显式舍入到 FP16 后写入。
+
+输入存储舍入、累加顺序、输出舍入是三件事。FP32 累加无法恢复 FP16 输入边界丢掉的信息。`input_precision` 控制受支持目标上的 FP32 点积输入，改变它不会提高这里 FP16 输入的精度。TF32、BF16、FP8 和 FP32 输入变体需要单独合同。参考值必须来自提升到双精度的**已存储 FP16 值**，而不是最初生成的随机实数。
+
+## 所有候选先验正确性，再计时
+
+实验形状为 `(M,N,K) = (1,1,1), (17,19,33), (32,32,32), (65,97,63), (128,128,128), (256,192,257)`，覆盖极小工作、整块、各方向尾部和较长归约。确定性带符号输入含相消模式；重复行列降低参考计算成本，但不跳过任何输出检查。
+
+独立标量参考对已存储值的双精度乘积使用 `math.fsum`。要求全部输出有限，满足 `abs(actual-reference) <= 0.02 + 0.002*abs(reference)`。固定教学容差容纳 FP16 输出舍入，不是通用 GEMM 误差上界。Linux CPU 门禁用 FP64 `torch.mm` 核对参考，绝对误差不超过 `1e-10`。每个 GPU 候选及原生 FP16 基线必须分别通过。NaN 初始化捕捉漏写；2048 元素 NaN 尾部和输入不变检查捕捉部分越界写，不能证明读取全都安全。不要为了让候选获胜而放宽容差。
+
+## 把逻辑复用与资源联系起来
+
+完整 K 块逻辑读取 `2*(BM*BK + BK*BN)` 字节 FP16 数据，按乘加计两次运算的惯例执行 `2*BM*BN*BK` 次算术操作。FP32 累加器含 `4*BM*BN` 逻辑字节。这是账本，不是实测 DRAM 流量或单线程寄存器分配。增大 BM/BN 同时增加复用和累加器压力；增大 BK 改变填充和流水线资源。网格大小、占用率（occupancy）、编译器布局及工作负载分布都会影响结果。
+
+## 实践与诊断
+
+先完成[练习（Exercise）](/triton/blocked-matrix-multiplication/exercises/)，再看[独立解答](/triton/blocked-matrix-multiplication/solutions/)。[PB-R5-017](/practice/#pb-r5-017) 给出另一种尾部缺陷。随后进入 [T05](/triton/autotuning/) 与 [LAB16](/labs/autotune-triton-gemm/)。
+
+编译失败：检查块形状、目标及资源上限。只有边缘错误：检查三组掩码。处处错误：检查行主序步长和归约坐标。到处存在小差异：先检查存储类型和输出舍入，再考虑验收合同。T04 不作证据声明；LAB16 保留**待硬件验证（Pending Hardware Verification）**，没有记录的输出、配置或计时。
+
+## 回忆检查
+
+1. A、B、C 掩码各保护哪些维度？
+2. 为什么本设计的二维网格不需要原子操作？
+3. `(BM,BN)` 块值和线程束（warp）数量有什么不同？
+4. 为什么 FP32 累加不能把实验变成 FP32 输入实验？
+5. 尾部保护区未变能证明所有读取安全吗？
+6. K 保持 63 而 BK 增大时，哪些东西会变化？
+
+## 一手来源与权利
+
+事实核查于 **2026-09-14**。[SRC-CUDA-089](/sources-and-versions/#src-cuda-089) 记录 Context7 检索及 Triton 3.7.1 精确源码/测试；[SRC-CUDA-087](/sources-and-versions/#src-cuda-087) 固定环境和 MIT 声明。原创实验代码采用 Apache-2.0，教学正文采用 CC BY 4.0。未复制上游内核列表、图表或测量结果。
