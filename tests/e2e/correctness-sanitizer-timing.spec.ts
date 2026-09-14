@@ -158,6 +158,7 @@ const exampleSlugs = [
 ] as const;
 const labSlugs = [
   'verify-fused-softmax',
+  'autotune-triton-gemm',
   'profile-custom-operator',
   'build-custom-operator',
   'record-cuda-environment',

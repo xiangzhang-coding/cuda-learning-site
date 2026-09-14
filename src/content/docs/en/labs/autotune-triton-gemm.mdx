@@ -132,6 +132,8 @@ After validating the selected output again, warm the direct selected JIT launch 
 
 ## Environment Manifest and retained bundle
 
+Rejected samples remain in their candidate/provider record with `status: rejected` and a rejection reason. Nonfinite observations use the JSON strings `nan`, `inf`, `-inf`; finite zero/negative values remain numbers. They are failed observations, never valid statistics. A provider that fails before returning samples remains incomplete. Native correctness and native post-benchmark failures have their own phase labels.
+
 | Record | Required fields |
 | --- | --- |
 | Source/build | Commit and dirty diff; Python source hashes; full lock hash; compiler artifacts, ptxas identity and actual-target PTX |

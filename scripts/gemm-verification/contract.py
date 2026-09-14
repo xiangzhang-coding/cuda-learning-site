@@ -15,13 +15,26 @@ def summarize_samples(samples):
 
 
 def selection_record(trials, selected, candidate_count):
-    if len(trials) != candidate_count or len({str(t['config']) for t in trials}) != candidate_count:
+    if len(trials) != candidate_count or len({tuple(sorted(t['config'].items())) for t in trials}) != candidate_count:
         raise ValueError('incomplete or duplicated candidate measurements')
     best = min(trials, key=lambda t: summarize_samples(t['samples']['rawMilliseconds'])['medianMilliseconds'])
     if best['config'] != selected:
         raise ValueError('selected configuration disagrees with recorded median objective')
     return {'selectedConfig': selected, 'objective': 'minimum sample median; first candidate breaks exact ties',
             'candidateTrials': trials, 'qualification': 'shape/device-local observation; manifest review required'}
+
+
+def record_samples(record, samples):
+    """Retain rejected observations too; strings encode nonfinite values in strict JSON."""
+    record['samples'] = {'rawMilliseconds': [x if math.isfinite(x) else str(x) for x in samples]}
+    try:
+        record['samples'] = summarize_samples(samples)
+    except ValueError as error:
+        record['status'] = 'rejected'
+        record['rejection'] = str(error)
+        raise
+    record['status'] = 'complete'
+    return record['samples']['medianMilliseconds']
 
 
 def reference_product(left, right):

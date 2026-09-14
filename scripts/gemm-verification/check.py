@@ -14,12 +14,16 @@ import time
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
-from contract import ATOL, RTOL, reference_product, verify_product, summarize_samples, selection_record
+from contract import ATOL, RTOL, reference_product, verify_product, selection_record, record_samples
 
 SHAPES = ((1, 1, 1), (17, 19, 33), (32, 32, 32), (65, 97, 63), (128, 128, 128), (256, 192, 257))
 # BM, BN, BK, num_warps, num_stages; small teaching search, no pruning.
 CANDIDATES = ((32, 32, 32, 4, 2), (32, 64, 32, 4, 3), (64, 32, 32, 4, 3), (64, 64, 32, 4, 3))
 WARMUP_CALLS = 20
+BENCH_WARMUP_MS = 25
+BENCH_REP_MS = 100
+BENCH_RETURN_MODE = 'all'
+ROUNDS = 3
 
 
 def digest(file):
@@ -143,8 +147,9 @@ def gpu_cases(report, output, candidates, benchmark, env_module):
     device_gate(torch, report, env_module)
     torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction = False
     report['measurement'] = {'scope': 'FP16 inputs/output; preallocated forward-only; current-stream events',
-        'warmupCalls': WARMUP_CALLS, 'doBenchWarmupMs': 25, 'doBenchRepMs': 100, 'returnMode': 'all',
-        'rounds': 3, 'cachePolicy': 'fresh owned JIT cache; disk autotune cache disabled; do_bench clears benchmark cache',
+        'warmupCalls': WARMUP_CALLS, 'doBenchWarmupMs': BENCH_WARMUP_MS,
+        'doBenchRepMs': BENCH_REP_MS, 'returnMode': BENCH_RETURN_MODE,
+        'rounds': ROUNDS, 'cachePolicy': 'fresh owned JIT cache; disk autotune cache disabled; do_bench clears benchmark cache',
         'nativeReducedPrecisionReduction': False, 'profiler': 'none', 'graphs': False,
         'excluded': ['allocations', 'transfers', 'validation', 'compilation', 'autotune search']}
     prepared = []
@@ -179,6 +184,7 @@ def gpu_cases(report, output, candidates, benchmark, env_module):
                 blocked_product[grid](a, b, c, m, n, k, **config.all_kwargs())
                 report['gpuExecuted'] = True
                 case['candidates'][index]['correctness'] = check_outputs(torch, a, b, original_a, original_b, guard, c, expected)
+            report['phase'] = f'native-correctness-{m}x{n}x{k}'
             torch.mm(a, b, out=native)
             torch.cuda.synchronize()
             case['nativeCorrectness'] = verify_product(native.cpu().tolist(), expected)
@@ -204,9 +210,8 @@ def gpu_cases(report, output, candidates, benchmark, env_module):
                     index = len(trials)
                     trial = {'config': config_record(candidates[index]), 'status': 'incomplete'}
                     trials.append(trial)
-                    trial['samples'] = summarize_samples(do_bench(fn, warmup=25, rep=100, return_mode='all'))
-                    trial['status'] = 'complete'
-                    return trial['samples']['medianMilliseconds']
+                    return record_samples(trial, do_bench(fn, warmup=BENCH_WARMUP_MS,
+                        rep=BENCH_REP_MS, return_mode=BENCH_RETURN_MODE))
                 tuned = triton.autotune(configs=candidates, key=['M', 'N', 'K'],
                                         do_bench=bench_candidate, cache_results=False)(blocked_product)
                 if tuned.cache_results:
@@ -239,16 +244,20 @@ def gpu_cases(report, output, candidates, benchmark, env_module):
                         fn()
                 torch.cuda.synchronize()
                 case['selectedAndNativeWarmupWallSeconds'] = time.perf_counter() - start
-                for round_index in range(3):
+                for round_index in range(ROUNDS):
                     order = ['triton', 'torch'] if round_index % 2 == 0 else ['torch', 'triton']
                     record = {'order': order, 'status': 'incomplete', 'providers': {}}
                     case['rounds'].append(record)
                     for name in order:
                         report['phase'] = f'steady-{m}x{n}x{k}-{round_index}-{name}'
-                        record['providers'][name] = summarize_samples(do_bench(providers[name], warmup=25, rep=100, return_mode='all'))
+                        provider = {'status': 'incomplete'}
+                        record['providers'][name] = provider
+                        record_samples(provider, do_bench(providers[name], warmup=BENCH_WARMUP_MS,
+                            rep=BENCH_REP_MS, return_mode=BENCH_RETURN_MODE))
                     record['status'] = 'complete'
                 report['phase'] = f'post-benchmark-{m}x{n}x{k}'
                 case['postBenchmarkCorrectness'] = check_outputs(torch, a, b, original_a, original_b, guard, c, expected)
+                report['phase'] = f'native-post-benchmark-{m}x{n}x{k}'
                 case['nativePostBenchmarkCorrectness'] = verify_product(native.cpu().tolist(), expected)
     mappings = {line.split()[-1] for line in Path('/proc/self/maps').read_text().splitlines()
                 if '.so' in line and line.split()[-1].startswith('/')}
