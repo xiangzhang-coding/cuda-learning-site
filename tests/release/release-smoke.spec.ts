@@ -683,7 +683,7 @@ test('serves the exact R4 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(13);
+    await expect(labCards).toHaveCount(14);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -698,6 +698,7 @@ test('serves the exact R4 release and current publication with production canoni
       'LAB11',
       'LAB12',
       'LAB13',
+      'LAB14',
     ]);
   }
 
@@ -984,11 +985,12 @@ test('keeps the Python bridge graph, separate practice, and EX21 canonical journ
       }
       await expectCanonicalRanges(page, ex21PublishedProject, ranges);
       expect(await page.locator('nav a[href*="/triton/"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')).sort()))
-        .toEqual(['masked-vector-addition', 'programs-and-block-values'].map((slug) => `/${prefix}triton/${slug}/`));
+        .toEqual(['masked-vector-addition', 'programs-and-block-values'].map((slug) => `${prefix}triton/${slug}/`));
       expect(await page.locator('nav a[href*="/frameworks/"]').evaluateAll((links) =>
         links.map((link) => link.getAttribute('href')).sort())).toEqual([
         'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',
         'first-custom-operator', 'operator-registration', 'operator-packaging',
+        'profile-led-optimization', 'sdpa-dispatch-verification',
       ].map((slug) => `${prefix}frameworks/${slug}/`).sort());
       await page.locator(`main a[href="${prefix}${suffix}exercises/"]`).first().click();
       await expect(page.locator('meta[name="cuda:unit-id"]')).toHaveAttribute('content', `${id}-EXERCISES`);
