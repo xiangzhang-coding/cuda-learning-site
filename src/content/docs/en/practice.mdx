@@ -1,6 +1,6 @@
 ---
 title: Practice Bank
-description: 98 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 100 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
 factCheckDate: '2026-09-14'
@@ -4315,7 +4315,57 @@ Retry latency needs a separately declared end-to-end host interval that covers t
 
 **Source basis:** Original benchmark audit; [SRC-CUDA-088](/en/sources-and-versions/#src-cuda-088). **Source date:** 2026-09-14. No performance observations.
 
+<span id="pb-r5-017" class="resource-target"></span>
+
+## PB-R5-017: An exact output tile can still have a K tail
+
+**ID:** PB-R5-017 · original Publication Pair.
+- **Direct prerequisite:** [T04](/en/triton/blocked-matrix-multiplication/), exactly `[T04]`.
+- **Related Learning Units and resources:** [T04](/en/triton/blocked-matrix-multiplication/), [LAB16](/en/labs/autotune-triton-gemm/).
+- **Hardware gate:** none.
+- **Last reviewed:** 2026-09-14.
+
+**Difficulty:** intermediate. **Version:** Triton 3.7.1.
+
+**Prompt:** A GEMM candidate has M=N=32, K=33 and BM=BN=BK=32. The author removes both K masks because the output fits one tile; its only passing test has K=32. Is this reasoning sound?
+
+**Constraints:** paper audit; no unsafe launch. **Expected evidence:** reduction iterations, valid inner coordinates and both repaired masks. **Acceptance criteria:** distinguish output coverage from reduction coverage, explain zero fill and require the nonmultiple-K oracle cases.
+
+<details><summary>Hint 1: enumerate K independently</summary><p>An exact M/N grid says nothing about the final K iteration.</p></details>
+<details><summary>Hint 2: both operands carry K</summary><p>A's columns and B's rows share that reduction coordinate.</p></details>
+<details><summary>Separate reviewed solution: Open after your attempt</summary><p>See the [T04 solution](/en/triton/blocked-matrix-multiplication/solutions/#practice-bank-review).</p></details>
+
+**Reviewed solution:** The [separate derivation](/en/triton/blocked-matrix-multiplication/solutions/#practice-bank-review) identifies the invalid 33–63 coordinates.
+
+**Source basis:** Original tail audit; [SRC-CUDA-089](/en/sources-and-versions/#src-cuda-089). **Source date:** 2026-09-14. No recorded observations.
+
+<span id="pb-r5-018" class="resource-target"></span>
+
+## PB-R5-018: The same tuning key is not the same device
+
+**ID:** PB-R5-018 · original Publication Pair.
+- **Direct prerequisite:** [T05](/en/triton/autotuning/), exactly `[T05]`.
+- **Related Learning Units and resources:** [T05](/en/triton/autotuning/), [LAB16](/en/labs/autotune-triton-gemm/).
+- **Hardware gate:** none.
+- **Last reviewed:** 2026-09-14.
+
+**Difficulty:** intermediate. **Version:** Triton 3.7.1; torch 2.13.0.
+
+**Prompt:** A long-running process moves a shape/dtype-identical workload to a second GPU and reuses its in-memory autotuner. No benchmark callback runs, so the report declares the first GPU's Config optimal on both. Neither device has a qualifying manifest.
+
+**Constraints:** invent no replacement timings. **Expected evidence:** cache-key interpretation and a device-separated rerun plan. **Acceptance criteria:** reject the generalized choice, require fresh environment/correctness/search/post-selection records per device, and retain Pending Hardware Verification.
+
+<details><summary>Hint 1: read the key's actual fields</summary><p>M/N/K and tensor dtype strings do not constitute device identity.</p></details>
+<details><summary>Hint 2: separate cache reuse from fresh evidence</summary><p>Avoid reusing selection state across the two experiments.</p></details>
+<details><summary>Separate reviewed solution: Open after your attempt</summary><p>See the [T05 solution](/en/triton/autotuning/solutions/#practice-bank-review).</p></details>
+
+**Reviewed solution:** The [separate solution](/en/triton/autotuning/solutions/#practice-bank-review) requires independent manifests and selection records.
+
+**Source basis:** Original cache/evidence audit; [SRC-CUDA-089](/en/sources-and-versions/#src-cuda-089). **Source date:** 2026-09-14. No performance observations.
+
 ## Review record
+
+Issue #48 adds PB-R5-017/018 on 2026-09-14 with exact prerequisites T04/T05. Current total: 100 original entries; LAB16 brings Pending Hardware Verification subjects to 38. All earlier increment totals below are historical. R5 aggregate review remains pending.
 
 Issue #47 adds PB-R5-015/016 on 2026-09-14, both requiring T03. Current total: 98 original entries; LAB15 brings Pending Hardware Verification subjects to 37. The older increment totals below are historical.
 

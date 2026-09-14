@@ -29,6 +29,8 @@ describe('resource index catalog', () => {
       ['T01', 'triton/programs-and-block-values', ['F02', 'F03', 'M02']],
       ['T02', 'triton/masked-vector-addition', ['T01', 'A01']],
       ['T03', 'triton/fused-softmax', ['T02', 'A10', 'Q05']],
+      ['T04', 'triton/blocked-matrix-multiplication', ['T02', 'A08', 'Q10']],
+      ['T05', 'triton/autotuning', ['T04', 'Q05', 'Q06']],
       ['EX23', 'examples/triton-vector-add', ['T02']],
       ['P02', 'python/devices-contexts-launches', ['P01', 'F07']],
       ['P03', 'python/runtime-compilation-linking', ['P02', 'M15', 'M16']],
@@ -43,6 +45,7 @@ describe('resource index catalog', () => {
       ['P12', 'frameworks/sdpa-dispatch-verification', ['A11', 'L11', 'P06', 'P07']],
       ['LAB14', 'labs/profile-custom-operator', ['P11']],
       ['LAB15', 'labs/verify-fused-softmax', ['T02', 'A10', 'Q05']],
+      ['LAB16', 'labs/autotune-triton-gemm', ['T04', 'T05']],
       ['EX22', 'examples/adjacent-energy', ['P08', 'P09']],
       ['LAB13', 'labs/build-custom-operator', ['P08', 'P09']],
       ['EX21', 'examples/cuda-python-launch', ['P02']],
@@ -59,7 +62,7 @@ describe('resource index catalog', () => {
       }
     }
     expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
-    for (const id of ['T04', 'EX24', 'LAB16']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
+    for (const id of ['T06', 'EX24', 'LAB17']) expect(PUBLISHED_DESTINATIONS[id]).toBeUndefined();
     const destinations = Object.fromEntries(Object.entries(PUBLISHED_DESTINATIONS)
       .map(([id, { indexGroup: _indexGroup, ...destination }]) => [id, destination]));
     expect(() => validateResourceCatalog([], { requiredGroups: [], destinations })).not.toThrow();
@@ -104,14 +107,14 @@ describe('resource index catalog', () => {
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(237 + currentPublication.scope.glossaryTerms);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(241 + currentPublication.scope.glossaryTerms);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 15, practice: 98, visuals: 20, glossary: currentPublication.scope.glossaryTerms, sources: 104 });
-    for (const absentId of ['LAB16']) {
+    ).toEqual({ labs: 16, practice: 100, visuals: 20, glossary: currentPublication.scope.glossaryTerms, sources: 105 });
+    for (const absentId of ['LAB17']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
     }

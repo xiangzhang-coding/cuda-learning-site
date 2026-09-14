@@ -44,7 +44,7 @@ for (const locale of ['', 'en/']) {
     await expect(group).toHaveCount(1);
     for (const { slug } of units) await expect(group.locator(`a[href="/${locale}${slug}/"]`)).toHaveCount(1);
     expect(await page.locator('nav a[href*="/triton/"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')).sort()))
-      .toEqual(['fused-softmax', 'masked-vector-addition', 'programs-and-block-values'].map((slug) => `/${locale}triton/${slug}/`));
+      .toEqual(['autotuning', 'blocked-matrix-multiplication', 'fused-softmax', 'masked-vector-addition', 'programs-and-block-values'].map((slug) => `/${locale}triton/${slug}/`));
     expect(await page.locator('nav a[href*="/frameworks/"]').evaluateAll((links) =>
       links.map((link) => link.getAttribute('href')).sort())).toEqual([
       'queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling',

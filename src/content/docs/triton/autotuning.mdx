@@ -1,0 +1,110 @@
+---
+title: 'T05：把自动调优搜索与内核计时分开'
+description: 分别记录编译、候选选择、缓存、预热与稳态证据。
+pairId: t05
+counterpart: /en/triton/autotuning/
+factCheckDate: '2026-09-14'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, candidates, phases, caches, selection, comparison, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T05
+prerequisites: [T04, Q05, Q06]
+relatedUnits: [LAB16]
+hardwareGate: none
+estimatedMinutes: 50
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton autotuner implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/autotuner.py', version: '3.7.1', platform: 'Pinned release implementation', accessDate: '2026-09-14' }
+  - { title: 'Triton benchmark implementation', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py', version: '3.7.1', platform: 'Device events and benchmark cache', accessDate: '2026-09-14' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t05 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/autotuning/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-14' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,candidates,phases,caches,selection,comparison,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T05 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T04,Q05,Q06' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: LAB16 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/autotuning/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+生成只适用于具体形状的配置记录，让搜索成本不会被误认成内核执行时间。解释首次调用和重复使用的差别，识别缺少依据的优胜声明。学习单元（Learning Unit）预计 50 分钟，随后进入 [LAB16](/labs/autotune-triton-gemm/)。阅读无需 GPU；运行证据需要实验规定的外部 Linux 环境。
+
+## 精确前置
+
+**[T04, Q05, Q06]**：[分块乘法](/triton/blocked-matrix-multiplication/)、[异步计时](/correctness/timing-asynchronous-gpu-work/) 与 [APOD 优化流程](/correctness/apod-optimization-loop/)。正确的块是调优输入；明确的完成边界与假设是性能结论的输入。
+
+## 为什么需要实测选择
+
+分块线性代数库长期以来就按工作负载与硬件选择内核。Triton 的自动调优（autotuning）让有限搜索更方便，但它不知道你的生产形状分布或正确性合同。更多候选带来更多机会，也增加编译、搜索成本与统计选择偏差。候选中的实测最小值不是可移植的最优解。
+
+## 声明小而明确的候选空间
+
+LAB16 只使用四个 `(BM,BN,BK,num_warps,num_stages)` 元组：`(32,32,32,4,2)`、`(32,64,32,4,3)`、`(64,32,32,4,3)`、`(64,64,32,4,3)`。均为 `num_ctas=1`，无剪枝、split-K、持久化调度或架构专属描述符。`triton.Config({'BM':32,'BN':32,'BK':32}, num_warps=4, num_stages=2)` 展示精确构造接口；Config 是提案，不是结果。
+
+实验用 `triton.autotune(configs=candidates, key=['M','N','K'], do_bench=bench_candidate, cache_results=False)` 包装同一个 JIT 函数。网格回调从选中配置读取 BM、BN。自动调优调用处不要再传 BM/BN/BK，否则会与配置冲突。内核完整覆盖 C，重复候选不会累加输出。若内核向 C 累加，就需要重置/恢复合同；`reset_to_zero` 与 `restore_value` 钩子可以实现这种合同，但不在本实验的测量范围内。
+
+## 分清每个阶段
+
+| 阶段 | 边界与保留记录 |
+| --- | --- |
+| 环境与输入 | 精确锁、目标、存储输入类型与独立参考 |
+| 编译请求 | 每候选 `kernel.warmup` 主机墙钟时间和实际目标 PTX 哈希 |
+| 正确性 | 所有形状、候选及原生基线，先于搜索 |
+| 候选设备预热 | 每候选启动 20 次后同步，单独记录墙钟时间 |
+| 自动调优搜索 | 新调优器；每候选原始事件样本和目标；同步包围的搜索加最终启动墙钟时间 |
+| 相同键缓存调用 | 不新增基准回调；同步包围的缓存命中加启动墙钟时间 |
+| 选中配置/原生预热 | 每实现 20 次后同步，单独记录墙钟时间 |
+| 稳态 | 直接启动选中 JIT 配置，对比原生 `torch.mm`，三轮交替顺序 |
+| 最终验证 | 复查输出、输入不变和写保护区 |
+
+`kernel.warmup` 请求编译，不会执行该内核来预热 GPU。普通的首次自动调优启动可能包含编译、所有候选测量及最终选中配置启动。LAB16 先编译并验证，所以记录的是**预编译后的搜索**，不是冷启动端到端延迟。分析一次性应用时，要保留设置、编译、搜索成本。不要叠加重叠时间，例如外层搜索墙钟和内部事件样本。
+
+## 说清楚是哪种缓存
+
+JIT 产物缓存避免重复编译。每个实验进程使用新的自有缓存目录，但不能保证操作系统或驱动缓存冷态。调优器还有独立的内存选择缓存：3.7.1 的键结合声明的参数值与张量 dtype 字符串。它不是通用环境身份；本实验只用一个设备，并为每个形状新建调优器。跨设备复用、步长或语义模式改变，需要有意隔离或设计键。
+
+磁盘调优缓存又是另一种机制。`cache_results=False` 禁用它，除非该版本的全局调优缓存开关覆盖此值；环境门禁拒绝继承的 Triton 覆盖项，工具还检查最终生效值。编译/选择缓存都不是 **GPU 数据缓存**。`do_bench` 在每次测量前清理其基准缓存；此策略不能证明每个操作数总在所有硬件缓存中未命中。热数据和图重放应作为不同实验比较。
+
+## 保留选择过程及失败
+
+自定义 `do_bench(fn, quantiles)` 适配器接受调优器回调签名，调用 `triton.testing.do_bench(fn, warmup=25, rep=100, return_mode='all')`，保留原始毫秒值，返回标量中位数。回调有意不使用请求的分位数。这里 warmup/rep 是**毫秒预算**，不是迭代次数。辅助函数估算重复次数、记录设备事件，并在返回样本前同步。
+
+固定版本的无剪枝调优器按声明列表访问候选；工具检查 `configs_timings` 顺序，并把 `best_config` 与独立重算的最小中位数核对。精确相同时保留首个候选。缺失候选、非正/非有限样本、记录不一致、数值或资源失败都会终止运行。未完成尝试保留首个失败阶段和已完成记录，不能确立优胜者。工具选择明确失败，而非悄悄删掉不方便的候选。
+
+## 公平比较选中实现
+
+两个实现使用相同、已在设备上的 FP16 输入及预分配 FP16 输出，仅前向、无梯度。原生基线禁用 FP16 低精度归约。设备事件样本排除分配、传输、编译、搜索、参考和分析器工作；设备时间线上可见的主机提交空隙仍可能影响结果。三轮顺序为 Triton/原生、原生/Triton、Triton/原生。按形状、实现保留所有样本、中位数及最小/最大值；决策前在可比负载下重复整个进程。
+
+不要选出最小值后，又把同一个最小值当作独立确认。LAB16 的选后轮次是新测量，搜索目标单独保留。按惯例计算运算吞吐量时，用 `2*M*N*K` 除以秒，并注明分子是逻辑操作数，不是实测指令数。回退和差异不明确的形状也要报告。一次性应用还需考虑设置/搜索摊销，仅稳态中位数更小不足以作决定。
+
+## 练习与证据
+
+完成[实现与报告练习（Exercise）](/triton/autotuning/exercises/)，再看[独立解答](/triton/autotuning/solutions/)。审查 [PB-R5-018](/practice/#pb-r5-018)，执行 [LAB16](/labs/autotune-triton-gemm/)。T05 证据数组为空。LAB16 为**待硬件验证（Pending Hardware Verification）**，没有发布配置、计时或加速比。选中配置只有连同形状、类型、候选列表、精确源码、设备/工具链、时钟/功耗/负载策略、全部阶段及合格环境清单（Environment Manifest）才有解释意义。不要推广到另一种形状或设备。
+
+## 回忆检查
+
+1. `kernel.warmup` 做什么，哪个阶段才真正执行内核？
+2. 哪四种不同缓存会影响实验？
+3. 为什么 M/N/K 应进入调优键，又为什么键不等于环境清单？
+4. 完整覆盖 C 的内核为什么可以不重置就反复测量？
+5. 第三个候选失败时必须保留什么？
+6. 为什么选后计时必须独立于搜索目标？
+
+## 一手来源与权利
+
+事实核查于 **2026-09-14**。[SRC-CUDA-089](/sources-and-versions/#src-cuda-089) 链接 3.7.1 调优器、JIT、缓存、基准实现和官方测试，以及 PyTorch 2.13 精度控制。原创讲解/练习使用 CC BY 4.0，实验工具使用 Apache-2.0。EX23 保留精确上游 MIT 声明；上游基准结果不构成本项目证据。

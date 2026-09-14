@@ -1,5 +1,12 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+T04/T05/LAB16 additionally reference the exact Triton 3.7.1 dot, Config,
+autotuner, cache, JIT, benchmark and owner-test sources, plus PyTorch 2.13.0
+mm and precision controls (SRC-CUDA-089, reviewed 2026-09-14). The existing
+exact MIT notice below remains governing for those upstream files. The new
+two-dimensional-grid kernel, scalar oracle, fixtures, report tooling and
+teaching materials are original; no owner listing, plot or result is copied.
+
 T03/LAB15 additionally reference the exact Triton 3.7.1 reduction, memory, JIT,
 testing and debugging files and PyTorch 2.13.0 native softmax signatures, reviewed
 2026-09-14 in SRC-CUDA-088. Their upstream rights remain those recorded below.

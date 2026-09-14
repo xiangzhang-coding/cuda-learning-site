@@ -73,6 +73,37 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  T04: {
+    href: { 'zh-CN': '/triton/blocked-matrix-multiplication/', en: '/en/triton/blocked-matrix-multiplication/' },
+    title: { 'zh-CN': 'T04：构造分块矩阵乘法', en: 'T04: Build a Blocked Matrix Product' },
+    prerequisites: ['T02', 'A08', 'Q10'],
+  },
+  T05: {
+    href: { 'zh-CN': '/triton/autotuning/', en: '/en/triton/autotuning/' },
+    title: { 'zh-CN': 'T05：把自动调优搜索与内核计时分开', en: 'T05: Autotune Without Timing the Search' },
+    prerequisites: ['T04', 'Q05', 'Q06'],
+  },
+  'T04-EXERCISES': {
+    href: { 'zh-CN': '/triton/blocked-matrix-multiplication/exercises/', en: '/en/triton/blocked-matrix-multiplication/exercises/' },
+    title: { 'zh-CN': 'T04 练习', en: 'T04 Exercises' }, prerequisites: ['T04'],
+  },
+  'T04-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/blocked-matrix-multiplication/solutions/', en: '/en/triton/blocked-matrix-multiplication/solutions/' },
+    title: { 'zh-CN': 'T04 独立参考解答', en: 'T04 Reviewed Solutions' }, prerequisites: ['T04-EXERCISES'],
+  },
+  'T05-EXERCISES': {
+    href: { 'zh-CN': '/triton/autotuning/exercises/', en: '/en/triton/autotuning/exercises/' },
+    title: { 'zh-CN': 'T05 练习', en: 'T05 Exercises' }, prerequisites: ['T05'],
+  },
+  'T05-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/autotuning/solutions/', en: '/en/triton/autotuning/solutions/' },
+    title: { 'zh-CN': 'T05 独立参考解答', en: 'T05 Reviewed Solutions' }, prerequisites: ['T05-EXERCISES'],
+  },
+  LAB16: {
+    href: { 'zh-CN': '/labs/autotune-triton-gemm/', en: '/en/labs/autotune-triton-gemm/' },
+    title: { 'zh-CN': 'LAB16：实现并自动调优 Triton GEMM', en: 'LAB16: Implement and Autotune Triton GEMM' },
+    prerequisites: ['T04', 'T05'], indexGroup: 'labs',
+  },
   T03: {
     href: { 'zh-CN': '/triton/fused-softmax/', en: '/en/triton/fused-softmax/' },
     title: { 'zh-CN': 'T03：在保留数值合同的前提下融合 Softmax', en: 'T03: Fuse Softmax Without Losing the Contract' },
