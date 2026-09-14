@@ -1,16 +1,24 @@
 // SPDX-License-Identifier: Apache-2.0
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { collectBrowserFailures } from '../helpers/browser-contract';
+import { collectBrowserFailures, settlePublicationPage } from '../helpers/browser-contract';
 
 const unit = 'libraries/cufft-plans-layouts-startup';
 const example = 'examples/cufft-batched-transform';
 const slugs = [unit, `${unit}/exercises`, `${unit}/solutions`, example];
 
 for (const slug of slugs) {
-  test(`${slug} has direct locale navigation and independent evidence`, async ({ page, baseURL }) => {
+  test(`${slug} has direct locale navigation and independent evidence`, async ({ page, browserName, baseURL }) => {
     const failures = collectBrowserFailures(page, baseURL!);
+    if (browserName === 'firefox') {
+      // Exercise locale replacement while Firefox's independently fetched icon is slow.
+      await page.route('**/favicon.svg', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        await route.continue();
+      });
+    }
     await page.goto(`/${slug}/`);
+    await settlePublicationPage(page);
     for (const locale of ['', 'en/']) {
       await expect(page.locator('main h1')).toContainText(slug === example ? 'EX19' : 'L12');
       await expect(page.locator('meta[name="cuda:fact-check-date"]')).toHaveAttribute('content', '2026-09-08');
@@ -22,7 +30,7 @@ for (const slug of slugs) {
       await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', counterpart);
       await page.locator('[data-locale-counterpart]').click();
       await expect(page).toHaveURL(`${baseURL}${counterpart}`);
-      await page.waitForLoadState('domcontentloaded');
+      await settlePublicationPage(page);
     }
     expect(failures).toEqual([]);
   });
