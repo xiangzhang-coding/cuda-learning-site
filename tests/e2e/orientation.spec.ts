@@ -16,7 +16,7 @@ test.describe('published route batches', () => {
     expect(routes).toHaveLength(684);
     expect(new Set(routes).size).toBe(684);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(56);
+    expect(routeBatches).toHaveLength(58);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
       expect(localized).toHaveLength(342);
