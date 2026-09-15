@@ -1,0 +1,123 @@
+---
+title: 'T06：为缺陷选择正确的调试执行方式'
+description: 区分解释器值检查、GPU 断言与 sanitizer 的覆盖范围。
+pairId: t06
+counterpart: /en/triton/debugging/
+factCheckDate: '2026-09-15'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, interpreter, diagnostics, fixture, sanitizer, custody, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T06
+prerequisites: [T02, Q03, Q04]
+relatedUnits: [T03, EX23]
+hardwareGate: none
+estimatedMinutes: 55
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton debugging guide', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/docs/programming-guide/chapter-3/debugging.rst', version: '3.7.1', platform: 'Interpreter and CUDA', accessDate: '2026-09-15' }
+  - { title: 'Compute Sanitizer User Guide', url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html', version: '2026.3', platform: 'NVIDIA Linux', accessDate: '2026-09-15' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t06 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/debugging/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-15' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,interpreter,diagnostics,fixture,sanitizer,custody,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T06 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,Q03,Q04' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T03,EX23' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1,2026.3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/debugging/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+面对错误结果，能够选择解释器（interpreter）值检查、编译期检查、GPU 断言（assertion）或具体的 Compute Sanitizer 工具，并解释一次干净运行不能证明什么。建议 55 分钟。阅读和归属练习不需要 GPU；诊断夹具在外部运行，学习站（Learning Site）不执行内核。
+
+## 精确先修条件
+
+**[T02, Q03, Q04]**：[带掩码向量加法](/triton/masked-vector-addition/)、[memcheck](/correctness/memcheck-invalid-memory-access/) 与 [racecheck/initcheck/synccheck](/correctness/racecheck-initcheck-synccheck/)。[T03](/triton/fused-softmax/) 提供相关数值案例：归约单位元错误也可以完全发生在已分配内存内。
+
+## 为什么需要两种执行模型
+
+源码级模拟让我们在处理异步执行与编译器降级前先检查中间值；设备插桩再检查真正执行过的指令。这两种方法解决不同问题：容易观察的执行过程之所以有用，正是因为它移除了并行机器的大部分复杂性。这也限制了它能提供的证据。
+
+## 解释器能检查什么
+
+在**内核装饰或导入之前**设置 `TRITON_INTERPRET=1`，Triton 3.7.1 会跳过编译，用 NumPy 等价操作顺序执行程序实例（program instance）。可以检查偏移、掩码（mask）、广播、归约轴和小规模输出。解释模式中的 Python `print`、`pdb` 和 `tensor.handle.data` 可以暴露中间值；内部 handle 是绑定版本的调试手段，不是可移植内核接口。
+
+官方指南排除原生 BF16 算术与追逐指针的加载。将已加载 BF16 值转为 FP32 有助于调查值，但会改变算术合同。不要因为解释器拒绝不支持的操作，就认定 GPU 有缺陷。选定实现还拒绝内联汇编与外部逐元素调用。顺序执行和解释器中不执行任何操作的屏障（barrier），不能验证竞态（race）、同步安全、物理通道布局、寄存器溢出、占用率（occupancy）、编译后算术或性能。不要在 CPU 解释器中故意执行无边界的非法指针；它不是内存安全沙箱。
+
+## 四种诊断，四种边界
+
+| 操作 | 选定版本的含义 | 限制 |
+| --- | --- | --- |
+| `tl.static_assert` | 检查分块约束等编译期条件 | 不能检查运行时张量；解释器将其作为 Python 断言求值 |
+| `tl.static_print` | 编译时打印特化信息 | JIT 缓存命中未必重新编译或打印 |
+| `tl.device_assert` | 启用调试编译时检查设备条件 | 导入前设置 `TRITON_DEBUG=1`；同步后发现失败就结束进程 |
+| `tl.device_print` | 打印 ASCII 字面量前缀及标量或张量值 | 输出顺序不是执行顺序；缓冲区可能丢弃输出 |
+
+编译内核中的 Python `print`/`assert` 会按设备操作及其限制降级，主机 Python 断言是另一回事。官方测试同时检查 JIT/启动调试参数与环境开关；本夹具只使用显式环境设置。3.7.1 的解释器 `InterpreterOptions.debug` 默认为 false，而语义层 `device_assert` 检查该选项。因此，**不能**用解释器中断言没有输出来证明正确：本夹具把断言案例限定为 GPU 执行，解释结果始终交给独立主机预言机（oracle）检查。
+
+解读 GPU 打印前先同步。如果确需增大打印 FIFO，绑定版本的 `triton.runtime.driver.active.utils.set_printf_fifo_size(size_bytes)` 必须针对当前设备、在打印内核运行前调用。默认容量不可移植。优先缩小夹具；计时必须关闭全部诊断，因为打印会改变调度，甚至掩盖竞态。
+
+## 一个有界尾部夹具
+
+使用 [EX23 设置](/examples/triton-vector-add/)的完整哈希锁：原生 Linux x86_64、普通 CPython **3.14.7**、Triton **3.7.1**、torch **2.13.0** 及锁定依赖。再通过下列独立诊断锁安装 **NumPy 2.5.3**，EX23 规范锁不变。从仓库根目录运行，移除继承的 `TRITON_*` 覆盖项。`scripts/triton-diagnostics/check.py` 在导入内核前设置模式。源码是原创 Apache-2.0 诊断工具，不另增可运行示例（Runnable Example）。
+
+```sh
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+"$PYTHON" -m pip install --require-hashes -r scripts/triton-diagnostics/requirements.lock
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode interpreter --case clean
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode interpreter --case tail
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode interpreter --case print
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode compile --case assert
+```
+
+逻辑长度为 **17**，块宽 **32**，类型 **FP32**。两个张量都分配 **18** 个元素，输出的第 17 号元素初始为 **−999**，用作守卫。正确掩码为 `offsets < N`，错误版本为 `offsets <= N`。预期验收：clean/print 返回零，17 个输出均等于输入加一，守卫不变；tail 非零退出并报告 `write guard changed`。这是预期，不是已记录观察。错误访问仍在分配范围内，因此 memcheck 干净也可能伴随这个逻辑缺陷。编译模式无驱动生成 `sm_80`，不授予 GPU 运行证据。
+
+## 把问题带到 GPU
+
+GPU 案例要求一个可见 NVIDIA GPU、**CC ≥ 8.0**、**≥ 8 GB**、驱动 **≥ 580.65.06**、完整锁及足够的框架空闲内存。夹具只分配两个各 18 元素的 FP32 张量，框架和工具开销另计。记录实际驱动、随包 `ptxas`、Toolkit 和 **Compute Sanitizer 2026.3** 版本。正确性检查不要求 GPU 性能计数器权限，但容器与驱动必须允许工具插桩；启动失败要记录为阻塞。
+
+```sh
+compute-sanitizer --version
+compute-sanitizer --tool memcheck --error-exitcode 86 "$PYTHON" -I scripts/triton-diagnostics/check.py --mode gpu --case clean
+compute-sanitizer --tool memcheck --error-exitcode 86 "$PYTHON" -I scripts/triton-diagnostics/check.py --mode gpu --case tail
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode gpu --case assert
+```
+
+每条命令启动新进程。tail 案例应由**应用预言机**判错，不一定由 memcheck 判错。assert 案例内部启用 `TRITON_DEBUG=1`，应在启动或同步时失败；随后丢弃 CUDA 上下文。不能把导入、版本或分配失败当成预期缺陷。真正的非法设备访问先用 memcheck，修正后重跑，再进入更窄的检查。memcheck 之后，`--tool racecheck` 针对共享内存危害，`--tool initcheck` 默认针对未初始化全局读取，`--tool synccheck` 针对受覆盖的同步误用。较新的 initcheck 地址空间扩展需要显式版本和选项。racecheck 不能证明任意跨程序全局竞态不存在，所有工具都不能证明数值正确。有界夹具不用于制造四类缺陷；它们的独立合同见 [Q04](/correctness/racecheck-initcheck-synccheck/)。
+
+## 留存证据而不公开私有日志
+
+私下保留命令、退出码、完整 stdout/stderr、源码提交与哈希、工作负载和开关、工具版本、观察者/日期及环境清单（Environment Manifest）：GPU/CC/数量/内存、驱动、Toolkit/组件、编译器、OS、Python/框架/Triton 与锁身份。没有摘要不等于零错误；进程失败与工具错误数是两个字段。计数不能定位缺陷，也不能证明目标内核执行过。
+
+公开派生记录可用 `scripts/triton-diagnostics/summarize.py --tool memcheck --exit-code 86` 从 stdin 读取私有日志，只输出已验证的工具/退出值和唯一可识别的错误摘要计数。它丢弃**全部**自由文本，包括路径、主机名、用户名、地址、命令参数及可能的凭据。多个或无法识别的摘要返回 null 计数，需要复核。留存链中保留私有原件及哈希、派生哈希、转换方式与复核者；其他报告也要检查后再分享。解析器的合成夹具有明确标记，绝不是 sanitizer 观察。两个单元证据数组均为空；GPU 诊断观察在具备合格基准环境（Reference Environment）记录前保持**待硬件验证（Pending Hardware Verification）**。解释器通过不授予编译已检查（Compile-Checked）或运行已验证（Runtime-Verified）。
+
+## 练习与下一步
+
+先完成[调试练习（Exercise）](/triton/debugging/exercises/)，再看[独立解答](/triton/debugging/solutions/)。[PB-R5-019](/practice/#pb-r5-019) 追问：解释器通过、racecheck 干净，为什么全局归属缺陷仍未排除？
+
+## 检索自测
+
+1. `TRITON_INTERPRET=1` 移除了哪种执行，必须何时设置？
+2. 为什么 `device_assert` 没有输出不够，尤其是在解释模式下？
+3. 为什么守卫改变时 memcheck 仍可能报告零错误？
+4. 哪些缺陷需要编译后的 GPU 路径，各由什么工具覆盖？
+5. 为什么断言失败后必须结束进程再运行下一案例？
+6. 仅计数的公开派生记录丢掉了哪些信息？
+
+## 一手来源与权利
+
+事实核查 **2026-09-15**。[SRC-CUDA-090](/sources-and-versions/#src-cuda-090) 记录精确调试指南、core/semantic/interpreter/JIT 实现、官方断言/打印测试及 NVIDIA 工具范围。原创正文与练习为 CC BY 4.0；原创诊断工具与测试为 Apache-2.0。上游 MIT 代码仅引用、不复制；精确许可保留在 EX23。上游输出不属于本站证据。

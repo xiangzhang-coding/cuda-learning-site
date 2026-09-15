@@ -201,6 +201,8 @@ export default defineConfig({
             { slug: 'triton/fused-softmax' },
             { slug: 'triton/blocked-matrix-multiplication' },
             { slug: 'triton/autotuning' },
+            { slug: 'triton/debugging' },
+            { slug: 'triton/persistent-kernels' },
           ],
         },
         {

@@ -1,9 +1,9 @@
 ---
 title: Sources and Version Record
-description: Exact publishing and technical sources through T03 and LAB15, with independent version, rights and evidence records.
+description: Exact publishing and technical sources through T07 and LAB16, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-14'
+factCheckDate: '2026-09-15'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -36,6 +36,9 @@ structure:
   - entry-src-cuda-086
   - entry-src-cuda-087
   - entry-src-cuda-088
+  - entry-src-cuda-089
+  - entry-src-cuda-090
+  - entry-src-cuda-091
   - content-sources
   - review-record
 evidence:
@@ -51,7 +54,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-14'
+      content: '2026-09-15'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -59,7 +62,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,entry-src-cuda-089,entry-src-cuda-090,entry-src-cuda-091,content-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -70,7 +73,7 @@ This record names exact publishing, theme and visual interfaces and owner source
 
 ## Scope of this record
 
-The **2026-09-14 current publication** has 92 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 91 Exercise-set and 91 separate solution-set Publication Pairs: **336 Publication Pairs / 672 source routes**. Its **448 catalog records** contain 16 Labs, 100 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 105 source records. Issue #48 adds SRC-CUDA-089; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-15 current publication** has 94 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 93 Exercise-set and 93 separate solution-set Publication Pairs: **342 Publication Pairs / 684 source routes**. Its **452 catalog records** contain 16 Labs, 102 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 107 source records. Issue #49 adds SRC-CUDA-090/091; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
 
 ## Source and version index
 
@@ -838,10 +841,44 @@ The exact [Triton root MIT notice](https://github.com/triton-lang/triton/blob/v3
 
 **Rights:** the exact Triton root MIT notice is retained at `examples/ex23-triton-vector-add/TRITON-LICENSE`, SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`. These are reference-only readings. The new two-dimensional-grid kernel, scalar oracle, phase/configuration reports, fixtures and exercises are original Apache-2.0 code or CC BY 4.0 prose. No owner tutorial listing, figure, binary or result is redistributed. PyTorch and installed NVIDIA components retain SRC-CUDA-087 terms. Source inspection grants no compilation/runtime evidence; LAB16 remains Pending Hardware Verification with no published selection or timing.
 
+<span id="src-cuda-090" class="resource-target"></span>
+
+## SRC-CUDA-090: Interpreter, assertion and sanitizer boundaries
+
+**Related IDs:** T06. **Access/fact check:** 2026-09-15. Triton **3.7.1**, commit `f797708c0626e5f9840ca5b0a98790e2c7cb09ad`; EX23 full CPython 3.14.7 / torch 2.13.0 hash lock. Context7 `/triton-lang/triton` returned main-branch debugging guidance; `/websites/nvidia_cuda` returned compiler instrumentation and occupancy rather than a version-specific sanitizer contract. Exact owner sources govern these claims.
+
+| Exact Triton 3.7.1 source | Inspected scope | Whole-file SHA-256 |
+| --- | --- | --- |
+| [debugging.rst](https://github.com/triton-lang/triton/blob/v3.7.1/docs/programming-guide/chapter-3/debugging.rst) | Sequential NumPy execution, BF16/pointer-chasing exclusions | `0d3037966d87cd2f729d64322b9daec4e89d43a68d1e74a0934f76a809a77c25` |
+| [core.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py) | Four diagnostics, literal prefix/FIFO, program ID/count | `373eebe68a4c1f6959c81ae6c382b65c5c2893d53274a205f5ff9bbb100fb31b` |
+| [semantic.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/semantic.py) | Device assertions check builder debug option and mask | `22b7669ff8ba591fc1540ce01a4030cf54aa2dccfdb21c2d31fa55d5cab77c7c` |
+| [interpreter.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/interpreter.py) | Debug default false, no-op barrier, unsupported asm/extern calls | `cdeca087f97ed6aadb0dbbc87ccd630d0278358e6c380b4bfe96e8f98afe3ab8` |
+| [jit.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/runtime/jit.py) | Interpreter selection at decoration; launch/JIT/environment debug | `5fe46fbfac257a2b8645b7a2cc709232273d42dd5e1d55de9770b412a9476d77` |
+| [test_debug.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/test_debug.py) | Static/device assertions, masks, debug flags, synchronization; read, not run | `6752ede1be83a4c50855e37078133850d7d242d0c3ed9d5c6e13fafdabb794c8` |
+| [test_subprocess.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/language/test_subprocess.py) / [print_helper.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/test/unit/language/print_helper.py) | Different interpreter/GPU print formats and subprocess/synchronization checks; read, not run | `9da034673a1e159dc76eb4c3dfc8f3d498cade8691da3536a2422d0453d43ad8` / `a322d49713f0aa219b989d0738143d74cd99fd1003d3da9c5c5a9c4a29f2cd7f` |
+
+[Compute Sanitizer User Guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html) and [Release Notes](https://docs.nvidia.com/compute-sanitizer/ReleaseNotes/index.html) now describe **2026.3**, with notes updated September 9. Earlier units' dated 2026.2.1 records remain historical. Inspected scopes: memcheck invalid/misaligned accesses, racecheck shared-memory hazards, default global initcheck, synccheck, memcheck-first order and `--error-exitcode`. That option supplies the configured status when tool errors occur and the application otherwise succeeds; retain application failures independently. No clean summary proves coverage. An attempted 2026.2.1 sanitizer archive did not yield a usable response and is not cited as verified.
+
+**Rights/evidence:** the owner tree has only the root MIT LICENSE for these paths. The exact notice is retained at `examples/ex23-triton-vector-add/TRITON-LICENSE`, SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`; Philippe Tillet (2018–2020) and OpenAI (2020–2022) retain stated copyright. NVIDIA manuals/tools retain NVIDIA notices and terms; they are linked/paraphrased, not redistributed. The bounded N=17 diagnostic, host oracle, ownership model and counts-only export tests are original Apache-2.0; prose/Exercises are CC BY 4.0. No upstream fixture, listing, output or binary is copied. Interpreter/compiler checks are not GPU evidence; sanitizer observations remain Pending Hardware Verification without qualifying manifests.
+
+The diagnostic interpreter additionally pins **NumPy 2.5.3** in `scripts/triton-diagnostics/requirements.lock`, leaving EX23's full lock unchanged. [Versioned PyPI metadata](https://pypi.org/pypi/numpy/2.5.3/json), checked 2026-09-15, supplies the ordinary cp314 Linux x86_64 wheel SHA-256 `b0521d0f4aebb6e06189451025fa17a913287b13c03d5fe05c017333b654ea5b` and license expression **BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0**. Installed wheel components retain their bundled notices; no NumPy package/source is redistributed by this Learning Site.
+
+<span id="src-cuda-091" class="resource-target"></span>
+
+## SRC-CUDA-091: Persistent scheduling and occupancy gates
+
+**Related IDs:** T07, LAB16. **Access/fact check:** 2026-09-15. Same Triton **3.7.1** commit/full lock as SRC-CUDA-090. Context7's persistent query returned other tutorial/configuration examples and backend discussion, not an exact persistent contract; the versioned owner file is decisive.
+
+[09-persistent-matmul.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/09-persistent-matmul.py), SHA-256 `26b19072955dd4472f9821d68c97943f625137f89850be1c5d9451cae3011aa3`: inspected ordinary/persistent launch, SM-bounded grid, cyclic loop, per-tile accumulator reset, masked pointers, shared-memory warning, FP8/TMA gates and Blackwell pipeline workaround/path-specific warp specialization. Owner `validate`/`run_test` logic was read, not executed; its tolerances/results are not adopted. The core/JIT ledger above supplies program count and bracket-grid semantics. T07 derives original row-major ownership and asks learners to adapt the project's LAB16 baseline, not reconstruct the owner's grouped/TMA implementations.
+
+[Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html), [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html) and [Release Notes](https://docs.nvidia.com/nsight-compute/ReleaseNotes/index.html) now identify **2026.3** as the newest section; the notes' July 15 footer alone does not identify a version. The exact 2026.2.1 ProfilingGuide URL returned 404. Current owner guidance was inspected for CTA resource limits, theoretical/achieved occupancy, active/eligible warps, launch statistics, replay, section/metric queries and counter permissions. Queries default to base names: obtain valid suffixes and units on the exact device. Denied queries do not measure occupancy; source inspection does not establish tool execution or universal counter availability.
+
+**Rights/evidence:** the tutorial follows the exact root MIT notice above; no owner code, shape fixture, plot or benchmark result is copied. NVIDIA material remains reference-only under its own notices. T07's fixed FP16 shapes, cyclic proof, solutions and PB-R5-020 are original CC BY 4.0. Runtime, residency, occupancy and timing require actual-target compilation/resources, numerical validation and a qualifying Reference Environment with a complete measurement manifest. They remain Pending Hardware Verification; program counts are not performance results.
+
 ## Content and asset sources
 
 
-- Home, 92 Learning Units, 23 Runnable Examples, 16 Labs, 100 Practice Bank entries, 207 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
+- Home, 94 Learning Units, 23 Runnable Examples, 16 Labs, 102 Practice Bank entries, 207 term definitions and all teaching compositions are original project work. Prose/compositions use **CC BY 4.0**; original software and tooling use **Apache-2.0**. The separately recorded Search adaptation retains MIT.
 - The current rolling public surface contains no adapted diagram, copied owner sample code, external font, or third-party image. Nineteen formal Visual Explainers, static teaching tables, the A12/A13 shared sparse-matrix composition, L01/L02 decision and algorithm-vocabulary tables, and L03/L04 CUB contract tables are not mirrored, traced, copied, or adapted from owner diagrams, tables, source, or tests, and none is GPU evidence.
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
@@ -875,4 +912,4 @@ On 2026-09-04, [issue #32](https://github.com/xiangzhang-coding/cuda-learning-si
 
 Immutable `src/r3-release-manifest.json` retains 62 Learning Units, 16 Runnable Examples, 10 Labs, 19 Visual Explainers, 66 Practice Bank entries including ten Nsight report-analysis entries, 176 Glossary terms, 76 source records, 347 catalog records, 61 Exercise sets, 61 solution sets, 232 Publication Pairs, and 464 source routes. [Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) retains its dynamic acceptance. R4 additionally qualifies eight existing library-and-algorithm-choice entries: `PB-R4-001`, `PB-R4-002`, `PB-R4-003`, `PB-R4-004`, `PB-R4-008`, `PB-R4-011`, `PB-R4-012`, and `PB-R4-016`. The R3 subset remains PB-R3-002 through PB-R3-005 and PB-R3-007 through PB-R3-012; both classifications are within the existing 82 entries.
 
-Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 22 other examples and 16 Labs remain Pending Hardware Verification, 38 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13, P01-P12 and T01-T05 retain empty evidence arrays. Six profiler plans remain expected-only; twenty browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.
+Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; 22 other examples and 16 Labs remain Pending Hardware Verification, 38 subjects total. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. L01-L13, P01-P12 and T01-T07 retain empty evidence arrays. Six profiler plans remain expected-only; twenty browser explainers grant no CUDA evidence. Source review creates no GPU, timing or performance observation. Automated checks do not establish WCAG conformance; CI and dynamic acceptance remain separately recorded.

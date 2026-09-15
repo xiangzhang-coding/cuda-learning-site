@@ -55,3 +55,8 @@ jobs:
           "$PYTHON" -m unittest discover -s scripts/gemm-verification -p 'test_*.py'
           "$PYTHON" -I scripts/gemm-verification/check.py --mode cpu --output "$RUNNER_TEMP/lab16-cpu"
           "$PYTHON" -I scripts/gemm-verification/check.py --mode compile --output "$RUNNER_TEMP/lab16-compile"
+      - name: Check T06 diagnostics and T07 host ownership without GPU evidence
+        run: |
+          PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+          "$PYTHON" -m pip install --require-hashes -r scripts/triton-diagnostics/requirements.lock
+          "$PYTHON" -m unittest discover -s scripts/triton-diagnostics -p 'test_*.py'

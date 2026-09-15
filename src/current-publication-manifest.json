@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-14",
+  "reviewDate": "2026-09-15",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 336,
-    "sourceRoutes": 672,
-    "exerciseSetPublicationPairs": 91,
-    "solutionSetPublicationPairs": 91,
+    "publicationPairs": 342,
+    "sourceRoutes": 684,
+    "exerciseSetPublicationPairs": 93,
+    "solutionSetPublicationPairs": 93,
     "learningUnits": [
       "O01",
       "O02",
@@ -107,7 +107,9 @@
       "T02",
       "T03",
       "T04",
-      "T05"
+      "T05",
+      "T06",
+      "T07"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22", "EX23"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16"],
@@ -133,7 +135,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 100,
+    "practiceBankEntries": 102,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -157,7 +159,7 @@
       "PB-R4-016"
     ],
     "glossaryTerms": 207,
-    "sourceRecords": 105
+    "sourceRecords": 107
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -527,7 +529,7 @@
     "performanceObservations": [],
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
     "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"],
-    "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10", "P11", "P12", "T01", "T02", "T03", "T04", "T05"],
+    "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10", "P11", "P12", "T01", "T02", "T03", "T04", "T05", "T06", "T07"],
     "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS17", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
@@ -541,6 +543,7 @@
     "retainedCompileRuns": [32720214527, 33275734951]
   },
   "knownLimitations": [
+    "T06/T07 publish interpreter/GPU diagnostic boundaries and gated persistent scheduling with exact prerequisites, Exercises, separate solutions and PB-R5-019/020. Interpreter/host checks grant no GPU evidence; sanitizer, occupancy and performance observations remain Pending Hardware Verification without qualifying manifests. No new Example or Lab is added; R5 aggregate review remains pending.",
     "T04/T05 and LAB16 publish blocked FP16 GEMM with FP32 accumulation and phase-separated autotuning under the EX23 full lock. No selected configuration, timing or speedup is published. Compilation and recorded observations remain empty; runtime is Pending Hardware Verification. Choices require shape/device-specific qualifying Environment Manifests. R5 aggregate review remains pending.",
     "T03 and LAB15 publish bounded finite FP32 fused softmax with exact prerequisites T02/A10/Q05. LAB15 reuses the independent CPython 3.14.7 / Triton 3.7.1 / torch 2.13.0 full lock. Compilation and recorded observations remain empty; runtime is Pending Hardware Verification. Logical traffic ledgers, CPU oracle checks and compiler gates establish no measured traffic, selected configuration, timing or speedup. R5 aggregate review remains pending.",
     "T01/T02, VIS17 and EX23 publish the Triton 3.7.1 mental-model/vector-add increment. EX23 independently pins CPython 3.14.7 and torch 2.13.0; its compiler-only lock is a subset, not a runtime profile. Runtime remains Pending Hardware Verification with empty published compilation and recorded observations. Browser, interpreter, CPU and EX02 evidence establish no Triton runtime or performance result. Remaining Triton units and R5 aggregate review are pending.",

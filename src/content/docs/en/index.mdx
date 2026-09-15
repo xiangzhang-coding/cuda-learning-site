@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-09-14'
+factCheckDate: '2026-09-15'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-14'
+      content: '2026-09-15'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-As of **2026-09-14**, the current publication extends R4 through P01-P12 and T01-T05: 92 Learning Units, 336 Publication Pairs, 672 source routes and 448 catalog records. [T04](/en/triton/blocked-matrix-multiplication/) and [T05](/en/triton/autotuning/) develop blocked GEMM and fair autotuning, with [LAB16](/en/labs/autotune-triton-gemm/). Earlier Triton units teach block values, vector addition and fused softmax. Using Python does not remove the Stable Curriculum's prerequisites.
+As of **2026-09-15**, the current publication extends R4 through P01-P12 and T01-T07: 94 Learning Units, 342 Publication Pairs, 684 source routes and 452 catalog records. [T06](/en/triton/debugging/) develops interpreter/GPU diagnosis; [T07](/en/triton/persistent-kernels/) develops persistent scheduling and occupancy trade-offs with the [LAB16](/en/labs/autotune-triton-gemm/) nonpersistent baseline. Earlier Triton units teach block values, vector addition, fused softmax, blocked GEMM and autotuning. Using Python does not remove the Stable Curriculum's prerequisites.
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
@@ -98,9 +98,9 @@ The site has 20 formal Visual Explainers: standalone VIS01-VIS14, [VIS17 SIMT/Tr
 
 A10-A14, Q06-Q13, L01-L13, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The current catalog contains 16 Labs, 100 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 105 source records: 448 records total. Source files form 336 Publication Pairs / 672 routes, with 91 Exercise sets and 91 separate solution sets. This increment adds PB-R5-017/018. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/).
+The current catalog contains 16 Labs, 102 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 107 source records: 452 records total. Source files form 342 Publication Pairs / 684 routes, with 93 Exercise sets and 93 separate solution sets. This increment adds PB-R5-019/020. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/).
 
-Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 22 examples and all 16 Labs remain Pending Hardware Verification, 38 subjects total. P01-P12 and T01-T05 keep four empty evidence arrays. EX21-EX23 and LAB13-LAB16 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; source and host checks do not grant GPU evidence.
+Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 22 examples and all 16 Labs remain Pending Hardware Verification, 38 subjects total. P01-P12 and T01-T07 keep four empty evidence arrays. EX21-EX23 and LAB13-LAB16 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; source, interpreter and host checks do not grant GPU evidence.
 
 [L12](/en/libraries/cufft-plans-layouts-startup/) has exactly `[Q05,M07]` as ordered prerequisites. [L12 Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) require `[L12]`; [separate solutions](/en/libraries/cufft-plans-layouts-startup/solutions/) require `[L12-EXERCISES]`. L12's four evidence arrays remain empty. The archived 12.9.2 cuFFT guide is the teaching baseline; the live 13.3 reference was accessed 2026-09-08 because exact 13.3.1 API and release-note archives were unavailable.
 
@@ -738,7 +738,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, environment, architecture, kernels, libraries, PyTorch and Triton through 100 original problems.</small>
+    <small>Practice evidence, environment, architecture, kernels, libraries, PyTorch and Triton through 102 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 105 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 107 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>
