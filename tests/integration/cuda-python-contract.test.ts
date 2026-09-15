@@ -31,10 +31,10 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current).toMatchObject({
       reviewDate: '2026-09-15',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
-      scope: { publicationPairs: 342, sourceRoutes: 684, exerciseSetPublicationPairs: 93,
-        solutionSetPublicationPairs: 93, practiceBankEntries: 102, sourceRecords: 107 },
+      scope: { publicationPairs: 345, sourceRoutes: 690, exerciseSetPublicationPairs: 94,
+        solutionSetPublicationPairs: 94, practiceBankEntries: 102, sourceRecords: 108 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23']);
     expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16']);
     expect(current.scope.visualExplainers).toEqual([...r4.scope.visualExplainers, 'VIS17'].sort());
@@ -58,7 +58,7 @@ describe('issue #42 CUDA Python publication contract', () => {
         ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
       pendingHardwareVerification: [...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
         ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
-      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07'],
+      r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'],
       evidenceNeutralVisualExplainers: [...r4.evidence.evidenceNeutralVisualExplainers, 'VIS17'].sort(),
     });
     expect(current.knownLimitations.join(' ')).toMatch(/EX21.*Pending Hardware Verification/);

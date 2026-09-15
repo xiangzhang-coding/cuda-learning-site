@@ -92,11 +92,11 @@ describe('R4 release review', () => {
         .toBe('2026-09-15');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /342 (?:Publication Pairs|个双语发布对)/, /684 (?:source routes|routes|条源路由|条路由)/,
-        /94 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
-        /93 (?:Exercise sets|组练习)/, /93 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
+        /345 (?:Publication Pairs|个双语发布对)/, /690 (?:source routes|routes|条源路由|条路由)/,
+        /95 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
+        /94 (?:Exercise sets|组练习)/, /94 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
         /102 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
-        /107 (?:source records|条来源(?:记录)?)/, /452 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /38 (?:subjects|个主体)/,
+        /108 (?:source records|条来源(?:记录)?)/, /453 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /38 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
       expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '102'], ['glossary', '207'], ['sources-and-versions', '107']]) {
+        for (const [slug, count] of [['practice', '102'], ['glossary', '207'], ['sources-and-versions', '108']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -617,12 +617,12 @@ describe('R4 release review', () => {
       expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
       expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
       expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018', 'PB-R5-019', 'PB-R5-020']);
-      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T0[8-9]|^PB-R[6-9]-|^(?:EX24|LAB17)$/.test(id))).toBe(false);
+      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[6-9]-|^(?:EX24|LAB17)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(
-      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition', 'fused-softmax', 'blocked-matrix-multiplication', 'autotuning', 'debugging', 'persistent-kernels']
+      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition', 'fused-softmax', 'blocked-matrix-multiplication', 'autotuning', 'debugging', 'persistent-kernels', 'attention-capstone']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}triton/${slug}/${suffix}`))).sort());
     expect(routes.filter((route) => /\/frameworks(?:\/|$)/.test(route)).sort()).toEqual(
       ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling', 'first-custom-operator', 'operator-registration', 'operator-packaging', 'profile-led-optimization', 'sdpa-dispatch-verification']

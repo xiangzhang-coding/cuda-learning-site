@@ -73,7 +73,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## 记录范围
 
-**2026-09-15 当前发布**有 94 个学习单元（Learning Unit）、23 个可运行示例（Runnable Example）、16 个实验（Lab）、20 项可视化讲解（Visual Explainer）、93 组练习与 93 组独立解答的双语发布对（Publication Pair），共 **342 个发布对 / 684 条源路由**。**452 条目录记录**包括 16 个实验、102 个练习题库（Practice Bank）条目、20 项可视化讲解、207 个术语表（Glossary）词条和 107 条来源。Issue #49 增加 SRC-CUDA-090/091，既有逐项日期不变。R4 仍是最近完成的聚合复核（277 对、554 路由、401 条记录），R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)保持历史记录。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+**2026-09-15 当前发布**有 95 个学习单元（Learning Unit）、23 个可运行示例（Runnable Example）、16 个实验（Lab）、20 项可视化讲解（Visual Explainer）、94 组练习与 94 组独立解答的双语发布对（Publication Pair），共 **345 个发布对 / 690 条源路由**。**453 条目录记录**包括 16 个实验、102 个练习题库（Practice Bank）条目、20 项可视化讲解、207 个术语表（Glossary）词条和 108 条来源。Issue #50 增加 SRC-CUDA-092，既有逐项日期不变。R4 仍是最近完成的聚合复核（277 对、554 路由、401 条记录），R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)保持历史记录。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 ## 来源与版本索引
 
@@ -875,9 +875,23 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 **权利/证据：** 教程遵循上述精确根 MIT 声明，没有复制官方代码、形状夹具、图或基准结果。NVIDIA 材料按其独立声明仅供参考。T07 的固定 FP16 形状、循环证明、解答和 PB-R5-020 为原创 CC BY 4.0。运行、驻留、占用率和计时需要实际目标编译/资源、数值验证及具备完整测量清单的合格基准环境；现保持待硬件验证，程序数不是性能结果。
 
+<span id="src-cuda-092" class="resource-target"></span>
+
+## SRC-CUDA-092：融合注意力综合练习契约
+
+**相关 ID：** T08、VIS18。**访问/核查日期：** 2026-09-15。Triton **3.7.1**、torch **2.13.0**、普通 CPython **3.14.7**、现有 EX23 完整哈希锁。Context7 `/triton-lang/triton` 提供主分支注意力/配置、编译器与调试检索，`/websites/pytorch_2_13` 提供 SDPA 与后端指导。固定契约以精确官方坐标为准；检索代码与教程测试仅作来源参考，不是执行证据。
+
+- [注意力教程与 test_op](https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/06-fused-attention.py)：检查在线重缩放、概率转换、描述符/架构门槛与独立前向/反向测试。官方头维度和反向整除限制不能泛化到本原创指针前向内核；不复制官方实现、输入或基准结果。
+- [core.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/language/core.py)，SHA-256 `373eebe68a4c1f6959c81ae6c382b65c5c2893d53274a205f5ff9bbb100fb31b`：点积类型/默认 FP32 输出、广播加载/存储掩码与 constexpr 断言。[compiler.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/compiler/compiler.py)，`021a45ca590052ab6ca6d850eb0a102abf542165836ad92bfb3bb573218fc5d3`：显式 ASTSource/目标避免发现活动目标。
+- [调试指南](https://github.com/triton-lang/triton/blob/v3.7.1/docs/programming-guide/chapter-3/debugging.rst)，`0d3037966d87cd2f729d64322b9daec4e89d43a68d1e74a0934f76a809a77c25`：设备断言需要 TRITON_DEBUG；解释器限制包括 BF16 和间接指针访问。[testing.py](https://github.com/triton-lang/triton/blob/v3.7.1/python/triton/testing.py)，`15e46e471ac9ecd221e9837e07eb626e88f0047c079612be44c28168a5427002`：do_bench 预热/重复预算、缓存清理、CUDA 事件样本与 return_mode='all'。
+- [PyTorch 2.13 SDPA](https://docs.pytorch.org/docs/2.13/generated/torch.nn.functional.scaled_dot_product_attention.html)：精确仅关键字 scale、dropout、掩码语义、FP64 MATH 与后端限制。SDPA 和选择控制仍为 **beta**；这是精确构建的框架对照练习，不增加持久先修 API 或生产支持承诺。不会静默复用 P12 较旧的 2.11 环境。
+- [Nsight Compute 分析指南](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) 与 [CLI](https://docs.nvidia.com/nsight-compute/NsightComputeCli/index.html)：保留 SRC-CUDA-091 的 **2026.3** 部分/指标查询、重放和权限边界。必须在外部记录精确 GPU 计数器名称和权限；源码检查不是工具执行。
+
+**权利/证据：** 根 [MIT LICENSE](https://github.com/triton-lang/triton/blob/v3.7.1/LICENSE) SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946` 与保留的 EX23 声明一致。新增 T08 文字/推导和 VIS18 复用为原创 CC BY 4.0；脚本/测试为原创 Apache-2.0。混合位宽字节账本是静态分析。不发布新的设备、派发、追踪、计时或加速比观察；运行保持待硬件验证，等待合格清单审核。
+
 ## 内容与素材来源
 
-- Home、94 个学习单元、23 个可运行示例、16 个实验、102 个练习题库条目、207 个术语定义与全部教学构图为项目原创。文字/构图采用 **CC BY 4.0**，原创软件和工具采用 **Apache-2.0**；单独记录的 Search 改编保留 MIT。
+- Home、95 个学习单元、23 个可运行示例、16 个实验、102 个练习题库条目、207 个术语定义与全部教学构图为项目原创。文字/构图采用 **CC BY 4.0**，原创软件和工具采用 **Apache-2.0**；单独记录的 Search 改编保留 MIT。
 - 当前 rolling public surface 没有改编图表、复制 owner 示例代码、外部字体或第三方图片；十九项正式 Visual Explainers、静态教学表、A12/A13 shared sparse matrix composition、L01/L02 decision/algorithm-vocabulary tables 与 L03/L04 CUB contract tables 未镜像、描摹、复制或改编 owner diagram/table/source/test，且都不是 GPU evidence。
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
@@ -911,4 +925,4 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 不可变 `src/r3-release-manifest.json` 保留 62 个学习单元、16 个可运行示例、10 个实验、19 项可视化讲解、66 个练习题库条目（其中十道 Nsight 报告分析题）、176 个术语表词条、76 条来源记录、347 条目录记录、61 组练习、61 组解答、232 个双语发布对和 464 条源路由。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保留其动态验收。R4 另将八道既有题目列为符合库与算法选择分类的条目：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。R3 子集仍为 PB-R3-002 至 PB-R3-005 和 PB-R3-007 至 PB-R3-012；两个分类均属于既有的 82 个条目。
 
-只有 EX02、EX10、LAB02 保留编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable），其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量仍为零。L01-L13、P01-P12 和 T01-T07 保留空证据数组。六份分析器计划只有预期内容，二十项浏览器讲解不授予 CUDA 证据。来源审查不产生 GPU、计时、性能观察。自动检查不建立 WCAG 一致性，CI 和动态验收单独记录。
+只有 EX02、EX10、LAB02 保留编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable），其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量仍为零。L01-L13、P01-P12 和 T01-T08 保留空证据数组，T08 设备验收待完成。六份分析器计划只有预期内容，二十项浏览器讲解不授予 CUDA 证据。来源审查不产生 GPU、计时、性能观察。自动检查不建立 WCAG 一致性，CI 和动态验收单独记录。

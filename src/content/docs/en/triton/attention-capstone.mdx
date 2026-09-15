@@ -1,0 +1,139 @@
+---
+title: 'T08: Build and Audit Fused Attention'
+description: Complete a bounded forward attention capstone with online normalization, tile IO, independent correctness, framework output checks and evidence-led profiling.
+pairId: t08
+counterpart: /triton/attention-capstone/
+factCheckDate: '2026-09-15'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, normalization, tiles, visual, correctness, execution, framework, profiling, debugging, practice, sources]
+resourceKind: learning-unit
+unitId: T08
+prerequisites: [T03, T04, A11, P12]
+relatedUnits: [VIS18, T06, L11]
+hardwareGate: none
+estimatedMinutes: 180
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton attention source and tests', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/06-fused-attention.py', version: '3.7.1', platform: 'Reference-only architecture-gated owner tutorial', accessDate: '2026-09-15' }
+  - { title: 'PyTorch SDPA', url: 'https://docs.pytorch.org/docs/2.13/generated/torch.nn.functional.scaled_dot_product_attention.html', version: '2.13', platform: 'Forward output and backend contract', accessDate: '2026-09-15' }
+  - { title: 'Nsight Compute Profiling Guide', url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html', version: '2026.3', platform: 'NVIDIA Linux', accessDate: '2026-09-15' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t08 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/attention-capstone/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-15' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,normalization,tiles,visual,correctness,execution,framework,profiling,debugging,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T08 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T03,T04,A11,P12' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'VIS18,T06,L11' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1,2.13,2026.3' } }
+---
+
+import AttentionIoExplorer from '../../../../components/AttentionIoExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/triton/attention-capstone/" lang="zh-CN">阅读中文对应页</a>
+
+## Outcome and stages
+
+Implement a learner copy of fused forward attention, justify its IO ledger, compare independent and framework outputs, and submit a bounded profiling argument. Budget 180 minutes plus external runs. Stages are **contract → recurrence → tiles → correctness → framework → profiling → evidence review**. The website never executes CUDA. The capstone's runtime remains **Pending Hardware Verification**; reading and host reasoning have no hardware gate.
+
+## Exact prerequisites
+
+T08 itself is an evidence-neutral Learning Unit with four empty evidence arrays. “Pending Hardware Verification” here describes the outstanding external capstone work requested by this ticket; it does not register a new Lab/Runnable Example or grant an Evidence Status to the Learning Unit.
+
+**[T03, T04, A11, P12]**: [fused softmax](/en/triton/fused-softmax/), [blocked matrix multiplication](/en/triton/blocked-matrix-multiplication/), [attention IO](/en/algorithms/attention-as-an-io-problem/) and [SDPA dispatch verification](/en/frameworks/sdpa-dispatch-verification/). Reuse normalization, dot-product layouts, the online recurrence and framework dispatch boundaries. [T06](/en/triton/debugging/) is optional troubleshooting; [L11](/en/libraries/attention-backend-dispatch/) supplies backend context.
+
+## Why this capstone exists
+
+Scaled dot-product attention separates score formation, normalization and value aggregation. Online normalization predates modern fused attention; FlashAttention's contribution includes organizing exact attention around IO constraints. A11's primary papers motivate these ideas, not current API support. This original teaching kernel uses ordinary pointer loads and fixed tiles. The owner's 3.7.1 tutorial also uses descriptors, architecture-specific configurations, FP8 paths and backward kernels; those have separate constraints and are not this implementation's contract.
+
+## Freeze the contract first
+
+`O = softmax(Q Kᵀ / sqrt(D) + mask) V`, independently for each batch/head. Q/K/V/O are equal-shaped, contiguous **FP16** `(B,H,N,D)`; `B,H ∈ [1,2]`, `N ∈ [1,128]`, `D ∈ {16,32,64}`. Inputs are finite with magnitude ≤4; all tensors share one CUDA device. Scores, maxima, normalizers and output accumulators use FP32. The unnormalized probability tile is rounded to FP16 before its value dot; output is stored once as FP16. Accept elementwise `abs(actual-reference) ≤ 0.02 + 0.01*abs(reference)` and finite outputs, not bitwise equality.
+
+Only square self-attention, `scale=D**-0.5`, dropout zero and either no mask or inclusive lower-triangular causal mask are supported. Each real row has a valid key (at least key zero). Reject empty dimensions, noncontiguous/unequal shapes, nonfinite inputs, other dtypes and `requires_grad=True`. Arbitrary masks, all-masked rows, rectangular attention, GQA, bias, dropout, backward, FP8/BF16, TMA and warp specialization need new contracts. This is an eager inference adapter, with no `torch.compile`, autograd or production-library promise. The acceptance route is **framework-output verification**, not gradient verification.
+
+## Merge stable state, not normalized fragments
+
+For each query row initialize `m=-∞, l=0, a=0`. For the next scaled, masked score tile `s`, compute `m'=max(m,max(s))`, `α=exp(m-m')`, `p=exp(s-m')`, then `l'=α*l+sum(p)` and `a'=α*a+pV`. Replace all three states together; after the final key tile store `a/l`. Both old normalizer and old weighted accumulator require rescaling. Averaging independently normalized tile outputs loses their relative partition masses.
+
+The scale is applied **before** normalization. This kernel uses natural `tl.exp`; do not copy an `exp2` implementation's `log2(e)` factor into it. Invalid key scores become negative infinity before maximum and exponentiation; zero-filled invalid K/V loads alone do not remove their probability mass. Padded query rows are never stored. They can safely follow the same loop here because key zero exists even for padded rows; arbitrary all-masked rows would need explicit zero-mass handling.
+
+## From recurrence to Triton tiles
+
+`grid=(ceil(N/16),B*H)`, `BM=16`, `BN=32`, four warps, two stages, one CTA. Program axis zero owns 16 query rows; axis one owns one batch/head. Q is `[BM,D]`, transposed K `[D,BN]`, score/P `[BM,BN]`, V `[BN,D]`, accumulator `[BM,D]`. Sweep `ceil(N/BN)` key tiles, including the full scan for causal attention. Causal masking removes probabilities but this simple implementation does not skip upper-triangular loads or dot work. The output mask proves each valid element has exactly one writer.
+
+Keep Q and the running states across the key loop; load K/V each iteration. Full N×N score/probability tensors never enter global storage. Larger BM can reduce K/V replay but increase live state and register/shared-memory pressure. A source-level tile is not a physical register allocation or residency guarantee.
+
+## Reuse VIS18 with the correct storage widths
+
+<AttentionIoExplorer locale="en" />
+
+VIS18 connects **score → `tl.dot(Q,K)`**, **normalize → row max/sum and rescaling**, **value → `tl.dot(P,V)` and final store**. Its three selected stages are a conceptual decomposition; our key loop interleaves them. Native selects work by keyboard; reset restores focus. There is no autoplay. Reduced motion, narrow screens, and the server-rendered diagram/table work without JavaScript.
+
+The visual's small **FP32, unmasked** fixtures are conceptual, not runnable capstone cases. VIS18 counts `4Nd+6N²` and `2Nd+2ceil(N/Br)Nd` elements at four bytes each. For this capstone's FP16 Q/K/V/O and a hypothetical FP32 materialized S/P schedule, the byte ledgers per head are instead **`8Nd+24N²`** versus **`4Nd+4ceil(N/16)Nd`**. Multiply by B×H. For synthetic `N=32,D=16`, these are **28672 B** and **6144 B**. This includes three reads of S for stable normalization; different library schedules have different ledgers. It excludes masks' storage, cache transactions, spills, allocations and host transfers. It is not measured DRAM traffic. The causal kernel still scans all tiles, so do not halve its ledger or its executed FLOPs.
+
+## Correctness before profiling
+
+The acceptance collector checks exact output shape, dtype and device before comparing numbers. A launch-blocking rejection matrix also requires invalid layouts, unequal shapes, gradients, dtype/device mismatches, nonfinite or out-of-bound inputs, invalid dimensions and a nonboolean causal flag to raise before reaching the kernel. Those device-side acceptance checks remain pending execution; host tests exercise output-metadata rejection and preserve invalid timing batches in JSON-safe reports.
+
+The canonical reviewed solution lives in `scripts/attention-capstone/`; start from the [Exercises](/en/triton/attention-capstone/exercises/) before opening its kernel. `contract.py` implements independent dense Python-double attention over already stored FP16 values and a separately structured online model. Host tests check tail lengths, tile partitions, stable extreme logits, causal first-row behavior, invalid results and the mixed-width IO ledger.
+
+`check.py --mode cpu` compares the independent reference with CPU FP64 SDPA MATH at `atol=rtol=1e-10`. Runtime `verify` checks the eager adapter and a guarded output buffer against that reference at the FP16 tolerance; it also verifies unchanged Q/K/V and tail guards, and compares forced SDPA MATH and FLASH_ATTENTION outputs. Cases `(B,H,N,D)` are `(1,1,1,16)`, `(1,2,17,32)`, `(2,1,33,64)`, `(1,2,65,16)`, `(1,1,128,64)`, each causal/noncausal and mixed/uniform/extreme. The last-key high-logit fixture tests a changing running maximum; uniform Q tests normalization and causal prefix means. CPU comparison success proves neither device arithmetic nor memory safety.
+
+## External execution and software gates
+
+Use native Linux x86_64, ordinary CPython **3.14.7**, Triton **3.7.1**, torch **2.13.0**, the existing EX23 full hash lock, one visible NVIDIA GPU with **CC≥8.0, ≥8 GB total, ≥2 GB free**, driver **≥580.65.06**. On CC9/10/newer, verify the pinned compiler and bundled assembler accept the actual target; stop on failure. VRAM alone is insufficient. The reviewed tensor cases are tiny; the memory gate reserves room for frameworks, compilation and instrumentation.
+
+From the repository root, first follow [EX23 setup](/en/examples/triton-vector-add/), then run in separate new output directories:
+
+```bash
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+"$PYTHON" -m unittest discover -s scripts/attention-capstone -p 'test_*.py'
+"$PYTHON" -I scripts/attention-capstone/check.py --mode cpu --output /tmp/t08-cpu
+"$PYTHON" -I scripts/attention-capstone/check.py --mode compile --output /tmp/t08-compile
+"$PYTHON" -I scripts/attention-capstone/check.py --mode verify --output /tmp/t08-verify
+"$PYTHON" -I scripts/attention-capstone/check.py --mode benchmark --output /tmp/t08-benchmark
+```
+
+`compile` uses `ASTSource` and explicit `GPUTarget('cuda',80,32)` without requesting an active driver. It retains TTIR, TTGIR, LLVM IR, PTX and cubin hashes for 30 N/D/mask specializations. SM80 artifact generation is independent of runtime validation and does not establish support for another target. All phases write pass/fail local reports without automatically granting Evidence Status. The evidence collector rejects debug/compiler override variables; diagnostic runs use a separate learner copy and reports.
+
+## Framework and backend comparison
+
+Pass resident tensors to the eager adapter. Validation synchronizes to reject invalid values and gradient requests; keep it outside kernel timing. For a native output use `F.scaled_dot_product_attention(q,k,v,dropout_p=0.0,is_causal=causal,scale=D**-0.5)` inside `sdpa_kernel(backends=[SDPBackend.MATH])` or `[SDPBackend.FLASH_ATTENTION]`. Do not combine an explicit mask with `is_causal=True`. SDPA dropout is controlled by its argument, not module evaluation mode. A boolean SDPA mask uses true for allowed entries, a different convention from some padding masks.
+
+Forcing one backend prevents silent selection of another enabled backend. The collector retains warnings and reports FLASH errors as **unavailable-or-failed**, never as a successful comparison. MATH failure and any numerical mismatch fail acceptance. Use a separate profiler trace to identify actual dispatched kernels; a backend enum is not a trace. Automatic dispatch can be an additional experiment only with the same contract and recorded selection. See P12/L11 for custom registration and dispatch boundaries; this capstone registers no global operator override.
+
+## Ask a bounded profiling question
+
+First ask: for one fixed shape/mask, does avoiding full S/P storage reduce observed memory traffic, and is that associated with lower elapsed time? Complete **every correctness case** before timing. Separate setup, target JIT compilation, correctness, warm-up, steady-state timing and profiler collection. No autotuning search is performed. Benchmark each checked provider with 20 warm-up calls, synchronize, then three alternating-order rounds using `do_bench(warmup=25,rep=100,return_mode='all')`; retain all raw milliseconds and median/min/max.
+
+The implemented comparison includes output allocation for both custom and SDPA forward calls, with resident inputs and validation/transfers excluded. It is not pure kernel latency or end-to-end model latency. Backend contexts and host enqueue overhead can influence event intervals. Record this boundary; never compare a preallocated custom kernel with allocation-inclusive SDPA without labeling different scopes. The harness rechecks outputs after timing. A slower custom kernel is a valid result.
+
+Separately use **Nsight Compute 2026.3**: query `ncu --list-sections` and `ncu --query-metrics` on the actual machine, record supported exact names/units, and collect the minimal memory-workload, launch-statistics and occupancy sections needed. First discover the kernel name, then filter the chosen launch so reference/validation kernels are excluded. Record replay/cache policy, launch count, shared memory/registers, counter permissions and profiler overhead. `ERR_NVGPUCTRPERM` blocks counter conclusions; timing alone cannot prove an IO mechanism. [Q09](/en/correctness/occupancy-stalls-throughput/) explains occupancy/stalls; projected byte savings are not a speedup.
+
+Required Environment Manifest fields include observer/date, Reference Environment identity or absence, GPU/UUID/CC/SMs/count/memory, driver, Toolkit, loaded components, compiler/assembler, OS/kernel/glibc, exact lock and source hashes/commit/dirty diff, shapes/dtypes/strides/scale/mask/tolerance, tile/grid configuration, commands/exits, clocks/power/competing load, synchronization/cache/measurement boundary, profiler permissions/versions/filters/replay/metrics, raw artifacts and custody, and per-case retain/reject/inconclusive decisions. The generated report lists manual fields still needed. Missing fields, unavailable backends or absent hardware keep conclusions bounded; no configuration, trace, timing or speedup is supplied as an observation here. Maintainer review of qualifying Reference Environment evidence is required for Runtime-Verified status.
+
+## Debug the first failing boundary
+
+Wrong uniform output: inspect total mass and invalid-key masking. Failure only after a new maximum: inspect rescaling of both l and a. Causal failure at row zero: check `key≤query`, scale and mask-before-max order. Tail corruption: independently check load and store masks and batch/head base offsets. NaNs: check finite inputs, all-masked extensions and `−∞−(−∞)`. Small errors: inspect probability FP16 conversion and reduction order before changing tolerances. Compile/resource failure: inspect exact target and emitted IR; reduce live tile state only as a new correctness-tested candidate.
+
+T06's `tl.static_assert` is compile-time; `tl.device_assert` requires `TRITON_DEBUG=1`. `TRITON_INTERPRET=1` is a CPU semantic aid, not the device compiler or profiler, and cannot establish Tensor Core rounding, scheduling or race safety. Run Compute Sanitizer on a separate external diagnostic copy if investigating memory errors; retain command/version and nonzero exits. Never benchmark instrumented/debug output or silently suppress a failing case.
+
+## Practice and retrieval
+
+Complete the [capstone Exercises](/en/triton/attention-capstone/exercises/), then inspect the [separate reviewed solution](/en/triton/attention-capstone/solutions/). Explain why both state terms rescale; why masked loads alone are insufficient; how VIS18's bytes differ from this kernel; why an unavailable forced backend is no comparison; and what evidence is missing before an IO or performance claim can be published.
+
+## Sources and rights
+
+Checked **2026-09-15**. [SRC-CUDA-092](/en/sources-and-versions/#src-cuda-092) records Context7 discovery and exact owner compiler, attention, debugging, framework and profiling coordinates. A11's papers motivate the algorithm only. Prose/VIS18 are original CC BY 4.0; the new scalar model, kernel and collector are original Apache-2.0 software. The upstream tutorial is reference-only; its exact MIT notice remains in `examples/ex23-triton-vector-add/TRITON-LICENSE`. No upstream benchmark or figure is republished as a project observation.

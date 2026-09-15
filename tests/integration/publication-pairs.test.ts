@@ -50,6 +50,7 @@ const publicationPairFixtures: readonly PublicationPair[] = [
   ...[
     { id: 'T06', slug: 'triton/debugging', prerequisites: 'T02,Q03,Q04' },
     { id: 'T07', slug: 'triton/persistent-kernels', prerequisites: 'T04,T05,Q09' },
+    { id: 'T08', slug: 'triton/attention-capstone', prerequisites: 'T03,T04,A11,P12' },
   ].flatMap(({ id, slug, prerequisites }) => [
     { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
       factCheckDate: '2026-09-15', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
@@ -4293,14 +4294,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(342);
-    expect(sourceRoutes.size).toBe(684);
+    expect(publicationPairs).toHaveLength(345);
+    expect(sourceRoutes.size).toBe(690);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['T08', 'EX24', 'LAB17']) {
+    for (const absentUnitId of ['EX24', 'LAB17']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });
@@ -4843,7 +4844,7 @@ describe('published navigation', () => {
     }
   }, 30_000);
 
-  // Full-locale DOM scans cover 342 pages; keep the internal-link scan's CI budget.
+  // Full-locale DOM scans cover 345 pages; keep the internal-link scan's CI budget.
   it.each(['zh', 'en'] as const)('uses valid HTTPS URLs for every external content link (%s)', async (locale) => {
     for (const route of publicationPairs.map((pair) => pair[locale])) {
       const document = await readRoute(route);

@@ -73,6 +73,19 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  T08: {
+    href: { 'zh-CN': '/triton/attention-capstone/', en: '/en/triton/attention-capstone/' },
+    title: { 'zh-CN': 'T08：实现并审查融合注意力', en: 'T08: Build and Audit Fused Attention' },
+    prerequisites: ['T03', 'T04', 'A11', 'P12'],
+  },
+  'T08-EXERCISES': {
+    href: { 'zh-CN': '/triton/attention-capstone/exercises/', en: '/en/triton/attention-capstone/exercises/' },
+    title: { 'zh-CN': 'T08 综合练习', en: 'T08 Capstone Exercises' }, prerequisites: ['T08'],
+  },
+  'T08-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/attention-capstone/solutions/', en: '/en/triton/attention-capstone/solutions/' },
+    title: { 'zh-CN': 'T08 综合练习复核解答', en: 'T08 Reviewed Capstone Solution' }, prerequisites: ['T08-EXERCISES'],
+  },
   T06: {
     href: { 'zh-CN': '/triton/debugging/', en: '/en/triton/debugging/' },
     title: { 'zh-CN': 'T06：为缺陷选择正确的调试执行方式', en: 'T06: Choose the Right Debugging Execution' },
