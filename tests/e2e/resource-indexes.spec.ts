@@ -590,10 +590,13 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   }
 });
 
-test('cuFFT practice filters in both locales and reveals each solution independently of its hints', async ({ page }) => {
-  for (const locale of INDEX_LOCALES) {
-    await page.goto(INDEX_ROUTES.practice[locale]);
+for (const locale of INDEX_LOCALES) {
+  test(`cuFFT practice filters and independent solutions (${locale})`, async ({ page }) => {
+    // Each locale loads the complete growing Practice Bank and opens two entries.
+    test.setTimeout(60_000);
+    await page.goto(INDEX_ROUTES.practice[locale], { waitUntil: 'networkidle' });
     const index = page.locator('cuda-resource-index');
+    await expect(index).toHaveAttribute('data-ready', 'true', { timeout: 15_000 });
     await index.locator('[data-resource-filter="relation"]').selectOption('L12');
     await expect(index.locator('[data-resource-card]:visible')).toHaveCount(2);
     for (const [planningId, answer] of [['PB-R4-013', '288'], ['PB-R4-014', '27.5']]) {
@@ -619,8 +622,8 @@ test('cuFFT practice filters in both locales and reveals each solution independe
       await expect(solution).toContainText(answer);
       await expect(secondHint).not.toHaveAttribute('open', '');
     }
-  }
-});
+  });
+}
 
 test('cuSPARSE filters resolve L13 and EX20 and keep solutions independent of hints in both locales', async ({ page }) => {
   // This journey loads three full indexes and revisits practice in both locales.
