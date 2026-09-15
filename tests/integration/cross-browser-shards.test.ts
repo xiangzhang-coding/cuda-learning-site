@@ -30,7 +30,7 @@ it('partitions every cross-browser test exactly once across three bounded CI job
   const job = workflow.split('\n  e2e-cross-browser:')[1].split('\n  accessibility-automated:')[0];
   expect(job).toContain('shard: [1, 2, 3]');
   expect(job).toContain('--shard=${{ matrix.shard }}/3');
-  expect(job).toContain('timeout-minutes: 35');
+  expect(job).toContain('timeout-minutes: 45');
   const [whole, ...shards] = await Promise.all([undefined, '1/3', '2/3', '3/3'].map(collectedTests));
   expect(whole.length).toBeGreaterThan(0);
   expect(new Set(whole).size).toBe(whole.length);
