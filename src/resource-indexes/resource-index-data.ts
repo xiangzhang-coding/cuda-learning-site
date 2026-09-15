@@ -1856,6 +1856,18 @@ const practice: readonly ResourceIndexRecord[] = [
     resourceType: 'evidence-review', difficulty: 'intermediate', prerequisites: ['T05'], relatedUnits: ['T05', 'LAB16'],
     hardwareGate: noHardware, versionGate: same('Triton 3.7.1; torch 2.13.0'), reviewedOn: '2026-09-14',
   },
+  {
+    planningId: 'PB-R5-019', group: 'practice', title: localized('顺序解释不能排除全局竞态', 'Sequential interpretation cannot exclude a global race'),
+    href: localized('/practice/#pb-r5-019', '/en/practice/#pb-r5-019'),
+    resourceType: 'correctness-debugging', difficulty: 'intermediate', prerequisites: ['T06'], relatedUnits: ['T06'],
+    hardwareGate: noHardware, versionGate: same('Triton 3.7.1; Compute Sanitizer 2026.3'), reviewedOn: '2026-09-15',
+  },
+  {
+    planningId: 'PB-R5-020', group: 'practice', title: localized('程序编号不是 SM 编号', 'A program ID is not an SM ID'),
+    href: localized('/practice/#pb-r5-020', '/en/practice/#pb-r5-020'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['T07'], relatedUnits: ['T07', 'LAB16'],
+    hardwareGate: noHardware, versionGate: same('Triton 3.7.1; Nsight Compute 2026.3'), reviewedOn: '2026-09-15',
+  },
 ];
 
 const visuals: readonly ResourceIndexRecord[] = [
@@ -3358,6 +3370,8 @@ const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-087', localized('Triton 精确版本、块值、掩码与生成工具链', 'Triton exact release, block values, masking and generated toolchain'), 'cuda-version-record', ['T01', 'T02', 'EX23', 'VIS17'], localized('Triton 3.7.1；CPython 3.14.7；独立 torch 2.13.0；Linux、CC 8.0+；仅来源审查。', 'Triton 3.7.1; CPython 3.14.7; independent torch 2.13.0; Linux, CC 8.0+; source review only.'), '2026-09-14', '2026-09-14'),
   sourceRecord('SRC-CUDA-088', localized('融合 Softmax 的归约、JIT 与测量接口', 'Fused softmax reduction, JIT and measurement interfaces'), 'cuda-version-record', ['T03', 'LAB15'], localized('Triton 3.7.1；负无穷填充、FP32 归约、编译与设备预热、do_bench 原始样本；torch 2.13.0 out 接口。', 'Triton 3.7.1; negative-infinity fill, FP32 reductions, compile versus device warm-up, do_bench raw samples; torch 2.13.0 out interface.'), '2026-09-14', '2026-09-14'),
   sourceRecord('SRC-CUDA-089', localized('分块矩阵乘法与可审查自动调优', 'Blocked matrix multiplication and auditable autotuning'), 'cuda-version-record', ['T04', 'T05', 'LAB16'], localized('Triton 3.7.1 dot、Config、选择缓存、JIT、事件计时；torch 2.13.0 FP16 mm。', 'Triton 3.7.1 dot, Config, selection cache, JIT and event timing; torch 2.13.0 FP16 mm.'), '2026-09-14', '2026-09-14'),
+  sourceRecord('SRC-CUDA-090', localized('解释器、断言与 sanitizer 边界', 'Interpreter, assertion and sanitizer boundaries'), 'cuda-version-record', ['T06'], localized('Triton 3.7.1 精确源码与测试；Compute Sanitizer 2026.3；仅计数派生记录。', 'Exact Triton 3.7.1 source/tests; Compute Sanitizer 2026.3; counts-only derivatives.'), '2026-09-15', '2026-09-15'),
+  sourceRecord('SRC-CUDA-091', localized('持久化调度与占用率门槛', 'Persistent scheduling and occupancy gates'), 'architecture-record', ['T07', 'LAB16'], localized('Triton 3.7.1 持久化教程与启动；Nsight Compute 2026.3 资源、重放和权限。', 'Triton 3.7.1 persistent tutorial and launch; Nsight Compute 2026.3 resources, replay and permissions.'), '2026-09-15', '2026-09-15'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

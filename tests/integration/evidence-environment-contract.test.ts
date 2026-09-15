@@ -451,6 +451,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-011', 'PB-R5-012',
       'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016',
       'PB-R5-017', 'PB-R5-018',
+      'PB-R5-019', 'PB-R5-020',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -543,6 +544,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-016': 'triton/fused-softmax',
       'PB-R5-017': 'triton/blocked-matrix-multiplication',
       'PB-R5-018': 'triton/autotuning',
+      'PB-R5-019': 'triton/debugging',
+      'PB-R5-020': 'triton/persistent-kernels',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -822,9 +825,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-016': ['triton/fused-softmax', 'labs/verify-fused-softmax'],
       'PB-R5-017': ['triton/blocked-matrix-multiplication', 'labs/autotune-triton-gemm'],
       'PB-R5-018': ['triton/autotuning', 'labs/autotune-triton-gemm'],
+      'PB-R5-019': ['triton/debugging'],
+      'PB-R5-020': ['triton/persistent-kernels', 'labs/autotune-triton-gemm'],
     };
 
-    expect(entrySections).toHaveLength(100);
+    expect(entrySections).toHaveLength(102);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];

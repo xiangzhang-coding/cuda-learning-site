@@ -404,14 +404,15 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(16);
-  expect(counts.practice).toBe(100);
+  expect(counts.practice).toBe(102);
   expect(counts.visuals).toBe(20);
   expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
-  expect(counts.sources).toBe(105);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(241 + currentPublication.scope.glossaryTerms);
+  expect(counts.sources).toBe(107);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(245 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
     'LAB16', 'PB-R5-017', 'PB-R5-018', 'SRC-CUDA-089',
+    'PB-R5-019', 'PB-R5-020', 'SRC-CUDA-090', 'SRC-CUDA-091',
     'LAB15', 'PB-R5-015', 'PB-R5-016', 'SRC-CUDA-088',
     'VIS17', 'PB-R5-013', 'PB-R5-014', 'TERM-205', 'TERM-206', 'TERM-207', 'SRC-CUDA-087',
     ...releaseLabIds,
@@ -589,10 +590,13 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   }
 });
 
-test('cuFFT practice filters in both locales and reveals each solution independently of its hints', async ({ page }) => {
-  for (const locale of INDEX_LOCALES) {
-    await page.goto(INDEX_ROUTES.practice[locale]);
+for (const locale of INDEX_LOCALES) {
+  test(`cuFFT practice filters and independent solutions (${locale})`, async ({ page }) => {
+    // Each locale loads the complete growing Practice Bank and opens two entries.
+    test.setTimeout(60_000);
+    await page.goto(INDEX_ROUTES.practice[locale], { waitUntil: 'networkidle' });
     const index = page.locator('cuda-resource-index');
+    await expect(index).toHaveAttribute('data-ready', 'true', { timeout: 15_000 });
     await index.locator('[data-resource-filter="relation"]').selectOption('L12');
     await expect(index.locator('[data-resource-card]:visible')).toHaveCount(2);
     for (const [planningId, answer] of [['PB-R4-013', '288'], ['PB-R4-014', '27.5']]) {
@@ -618,8 +622,8 @@ test('cuFFT practice filters in both locales and reveals each solution independe
       await expect(solution).toContainText(answer);
       await expect(secondHint).not.toHaveAttribute('open', '');
     }
-  }
-});
+  });
+}
 
 test('cuSPARSE filters resolve L13 and EX20 and keep solutions independent of hints in both locales', async ({ page }) => {
   // This journey loads three full indexes and revisits practice in both locales.

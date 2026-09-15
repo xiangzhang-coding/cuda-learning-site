@@ -1,5 +1,30 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Triton debugging and persistence — 2026-09-15
+
+Issue #49 publishes T06 `[T02,Q03,Q04]`, T07 `[T04,T05,Q09]`, their complete
+Exercise/solution pairs, PB-R5-019/020 and SRC-CUDA-090/091. Current scope is
+94 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers,
+102 Practice Bank entries, 207 terms, 107 sources, 452 catalog records,
+93 Exercise and 93 solution pairs, 342 Publication Pairs / 684 routes.
+All inventories in earlier dated increments below are historical.
+
+Context7 queries covered interpreter/assert/print/sanitizer behavior, persistent
+matmul and occupancy, and NVIDIA sanitizer/occupancy scopes. Returned main-branch
+examples and compiler instrumentation were discovery only. Exact Triton 3.7.1
+source/test hashes and inspected functions are in SRC-CUDA-090/091. The default
+interpreter debug option must not be confused with GPU debug compilation.
+Current NVIDIA manuals identify 2026.3, so this increment records that tool
+version rather than relabeling earlier 2026.2.1 reviews. No owner tests were run.
+
+The separate diagnostic lock adds NumPy 2.5.3 to the unchanged EX23 full lock.
+The ordinary cp314 Linux x86_64 wheel hash was checked against
+https://pypi.org/pypi/numpy/2.5.3/json. NumPy's BSD-3-Clause and bundled notices
+remain attached to the externally installed package; no wheel is redistributed.
+Original code and synthetic fixtures use Apache-2.0, original prose CC BY 4.0.
+No interpreter, host-model or compiler check upgrades GPU Evidence Status.
+Sanitizer, residency, occupancy and performance still require qualifying manifests.
+
 ## Blocked GEMM and autotuning — 2026-09-14
 
 Issue #48 publishes T04 `[T02,A08,Q10]`, T05 `[T04,Q05,Q06]`, LAB16

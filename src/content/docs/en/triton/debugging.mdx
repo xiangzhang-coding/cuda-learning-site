@@ -1,0 +1,123 @@
+---
+title: 'T06: Choose the Right Debugging Execution'
+description: Separate interpreter value checks, GPU assertions and sanitizer coverage.
+pairId: t06
+counterpart: /triton/debugging/
+factCheckDate: '2026-09-15'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, interpreter, diagnostics, fixture, sanitizer, custody, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T06
+prerequisites: [T02, Q03, Q04]
+relatedUnits: [T03, EX23]
+hardwareGate: none
+estimatedMinutes: 55
+difficulty: intermediate
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton debugging guide', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/docs/programming-guide/chapter-3/debugging.rst', version: '3.7.1', platform: 'Interpreter and CUDA', accessDate: '2026-09-15' }
+  - { title: 'Compute Sanitizer User Guide', url: 'https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html', version: '2026.3', platform: 'NVIDIA Linux', accessDate: '2026-09-15' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t06 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/debugging/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-15' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,interpreter,diagnostics,fixture,sanitizer,custody,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T06 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T02,Q03,Q04' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'T03,EX23' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1,2026.3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/triton/debugging/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Given a wrong result, choose a value-level interpreter check, a compile-time check, a GPU assertion or a specific Compute Sanitizer tool. Explain what a clean run cannot establish. Allow 55 minutes. Reading and the ownership exercise need no GPU; the diagnostic fixture runs externally, never in the Learning Site.
+
+## Exact prerequisites
+
+**[T02, Q03, Q04]**: [masked vector addition](/en/triton/masked-vector-addition/), [memcheck](/en/correctness/memcheck-invalid-memory-access/) and [racecheck/initcheck/synccheck](/en/correctness/racecheck-initcheck-synccheck/). [T03](/en/triton/fused-softmax/) supplies a related numerical example: a wrong reduction identity can remain entirely within allocated memory.
+
+## Why two execution models help
+
+Source-level simulation makes intermediate values inspectable before confronting asynchronous execution and compiler lowering. Device instrumentation then asks questions about the instructions that actually ran. These approaches developed to answer different questions: an interpretable execution is useful precisely because it removes much of the parallel machine. That removal also limits its evidence.
+
+## What the interpreter can check
+
+With `TRITON_INTERPRET=1` set **before kernel decoration/import**, Triton 3.7.1 bypasses compilation and evaluates program instances sequentially using NumPy equivalents. Inspect offsets, masks, broadcasting, reduction axes and small outputs. Under interpretation, Python `print`, `pdb` and `tensor.handle.data` can expose intermediate values; that internal handle is a version-bound debugging aid, not a portable kernel interface.
+
+The owner guide excludes native BF16 arithmetic and pointer-chasing loads. Converting a loaded BF16 value to FP32 can support a value investigation, but changes the arithmetic contract. Do not call an unsupported operation a GPU defect merely because interpretation rejects it. The pinned implementation also rejects inline assembly and external elementwise calls. Sequential program execution and a no-op interpreter barrier cannot establish races, synchronization safety, physical lane layouts, register spills, occupancy, compiled arithmetic or performance. Never deliberately execute an unbounded invalid pointer on the CPU interpreter; it is not a memory-safety sandbox.
+
+## Four diagnostics, four boundaries
+
+| Operation | Selected-release meaning | Limit |
+| --- | --- | --- |
+| `tl.static_assert` | Check a compile-time condition, such as a tile constraint | Cannot check a runtime tensor; interpreter evaluates it as a Python assertion |
+| `tl.static_print` | Print specialization information during compilation | A JIT cache hit need not compile or print again |
+| `tl.device_assert` | Check a device condition when debug compilation is enabled | Set `TRITON_DEBUG=1` before import; synchronize and end the process after a failure |
+| `tl.device_print` | Print a literal ASCII prefix followed by scalar/tensor values | Output order is not execution ordering; buffering can drop output |
+
+In compiled kernels, Python `print`/`assert` lower to device operations with their restrictions. Host Python assertions are different. The exact owner test checks JIT/launch debug flags as well as the environment knob; this fixture uses only the explicit environment setting. In 3.7.1, interpreter `InterpreterOptions.debug` defaults to false, while semantic `device_assert` checks that option. Do **not** use interpreter assertion silence as validation; this fixture reserves the assertion case for GPU execution and always checks interpreted values with an independent host oracle.
+
+Synchronize before interpreting GPU print output. If a larger print FIFO is necessary, the version-bound `triton.runtime.driver.active.utils.set_printf_fifo_size(size_bytes)` must be called for the current device before a printing kernel runs. The default size is not portable. Prefer a tiny fixture and disable all diagnostics for timing; printing can change scheduling and hide a race.
+
+## A bounded tail fixture
+
+Use the [EX23 setup](/en/examples/triton-vector-add/) full hash lock: native Linux x86_64, ordinary CPython **3.14.7**, Triton **3.7.1**, torch **2.13.0** and locked dependencies. Add **NumPy 2.5.3** from the separate diagnostic lock below; EX23's canonical lock is unchanged. Run from the repository root with no inherited `TRITON_*` overrides. `scripts/triton-diagnostics/check.py` sets its mode before importing its kernel. The source is original Apache-2.0 diagnostic tooling, not another Runnable Example.
+
+```sh
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+"$PYTHON" -m pip install --require-hashes -r scripts/triton-diagnostics/requirements.lock
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode interpreter --case clean
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode interpreter --case tail
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode interpreter --case print
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode compile --case assert
+```
+
+The logical extent is **17**, block width **32**, dtype **FP32**. Both tensors allocate **18** elements; element 17 of the output starts at **−999** as a guard. The clean mask is `offsets < N`; the broken mask is `offsets <= N`. Expected acceptance: clean/print return zero and all 17 outputs equal input plus one, with the guard unchanged; tail returns nonzero with `write guard changed`. These are expected outcomes, not retained observations. The wrong access remains inside the allocation, so a clean memcheck is compatible with this logical bug. Compilation targets `sm_80` without a driver and grants no GPU runtime evidence.
+
+## Move the question to the GPU
+
+GPU cases require one visible NVIDIA GPU, **CC ≥ 8.0**, **≥ 8 GB**, driver **≥ 580.65.06**, the full lock and sufficient free memory for the framework. This tiny fixture allocates only two 18-element FP32 tensors; framework/tool overhead is separate. Retain the actual driver, bundled `ptxas`, Toolkit and **Compute Sanitizer 2026.3** versions. GPU counter permission is not required for these correctness checks; container/driver instrumentation access still must work. Record tool startup failures as blockers.
+
+```sh
+compute-sanitizer --version
+compute-sanitizer --tool memcheck --error-exitcode 86 "$PYTHON" -I scripts/triton-diagnostics/check.py --mode gpu --case clean
+compute-sanitizer --tool memcheck --error-exitcode 86 "$PYTHON" -I scripts/triton-diagnostics/check.py --mode gpu --case tail
+"$PYTHON" -I scripts/triton-diagnostics/check.py --mode gpu --case assert
+```
+
+Each command starts a new process. The tail case should fail its **application oracle**, not necessarily memcheck. The assertion case enables `TRITON_DEBUG=1` internally and should fail at launch or synchronization; discard that CUDA context. Do not accept an import, version or allocation failure as the expected defect. For an actual invalid device access, use memcheck first, then rerun the corrected path before narrower checks. After memcheck, `--tool racecheck` targets shared-memory hazards, `--tool initcheck` defaults to uninitialized global reads, and `--tool synccheck` targets supported synchronization misuse. Newer initcheck address-space extensions require explicit version/options. Racecheck does not certify arbitrary cross-program global races, and none of the tools proves numerical correctness. The bounded fixture is not designed to produce all four defect classes; use [Q04](/en/correctness/racecheck-initcheck-synccheck/) for their distinct contracts.
+
+## Retain evidence without publishing private logs
+
+Privately retain command, exit status, complete stdout/stderr, source commit and hashes, workload and knobs, tool versions, observer/date and Environment Manifest: GPU/CC/count/memory, driver, Toolkit/components, compiler, OS, Python/framework/Triton and lock identity. A missing summary is not zero errors; process failure and tool error count are separate. A count cannot identify a defect or prove that the target kernel executed.
+
+For a public derivative, `scripts/triton-diagnostics/summarize.py --tool memcheck --exit-code 86` reads the private log from stdin and emits only validated tool/exit enums and one recognized error-summary count. It drops **all** free text, including paths, hostnames, usernames, addresses, command arguments and possible credentials. Multiple or unrecognized summaries yield a null count requiring review. Keep the private original and its hash, derivative hash, transformation and reviewer in the custody record; inspect any other report before sharing. Synthetic parser fixtures are clearly labeled and are never sanitizer observations. Both units keep empty evidence arrays; GPU diagnostic observations remain **Pending Hardware Verification** until a qualifying Reference Environment record exists. Interpreter success grants neither Compile-Checked nor Runtime-Verified status.
+
+## Exercises and next steps
+
+Complete the [debugging Exercises](/en/triton/debugging/exercises/), then consult the [separate solutions](/en/triton/debugging/solutions/). [PB-R5-019](/en/practice/#pb-r5-019) asks why an interpreter pass and a clean racecheck still leave a global ownership bug unresolved.
+
+## Retrieval check
+
+1. Which execution does `TRITON_INTERPRET=1` remove, and when must it be set?
+2. Why is silent `device_assert` output insufficient, particularly under interpretation?
+3. Why can the guard change while memcheck reports zero errors?
+4. Which defects require the compiled GPU path, and which tool covers each?
+5. Why must an assertion failure end the process before another case?
+6. What information is lost in a counts-only public derivative?
+
+## Primary sources and rights
+
+Facts checked **2026-09-15**. [SRC-CUDA-090](/en/sources-and-versions/#src-cuda-090) records exact debugging guide, core/semantic/interpreter/JIT implementation and owner debug/print tests, plus NVIDIA tool scopes. Original prose and Exercises: CC BY 4.0. Original diagnostic tooling/tests: Apache-2.0. Upstream MIT code is referenced, not copied; its exact license remains retained under EX23. No upstream output is local evidence.

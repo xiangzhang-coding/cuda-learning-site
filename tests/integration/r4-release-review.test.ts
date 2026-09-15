@@ -87,16 +87,16 @@ describe('R4 release review', () => {
     for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md']) {
       const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
       const { frontmatter } = parseFrontmatter(raw);
-      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-14');
+      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-15');
       expect(frontmatter.head.find((entry: { attrs: { name: string } }) => entry.attrs.name === 'cuda:fact-check-date')?.attrs.content)
-        .toBe('2026-09-14');
+        .toBe('2026-09-15');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /336 (?:Publication Pairs|个双语发布对)/, /672 (?:source routes|routes|条源路由|条路由)/,
-        /92 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
-        /91 (?:Exercise sets|组练习)/, /91 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
-        /100 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
-        /105 (?:source records|条来源(?:记录)?)/, /448 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /38 (?:subjects|个主体)/,
+        /342 (?:Publication Pairs|个双语发布对)/, /684 (?:source routes|routes|条源路由|条路由)/,
+        /94 (?:Learning Units|个学习单元)/, /23 (?:Runnable Examples|个可运行示例)/,
+        /93 (?:Exercise sets|组练习)/, /93 (?:separate reviewed-solution sets|separate solution sets|组独立参考解答|组独立解答)/,
+        /102 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
+        /107 (?:source records|条来源(?:记录)?)/, /452 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /38 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R4[^\n]*2026-09-10|2026-09-10[^\n]*R4/);
       expect(prose).toMatch(/R5[^\n]*(?:pending|待完成)/);
@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '100'], ['glossary', '207'], ['sources-and-versions', '105']]) {
+        for (const [slug, count] of [['practice', '102'], ['glossary', '207'], ['sources-and-versions', '107']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -163,7 +163,7 @@ describe('R4 release review', () => {
     expect(current).toMatchObject({
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-14',
+      reviewDate: '2026-09-15',
       releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
@@ -474,7 +474,7 @@ describe('R4 release review', () => {
         expect(document).not.toMatch(/R4 aggregate review remains pending|R4 聚合复核仍待完成/i);
       }
       const practice = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8');
-      expect(practice).toMatch(/94 (?:complete original entries|个完整原创条目)/i);
+      expect(practice).toMatch(/102 (?:complete original entries|个完整原创条目)/i);
       expect(practice).not.toMatch(/68 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
       for (const id of ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016']) {
@@ -616,13 +616,13 @@ describe('R4 release review', () => {
       expectExactMembers(subjectsWith('evidence-runtime', 'Pending Hardware Verification'), current.evidence.pendingHardwareVerification);
       expectExactMembers(subjectsWith('evidence-runtime', 'Runtime-Not-Applicable'), current.evidence.runtimeNotApplicable);
       expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
-      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018']);
-      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T0[6-9]|^PB-R[6-9]-|^(?:EX24|LAB17)$/.test(id))).toBe(false);
+      expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018', 'PB-R5-019', 'PB-R5-020']);
+      expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T0[8-9]|^PB-R[6-9]-|^(?:EX24|LAB17)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(
-      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition', 'fused-softmax', 'blocked-matrix-multiplication', 'autotuning']
+      ['', 'en/'].flatMap((prefix) => ['programs-and-block-values', 'masked-vector-addition', 'fused-softmax', 'blocked-matrix-multiplication', 'autotuning', 'debugging', 'persistent-kernels']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}triton/${slug}/${suffix}`))).sort());
     expect(routes.filter((route) => /\/frameworks(?:\/|$)/.test(route)).sort()).toEqual(
       ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling', 'first-custom-operator', 'operator-registration', 'operator-packaging', 'profile-led-optimization', 'sdpa-dispatch-verification']

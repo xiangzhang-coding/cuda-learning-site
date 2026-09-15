@@ -1,0 +1,114 @@
+---
+title: 'T07：让程序持续工作，但不假定驻留位置'
+description: 证明持久化分块归属，在明确工作负载和架构门槛下评估占用率。
+pairId: t07
+counterpart: /en/triton/persistent-kernels/
+factCheckDate: '2026-09-15'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, ownership, occupancy, distribution, gates, comparison, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T07
+prerequisites: [T04, T05, Q09]
+relatedUnits: [LAB16]
+hardwareGate: none
+estimatedMinutes: 60
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton persistent matmul tutorial', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/09-persistent-matmul.py', version: '3.7.1', platform: 'CUDA architecture-gated source', accessDate: '2026-09-15' }
+  - { title: 'Nsight Compute Profiling Guide', url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html', version: '2026.3', platform: 'NVIDIA Linux', accessDate: '2026-09-15' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t07 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/persistent-kernels/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-15' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,ownership,occupancy,distribution,gates,comparison,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T07 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T04,T05,Q09' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: LAB16 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1,2026.3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/persistent-kernels/" lang="en">Read the English counterpart</a>
+
+## 学习目标
+
+把每程序一块的 GEMM 改为有界循环调度，证明覆盖性，并选择公平的非持久化对照。能够解释为什么程序更少不代表占用率（occupancy）更高，也不代表主机启动次数减少。建议 60 分钟，另加实现练习时间。阅读无硬件门槛；设备观察均要求外部受支持环境（Supported Environment）。
+
+## 精确先修条件
+
+**[T04, T05, Q09]**：[分块 GEMM](/triton/blocked-matrix-multiplication/)、[分阶段自动调优](/triton/autotuning/) 和[占用率、停顿与吞吐](/correctness/occupancy-stalls-throughput/)。[LAB16](/labs/autotune-triton-gemm/) 提供既有原创非持久化内核、输入/预言机（oracle）合同与报告方法。
+
+## 从分块网格到长驻工作程序
+
+普通分块执行让 GPU 调度器分派大量独立线程块；持久化调度（persistent scheduling）则让每个已启动程序循环处理多个工作项。软件能利用复用或控制工作分配时，这种方式可能有用，但会增加循环状态和负载均衡责任。持久化程序是在一次启动内活得更久，不是永久运行的服务。普通 GEMM 和这里的持久化 GEMM 都只进行**一次主机内核启动**。程序数下降不自动等于启动融合。
+
+## 测量之前先证明归属
+
+令 `Tm=ceil(M/BM)`、`Tn=ceil(N/BN)`、`T=Tm*Tn`。正维度下选择 `1 ≤ P ≤ T`。启动 P 个程序，程序 p 访问 `p, p+P, p+2P, …`，直到分块 ID 不再小于 T。每个 ID 解码为行块 `t // Tn`、列块 `t % Tn`。非持久化后备路径为 T 个分块各分配一个程序。
+
+任意分块 t 除以 P，唯一得到 `t=qP+r` 且 `0 ≤ r < P`，因此程序 r 恰好拥有该块一次。循环步长必须等于**实际启动程序数**，可以用 `tl.num_programs(0)` 获得，不能随意换成 SM 数。一个合法初始策略是 `P=min(T,S)`，其中 S 是实际设备的 SM 数；它只是候选策略，不保证驻留（residency）。空维度应在主机返回，不能进入零步长循环；本练习仅接受正维度。
+
+FP32 累加器必须在**每次输出块迭代内部**清零。重新计算行列指针，保留全部 M/N/K 掩码（mask）及 K 尾部零填充，完成整个 K 归约后存储一次 FP16。把累加器放在块循环外会混合不同输出；把 K 循环移到外层会改变复用与状态需求，属于另一项实验。各输出块只有一个写入者，因此不需要跨程序通信或全局屏障（global barrier）。
+
+## 驻留是资源约束
+
+本实验采用标准 NVIDIA 后端与 `num_ctas=1`，一个程序对应一个协作线程数组（CTA），`num_warps` 控制其线程束（warp）数。设备调度器把 CTA 放到 SM 上。程序 ID **不是** SM 编号，`P=S` 不保证每个 SM 上恰有一个 CTA，也不保证同时驻留。不能以此构造自旋等待的全局屏障：等待中的 CTA 可能阻止未调度的生产者运行。
+
+每 SM 驻留 CTA 数同时受寄存器分配、共享内存、线程/线程束、屏障及架构线程块上限约束。粗略上界取各容量约束的最小值；实际分配粒度也重要，所以寄存器数量相除不是精确占用率计算。理论线程束占用率是驻留线程束数除以架构最大驻留数；已达占用率是在执行中测得的，可能因调度、尾部与不均衡而不同。两者都不是有效工作通道比例，也不是加速比预测。
+
+增大 BM/BN 会扩大累加器状态；增大 BK 或流水线阶段数可能增加共享内存和活跃值。更多线程束可以分摊工作，也会占用线程资源。必须在实际目标上检查编译生成的资源用量，不能只凭源码张量大小推断。长驻 CTA 可能改善复用，同时减少可发射线程束或其他内核的响应性。用 [Q09](/correctness/occupancy-stalls-throughput/) 把资源、活跃/可发射/正在发射线程束与停顿联系到吞吐，不要只追求占用率百分比。
+
+## 工作分配与尾部效应
+
+在**合成算例** `T=10, P=3` 中，归属分别是 `[0,3,6,9]`、`[1,4,7]`、`[2,5,8]`。块数最多差一，但时长未必相近。边界掩码、缓存行为或可变工作会造成慢尾。普通调度能动态分派剩余 CTA，而循环分配不能从忙碌程序中窃取任务。动态原子队列属于另一设计，要承担争用、终止和内存顺序成本，本单元不要求实现。
+
+若本来会出现 `T<P`，就把 P 截断到 T。只有一块时，两种调度均退化为一个程序执行同样的块工作：适合验证正确性，却不能提供多块调度获益的有意义证据。T 只比 P 稍大时，循环开销与不均匀尾部可能抵消复用收益。`scripts/triton-diagnostics/contract.py` 的主机模型仅验证循环归属，不验证物理执行。
+
+## 明确架构与工作负载门槛
+
+使用原生 Linux x86_64、普通 CPython **3.14.7**、Triton **3.7.1**、torch **2.13.0**、EX23 完整哈希锁、一个可见 NVIDIA GPU 和驱动 **≥ 580.65.06**。实验前要求**总内存 ≥ 8 GB、空闲 ≥ 2 GB**。记录实际 CC、SM 数、内存、编译器/`ptxas`、Toolkit、驱动与锁身份。下列每个案例的输入/输出分配不足 2 MiB，框架、预言机与插桩开销另计。
+
+| 场景 | 门槛、类型与工作负载 | 比较或停止条件 |
+| --- | --- | --- |
+| 可移植指针式练习 | CC ≥ 8.0；连续、有限 FP16 输入/输出，FP32 累加；绝对值 ≤ 4；`(M,N,K)` 为 `(1,1,1)`、`(17,19,33)`、`(65,97,63)`、`(256,192,257)`、`(512,512,512)` | BM=BN=BK=32，四线程束、两阶段、一个 CTA；P=min(T,S) 和 P=min(T,2S) 对照相同分块设置的 LAB16 非持久化内核 |
+| CC 9.0 上的同一练习 | 相同 ≥8 GB/≥2 GB 门槛、FP16 类型与精确形状列表；不使用 TMA/描述符/FP8 | 针对实际目标重新编译，与同一非持久化后备路径比较，不沿用 CC 8.x 结果 |
+| CC 10.x 或更新受后端支持目标上的同一练习 | 相同内存/类型/形状；启动前确认选定后端与随包汇编器接受精确目标 | 不自动启用线程束专门化；目标/编译/资源失败就停止该候选，保留兼容的非持久化路径，不宣称性能比较 |
+
+计数器采集要求 **Nsight Compute 2026.3**、精确 GPU 上兼容的指标及管理员批准的性能计数器访问。记录权限状态；受阻时记录 `ERR_NVGPUCTRPERM`。在该机器查询 `ncu --list-sections` 与 `ncu --query-metrics`；采集 Launch Statistics、Occupancy 及假设所需的最少调度/停顿数据前，保留精确名称、单位、范围、内核/启动过滤与重放策略。没有计数器的计时能比较耗时，却不能确立占用率机制。权限不足绝不能变成虚构指标。
+
+官方 3.7.1 持久化教程还探索了 TMA/描述符和 FP8，具有 CC ≥9.0 门槛、布局要求和共享内存约束。它明确提醒其配置可能在共享内存较少的设备上失败；≥8 GB 显存不能单独授权运行这些配置。源码还记录了 Blackwell 流水线的规避方案及不同路径的线程束专门化限制。这些配置**仅供来源参考**，不在本练习的类型/形状合同内：没有单独复核的特性、精度、布局、资源和环境合同，比较就没有意义。这里仍以指针式非持久化内核后备；持久化调度本身不要求 TMA 或 FP8。
+
+## 比较假设，而不是标签
+
+先在 LAB16 学习者副本上实现两种调度。每个形状和 P 都与存储后 FP16 输入的独立 FP64 CPU 乘积比较，沿用逐元素 `atol=0.02, rtol=0.01`、有限性检查、输入不变和尾部写入守卫。即使新内核更慢也保留所有案例。两个同样有错的 GPU 内核相等不能作为预言机。
+
+像 T05 一样分开环境/设置、逐目标编译、正确性、可能的调优搜索、设备预热与稳态测量。从上述固定分块出发，不要分别调优两种实现后称之为纯调度效应。每个候选与后备先**启动 20 次**并同步，再保留**三轮交替顺序**、全部事件原始样本及每形状/P 的中位数和最小/最大值。沿用 LAB16 `do_bench` 的 **25 ms warmup、100 ms rep**、`return_mode='all'`、相同预分配驻留输入/输出和缓存策略。计时关闭调试打印、断言和分析器；插桩计数器另采，记录时钟、功耗、竞争负载与同步策略。
+
+环境清单（Environment Manifest）还需要源码哈希/提交、候选列表、网格、类型/步长/容差、GPU 数量/CC/SM/内存、OS/编译器/工具版本、观察者/日期、原始报告与脱敏派生留存链。单次调用成本有意义时单独记录。必要时结论应为“更慢”或“差异不明确”；计时差异本身不能定位占用率原因。没有合格基准环境（Reference Environment）记录时，所有拟议的运行、占用率和性能观察均保持**待硬件验证（Pending Hardware Verification）**。本学习单元（Learning Unit）四个证据数组为空。
+
+## 练习与证据复核
+
+先实现[持久化调度练习（Exercise）](/triton/persistent-kernels/exercises/)，再看[独立解答](/triton/persistent-kernels/solutions/)。[PB-R5-020](/practice/#pb-r5-020) 挑战“每程序一个 SM”的无依据断言。[LAB16](/labs/autotune-triton-gemm/) 提供原创基线和测量工具。
+
+## 检索自测
+
+1. 为什么分块数、程序数、驻留 CTA 数和主机启动数不同？
+2. 带余除法如何证明覆盖完整且不重叠？
+3. 累加器必须在哪里清零，为什么？
+4. 为什么 P 等于 SM 数也不能使全局自旋屏障安全？
+5. 为什么更高理论占用率可能得到更差耗时？
+6. 将差异归因于占用率需要什么权限和配对记录？
+
+## 一手来源与权利
+
+事实核查 **2026-09-15**。[SRC-CUDA-091](/sources-and-versions/#src-cuda-091) 记录精确 3.7.1 官方持久化教程、启动/程序数接口和 NVIDIA 占用率/权限指南。解释、合成算术与练习为原创 CC BY 4.0。官方教程按其 MIT 许可仅作来源参考，不把其代码或基准结果重新发布为本站作品。

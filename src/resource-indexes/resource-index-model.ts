@@ -73,6 +73,32 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  T06: {
+    href: { 'zh-CN': '/triton/debugging/', en: '/en/triton/debugging/' },
+    title: { 'zh-CN': 'T06：为缺陷选择正确的调试执行方式', en: 'T06: Choose the Right Debugging Execution' },
+    prerequisites: ['T02', 'Q03', 'Q04'],
+  },
+  T07: {
+    href: { 'zh-CN': '/triton/persistent-kernels/', en: '/en/triton/persistent-kernels/' },
+    title: { 'zh-CN': 'T07：让程序持续工作，但不假定驻留位置', en: 'T07: Keep Programs Busy Without Assuming Residency' },
+    prerequisites: ['T04', 'T05', 'Q09'],
+  },
+  'T06-EXERCISES': {
+    href: { 'zh-CN': '/triton/debugging/exercises/', en: '/en/triton/debugging/exercises/' },
+    title: { 'zh-CN': 'T06 练习', en: 'T06 Exercises' }, prerequisites: ['T06'],
+  },
+  'T06-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/debugging/solutions/', en: '/en/triton/debugging/solutions/' },
+    title: { 'zh-CN': 'T06 独立参考解答', en: 'T06 Reviewed Solutions' }, prerequisites: ['T06-EXERCISES'],
+  },
+  'T07-EXERCISES': {
+    href: { 'zh-CN': '/triton/persistent-kernels/exercises/', en: '/en/triton/persistent-kernels/exercises/' },
+    title: { 'zh-CN': 'T07 练习', en: 'T07 Exercises' }, prerequisites: ['T07'],
+  },
+  'T07-SOLUTIONS': {
+    href: { 'zh-CN': '/triton/persistent-kernels/solutions/', en: '/en/triton/persistent-kernels/solutions/' },
+    title: { 'zh-CN': 'T07 独立参考解答', en: 'T07 Reviewed Solutions' }, prerequisites: ['T07-EXERCISES'],
+  },
   T04: {
     href: { 'zh-CN': '/triton/blocked-matrix-multiplication/', en: '/en/triton/blocked-matrix-multiplication/' },
     title: { 'zh-CN': 'T04：构造分块矩阵乘法', en: 'T04: Build a Blocked Matrix Product' },

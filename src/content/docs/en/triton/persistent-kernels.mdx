@@ -1,0 +1,114 @@
+---
+title: 'T07: Keep Programs Busy Without Assuming Residency'
+description: Prove persistent tile ownership and evaluate occupancy under explicit workload and architecture gates.
+pairId: t07
+counterpart: /triton/persistent-kernels/
+factCheckDate: '2026-09-15'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, ownership, occupancy, distribution, gates, comparison, practice, retrieval, sources]
+resourceKind: learning-unit
+unitId: T07
+prerequisites: [T04, T05, Q09]
+relatedUnits: [LAB16]
+hardwareGate: none
+estimatedMinutes: 60
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton persistent matmul tutorial', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/09-persistent-matmul.py', version: '3.7.1', platform: 'CUDA architecture-gated source', accessDate: '2026-09-15' }
+  - { title: 'Nsight Compute Profiling Guide', url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html', version: '2026.3', platform: 'NVIDIA Linux', accessDate: '2026-09-15' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t07 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/triton/persistent-kernels/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-15' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,ownership,occupancy,distribution,gates,comparison,practice,retrieval,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T07 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T04,T05,Q09' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: LAB16 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '2' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1,2026.3' } }
+---
+
+<a class="locale-pair" data-locale-counterpart href="/triton/persistent-kernels/" lang="zh-CN">阅读中文对应页</a>
+
+## Learning goals
+
+Turn a one-program-per-tile GEMM into a bounded cyclic work schedule, prove coverage and choose a fair nonpersistent comparison. Explain why fewer programs do not prove higher occupancy or fewer host launches. Allow 60 minutes plus the implementation Exercise. Reading has no hardware gate; all device observations below require an external supported environment.
+
+## Exact prerequisites
+
+**[T04, T05, Q09]**: [blocked GEMM](/en/triton/blocked-matrix-multiplication/), [phase-separated autotuning](/en/triton/autotuning/) and [occupancy, stalls and throughput](/en/correctness/occupancy-stalls-throughput/). [LAB16](/en/labs/autotune-triton-gemm/) supplies the existing original nonpersistent kernel, input/oracle contract and reporting method.
+
+## From a tile grid to longer-lived workers
+
+Ordinary tiled execution lets the GPU scheduler dispatch many independent blocks. Persistent scheduling instead gives each launched program a loop over several work items. This is useful when software can exploit reuse or control work distribution, but adds loop state and a load-balancing obligation. A persistent program lasts longer within a launch; it is not a permanently running service. Both the ordinary GEMM and this persistent GEMM perform **one host kernel launch**. Reducing the number of programs is not automatically launch fusion.
+
+## Prove ownership before measuring
+
+Let `Tm=ceil(M/BM)`, `Tn=ceil(N/BN)` and `T=Tm*Tn`. For positive dimensions choose `1 ≤ P ≤ T`. Launch `P` programs; program `p` visits tile IDs `p, p+P, p+2P, …` while the ID is below `T`. Decode each ID as row tile `t // Tn`, column tile `t % Tn`. The nonpersistent fallback assigns one program to each of the `T` tiles.
+
+For any tile `t`, division by `P` uniquely yields `t=qP+r`, with `0 ≤ r < P`; program `r` owns that tile exactly once. The loop step must equal the **actual launched program count**, obtainable with `tl.num_programs(0)`, not an unrelated SM count. A valid initial policy is `P=min(T,S)`, where `S` is the actual device's SM count, but that is a proposal, not a residency guarantee. Empty dimensions must return on the host without a zero-step loop; this Exercise accepts positive dimensions only.
+
+Reset the FP32 accumulator **inside** each output-tile iteration. Recompute row/column pointers, keep all M/N/K masks and zero-filled K tails, finish the whole K reduction and store FP16 once. Keeping the accumulator outside the tile loop mixes different outputs. Moving the K loop outside changes reuse and state requirements and is a different experiment. No cross-program communication or global barrier is needed because each output tile has a single writer.
+
+## Residency is a resource constraint
+
+For this standard NVIDIA backend experiment with `num_ctas=1`, a program maps to a CTA; `num_warps` controls its warp count. The device scheduler places CTAs on SMs. Program ID does **not** name an SM, and `P=S` does not promise one CTA on every SM or simultaneous residency. Never build a spin-wait global barrier on that assumption: waiting CTAs can prevent unscheduled producers from running.
+
+Resident CTAs per SM are limited jointly by register allocation, shared memory, threads/warps, barriers and architectural block limits. A rough bound takes the minimum of those capacities; real allocation granularity matters, so a ratio of register counts is not an exact occupancy calculation. Theoretical warp occupancy is resident warps divided by the architecture's maximum resident warps. Achieved occupancy is measured over execution and can differ because of scheduling, tails and imbalance. Neither is the fraction of lanes doing useful work, nor a speedup prediction.
+
+Larger BM/BN increase accumulator state; larger BK or more pipeline stages can increase shared memory and live values. More warps can spread work yet consume more thread resources. Compiler-generated resource usage must be inspected on the actual target; do not infer it from source tensor size alone. A long-lived CTA can improve reuse while reducing eligible warps or competing-kernel responsiveness. Use [Q09](/en/correctness/occupancy-stalls-throughput/) to relate resources, active/eligible/issuing warps and stalls to throughput, rather than maximizing an occupancy percentage.
+
+## Work distribution and tail effects
+
+For a **synthetic** `T=10, P=3`, ownership is `[0,3,6,9]`, `[1,4,7]`, `[2,5,8]`. Tile counts differ by at most one; durations need not. Edge masks, cache behavior or variable work can create stragglers. Ordinary scheduling can distribute remaining CTAs dynamically, whereas this cyclic assignment cannot steal work from a busy program. A dynamic atomic queue is a separate design with contention, termination and memory-ordering costs; it is not required here.
+
+When `T<P` would otherwise occur, cap P at T. With one tile, both schedules reduce to one program and the same tile work: this case validates correctness but provides no meaningful evidence for a multi-tile scheduling benefit. When T is only slightly above P, loop overhead and uneven tails may outweigh reuse. Host model tests in `scripts/triton-diagnostics/contract.py` verify cyclic ownership only, never physical execution.
+
+## Explicit architecture and workload gates
+
+Use native Linux x86_64, ordinary CPython **3.14.7**, Triton **3.7.1**, torch **2.13.0**, the EX23 full hash lock, one visible NVIDIA GPU and driver **≥ 580.65.06**. Require **≥ 8 GB total and ≥ 2 GB free** before the experiment. Record actual CC, SM count, memory, compiler/`ptxas`, Toolkit, driver and lock identity. The input/output allocations below are under 2 MiB per case, excluding framework, oracle and instrumentation overhead.
+
+| Scenario | Gates, dtype and workload | Comparison / stop rule |
+| --- | --- | --- |
+| Portable pointer-based Exercise | CC ≥ 8.0; contiguous finite FP16 inputs/output, FP32 accumulation; magnitude ≤ 4; `(M,N,K)` = `(1,1,1)`, `(17,19,33)`, `(65,97,63)`, `(256,192,257)`, `(512,512,512)` | BM=BN=BK=32, four warps, two stages, one CTA; compare P=min(T,S) and P=min(T,2S) against the LAB16 nonpersistent kernel with identical tile settings |
+| Same Exercise on CC 9.0 | Same ≥8 GB/≥2 GB gate, FP16 dtype and exact shape list; no TMA/descriptors/FP8 | Recompile for the actual target; compare the same nonpersistent fallback, independently of any CC 8.x result |
+| Same Exercise on CC 10.x or newer supported target | Same memory/dtype/shapes; verify the pinned backend and bundled assembler accept the exact target before launch | No automatic warp specialization; on target/compiler/resource failure, stop that candidate and retain the compatible nonpersistent path without asserting a performance comparison |
+
+Counter collection requires **Nsight Compute 2026.3**, compatible exact-GPU metrics and administrator-approved access to performance counters. Record permission status and `ERR_NVGPUCTRPERM` if blocked. Query `ncu --list-sections` and `ncu --query-metrics` on that machine; retain exact names, units, scope, kernel/launch filter and replay policy before collecting Launch Statistics, Occupancy and the minimal scheduler/stall data needed for the hypothesis. Timing without counters can compare elapsed time but cannot establish an occupancy mechanism. Missing permissions never become fabricated metrics.
+
+The owner's 3.7.1 persistent tutorial additionally explores TMA/descriptors and FP8, with CC ≥9.0 gates, layout requirements and shared-memory constraints. It explicitly warns that its configurations can fail on smaller shared-memory devices; ≥8 GB VRAM alone cannot authorize them. Its source also documents a Blackwell pipelining workaround and path-specific warp-specialization limits. Those configurations are **reference-only**, outside this Exercise's dtype/shape contract: no comparison is meaningful without a separately reviewed feature, precision, layout, resource and environment contract. Here the pointer-based nonpersistent kernel remains the fallback; persistent scheduling itself does not require TMA or FP8.
+
+## Compare a hypothesis, not a label
+
+First implement both schedules on a learner copy of LAB16. For every shape and P, compare against an independent FP64 CPU product of the stored FP16 inputs, using the existing elementwise `atol=0.02, rtol=0.01`, finite checks, input immutability and a tail write guard. Include all cases even when the new kernel is slower. Matching two broken GPU kernels is not an oracle.
+
+Keep environment/setup, per-target compilation, correctness, any tuning search, device warm-up and steady-state measurements separate as in T05. Start with the fixed tile above rather than independently tuning both implementations and calling the result a scheduling-only effect. Warm each candidate and the fallback with **20 launches**, synchronize, then retain **three alternating-order rounds**, all raw event samples and median/min/max per shape and P. Use LAB16's `do_bench` budgets **25 ms warmup, 100 ms rep**, `return_mode='all'`, identical preallocated resident inputs/outputs and cache policy. Disable debug printing, assertions and profiling in timing runs. Instrumented counter collection is separate; record clocks, power, competing load and synchronization policy.
+
+The Environment Manifest also needs exact source hashes/commit, candidate list, grids, dtype/strides/tolerances, GPU count/CC/SMs/memory, OS/compiler/tool versions, observer/date, raw reports and sanitized derivative custody. Record one-shot cost separately if it matters. State “slower” or “inconclusive” when appropriate; a timing difference alone does not identify occupancy as the cause. All proposed runtime, occupancy and performance observations remain **Pending Hardware Verification** without qualifying Reference Environment records. This Learning Unit's four evidence arrays remain empty.
+
+## Exercises and evidence review
+
+Implement the [persistent scheduling Exercises](/en/triton/persistent-kernels/exercises/), then read the [separate solutions](/en/triton/persistent-kernels/solutions/). [PB-R5-020](/en/practice/#pb-r5-020) challenges an unjustified one-SM-per-program claim. Return to [LAB16](/en/labs/autotune-triton-gemm/) for the original baseline and measurement harness.
+
+## Retrieval check
+
+1. Why do tile count, program count, resident CTA count and host launch count differ?
+2. How does division with remainder prove complete, nonoverlapping ownership?
+3. Where must the accumulator reset, and why?
+4. Why does P equal to the SM count not make a global spin barrier safe?
+5. Why can higher theoretical occupancy produce worse measured time?
+6. Which permissions and matched records are needed to attribute a difference to occupancy?
+
+## Primary sources and rights
+
+Facts checked **2026-09-15**. [SRC-CUDA-091](/en/sources-and-versions/#src-cuda-091) records the exact 3.7.1 owner persistent tutorial, launch/program-count interfaces and NVIDIA occupancy/permission guidance. Explanations, synthetic arithmetic and Exercises are original CC BY 4.0. The owner tutorial is reference-only under its MIT license; neither its code nor benchmark results are republished as project work.

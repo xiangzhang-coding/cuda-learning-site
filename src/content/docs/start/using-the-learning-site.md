@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-14'
+factCheckDate: '2026-09-15'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-14'
+      content: '2026-09-15'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -98,7 +98,7 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 截至 **2026-09-12**，稳定课程（Stable Curriculum）的当前发布完整双语覆盖 82 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07。可复用库路线保留 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)及各自示例；Python 桥接从 [P01](/python/cuda-python-bridge/)进入，仍需满足已有 CUDA 生命周期与流的先修条件。P04-P07 将这些概念用于 eager PyTorch。下面列出当前完整发布的严格先修关系。
 
-最近完成的聚合静态复核仍是 2026-09-10 的 R4。冻结的 `/release.json` 保留 75 个学习单元、277 个双语发布对、554 条源路由、74 组练习、74 组独立解答、401 条目录记录。R1-R3 是不变的历史快照。`/publication.json` 当前记录 336 个双语发布对、672 条源路由、91 组练习和 91 组独立参考解答。R5 聚合复核仍待完成，发布不升级运行证据。
+最近完成的聚合静态复核仍是 2026-09-10 的 R4。冻结的 `/release.json` 保留 75 个学习单元、277 个双语发布对、554 条源路由、74 组练习、74 组独立解答、401 条目录记录。R1-R3 是不变的历史快照。`/publication.json` 当前记录 342 个双语发布对、684 条源路由、93 组练习和 93 组独立参考解答。R5 聚合复核仍待完成，发布不升级运行证据。
 
 **R4 聚合静态复核日期：2026-09-10。** [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41)和当时的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)保留为历史记录，不覆盖本次 [issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42)的 Python 桥接增量。当前页面发布不预先证明 CI、Preview、生产部署或远程冒烟检查已通过，也不表示框架或 Triton 路线已完成。技术来源仍保留逐项访问与复核日期。
 
@@ -137,11 +137,11 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 可复用库路线可进入 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)、[L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)、[L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)与[解答](/libraries/libcu-plus-plus-synchronization/solutions/)、[L06 练习](/libraries/cublas-gemm/exercises/)与[解答](/libraries/cublas-gemm/solutions/)，以及 [L07 练习](/libraries/cublaslt-matmul/exercises/)与[解答](/libraries/cublaslt-matmul/solutions/)。本次新增 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)，以及 [L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
 
-当前 92 个学习单元扩展至 P12 和 T05。[T04](/triton/blocked-matrix-multiplication/) 依赖 `[T02,A08,Q10]`；[T05](/triton/autotuning/) 依赖 `[T04,Q05,Q06]`。[实验索引](/labs/)列出 16 个实验，[可视化讲解索引](/visuals/)列出 20 项讲解。有 100 个[练习题库](/practice/)条目、207 个[术语表](/glossary/)词条、105 条[来源记录](/sources-and-versions/)，共 448 条资源目录记录。PB-R5-017/018 增加原创 GEMM 尾部与选择缓存审查题；R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题不变。
+当前 94 个学习单元扩展至 P12 和 T07。[T06](/triton/debugging/) 依赖 `[T02,Q03,Q04]`；[T07](/triton/persistent-kernels/) 依赖 `[T04,T05,Q09]`。[实验索引](/labs/)列出 16 个实验，[可视化讲解索引](/visuals/)列出 20 项讲解。有 102 个[练习题库](/practice/)条目、207 个[术语表](/glossary/)词条、107 条[来源记录](/sources-and-versions/)，共 452 条资源目录记录。PB-R5-019/020 增加原创诊断与持久化归属审查题；R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题不变。
 
 P04-P07 的证据数组为空，[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、随包 CUDA 12.8.1/runtime 12.8.90 与 native 分配器。Eager 工作不需要系统 Toolkit。[P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含练习和独立解答。扩展项目另行要求 Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0。T01-T03、EX23 与 LAB15 使用独立 Triton 3.7.1 环境；更后续 Triton 单元尚未发布。
 
-只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。P01-P12 和 T01-T05 证据数组为空。EX21-EX23 与 LAB13-LAB16 编译/已记录观察为空，仍待硬件验证。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察均为零；来源和主机检查不是 GPU 证据。
+只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。P01-P12 和 T01-T07 证据数组为空。EX21-EX23 与 LAB13-LAB16 编译/已记录观察为空，仍待硬件验证。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察均为零；来源和主机检查不是 GPU 证据。
 
 Q06-Q13、A10-A14 与 L01-L13 的四个证据数组均为空，不授予证据状态（Evidence Status）。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。LAB12 已发布可执行的比较步骤，但没有记录输出、计时、加速比或赢家；L07 的发布也不表示 EX18/LAB12 实现了 Lt 选择。EX17 的五项组件矩阵是非证据性的构建检查，不表示 CI 已运行。当前六份分析器测试材料都是预期计划，不是采集报告；当前发布不声明基准环境（Reference Environment）或 `performanceObservations`。
 
