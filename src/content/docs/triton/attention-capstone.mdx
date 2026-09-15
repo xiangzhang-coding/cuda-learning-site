@@ -1,0 +1,139 @@
+---
+title: 'T08：实现并审查融合注意力'
+description: 完成有明确边界的前向注意力综合练习，结合在线归一化、分块 IO、独立正确性、框架输出与证据驱动的性能分析。
+pairId: t08
+counterpart: /en/triton/attention-capstone/
+factCheckDate: '2026-09-15'
+license: CC-BY-4.0
+provenance: original
+structure: [outcome, prerequisites, history, contract, normalization, tiles, visual, correctness, execution, framework, profiling, debugging, practice, sources]
+resourceKind: learning-unit
+unitId: T08
+prerequisites: [T03, T04, A11, P12]
+relatedUnits: [VIS18, T06, L11]
+hardwareGate: none
+estimatedMinutes: 180
+difficulty: advanced
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'Triton attention source and tests', url: 'https://github.com/triton-lang/triton/blob/v3.7.1/python/tutorials/06-fused-attention.py', version: '3.7.1', platform: 'Reference-only architecture-gated owner tutorial', accessDate: '2026-09-15' }
+  - { title: 'PyTorch SDPA', url: 'https://docs.pytorch.org/docs/2.13/generated/torch.nn.functional.scaled_dot_product_attention.html', version: '2.13', platform: 'Forward output and backend contract', accessDate: '2026-09-15' }
+  - { title: 'Nsight Compute Profiling Guide', url: 'https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html', version: '2026.3', platform: 'NVIDIA Linux', accessDate: '2026-09-15' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: t08 } }
+  - { tag: meta, attrs: { name: 'cuda:counterpart', content: '/en/triton/attention-capstone/' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-15' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:provenance', content: original } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'outcome,prerequisites,history,contract,normalization,tiles,visual,correctness,execution,framework,profiling,debugging,practice,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: learning-unit } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: T08 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'T03,T04,A11,P12' } }
+  - { tag: meta, attrs: { name: 'cuda:related-units', content: 'VIS18,T06,L11' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:source-count', content: '3' } }
+  - { tag: meta, attrs: { name: 'cuda:source-versions', content: '3.7.1,2.13,2026.3' } }
+---
+
+import AttentionIoExplorer from '../../../components/AttentionIoExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/triton/attention-capstone/" lang="en">Read the English counterpart</a>
+
+## 目标与阶段
+
+在学习者副本中实现融合前向注意力（fused forward attention），论证 IO 账本，对照独立参考与框架输出，并提交有边界的性能分析。预计 180 分钟，另加外部运行。阶段为 **契约 → 递推 → 分块 → 正确性 → 框架 → 性能分析 → 证据审查**。网站从不执行 CUDA。综合练习运行状态保持 **待硬件验证（Pending Hardware Verification）**；阅读和主机推导没有硬件门槛。
+
+## 精确先修
+
+T08 本身是不授予证据状态的学习单元，四个证据数组为空。这里的“待硬件验证”描述本任务要求的外部综合练习仍待执行；它不注册新的实验/可运行示例，也不向学习单元授予证据状态。
+
+**[T03, T04, A11, P12]**：[融合 softmax](/triton/fused-softmax/)、[分块矩阵乘法](/triton/blocked-matrix-multiplication/)、[注意力 IO](/algorithms/attention-as-an-io-problem/) 与 [SDPA 派发验证](/frameworks/sdpa-dispatch-verification/)。复用归一化、点积布局、在线递推以及框架派发边界。[T06](/triton/debugging/) 是可选排障资源；[L11](/libraries/attention-backend-dispatch/) 提供后端背景。
+
+## 为什么需要这项综合练习
+
+缩放点积注意力（scaled dot-product attention）把分数形成、归一化与值聚合分开。在线归一化早于现代融合注意力；FlashAttention 的贡献包括围绕 IO 约束组织精确注意力。A11 的原始论文用于解释动机，不说明当前 API 支持。本原创教学内核采用普通指针加载和固定分块。官方 3.7.1 教程还使用描述符、架构特定配置、FP8 路径与反向内核；它们各有约束，不属于本实现契约。
+
+## 先固定契约
+
+每个批次/头独立计算 `O = softmax(Q Kᵀ / sqrt(D) + mask) V`。Q/K/V/O 同形状、连续，采用 **FP16** `(B,H,N,D)`；`B,H ∈ [1,2]`，`N ∈ [1,128]`，`D ∈ {16,32,64}`。输入有限且绝对值 ≤4；所有张量位于同一 CUDA 设备。分数、最大值、归一化因子与输出累加器使用 FP32。未归一化概率分块在值点积前舍入到 FP16；输出最后一次存为 FP16。逐元素接受 `abs(actual-reference) ≤ 0.02 + 0.01*abs(reference)`，同时要求输出有限，不要求位级相同。
+
+仅支持方形自注意力、`scale=D**-0.5`、零 dropout，以及无掩码或包含对角线的下三角因果掩码（causal mask）。每个真实行至少有一个有效键（至少键零）。拒绝空维度、不连续/不同形状、非有限输入、其他类型和 `requires_grad=True`。任意掩码、全屏蔽行、矩形注意力、GQA、偏置、dropout、反向传播、FP8/BF16、TMA 和 warp specialization 需要新契约。这是 eager 推理适配器，不承诺 `torch.compile`、自动微分或生产库能力。验收选择 **框架输出验证**，不是梯度验证。
+
+## 合并稳定状态，而不是已归一化片段
+
+每个查询行初始化 `m=-∞, l=0, a=0`。对下一个已缩放并屏蔽的分数块 `s`，计算 `m'=max(m,max(s))`、`α=exp(m-m')`、`p=exp(s-m')`，然后 `l'=α*l+sum(p)` 与 `a'=α*a+pV`。三个状态一起替换；最后一个键块后存储 `a/l`。旧归一化因子与旧加权累加器都必须重缩放。把各块独立归一化后平均，会丢失它们的相对分区质量。
+
+缩放发生在归一化 **之前**。本内核用自然指数 `tl.exp`，不要把 `exp2` 实现的 `log2(e)` 因子复制进来。无效键分数在求最大值和指数前设为负无穷；仅把无效 K/V 加载填零并不能去掉它们的概率质量。填充查询行不写回。在这里，连填充行也有键零，因此可以安全执行相同循环；扩展到任意全屏蔽行时需要显式处理零质量。
+
+## 从递推到 Triton 分块
+
+`grid=(ceil(N/16),B*H)`，`BM=16`、`BN=32`、四个 warp、两个阶段、一个 CTA。程序轴零拥有 16 个查询行；轴一拥有一个批次/头。Q 为 `[BM,D]`、转置 K 为 `[D,BN]`、分数/P 为 `[BM,BN]`、V 为 `[BN,D]`、累加器为 `[BM,D]`。扫描 `ceil(N/BN)` 个键块，因果注意力也完整扫描。因果掩码去掉概率，但本简单实现不跳过上三角加载或点积工作。输出掩码保证每个有效元素只有一个写者。
+
+跨键循环保留 Q 与运行状态，每轮加载 K/V。完整 N×N 分数/概率张量不进入全局存储。增大 BM 能减少 K/V 重读，却可能增大活跃状态与寄存器/共享内存压力。源码分块不等于物理寄存器分配或驻留保证。
+
+## 用正确存储宽度复用 VIS18
+
+<AttentionIoExplorer locale="zh-CN" />
+
+VIS18 连接 **分数 → `tl.dot(Q,K)`**、**归一化 → 行最大值/求和与重缩放**、**值 → `tl.dot(P,V)` 与最终写回**。它的三个可选阶段是概念分解；我们的键循环交错执行这些阶段。原生选择器支持键盘，重置恢复焦点；没有自动播放。减少动态效果、窄屏和无 JavaScript 时，服务端渲染的图表仍可使用。
+
+可视化的小型 **FP32、无掩码** 输入是概念示例，不是综合练习运行案例。VIS18 分别统计 `4Nd+6N²` 和 `2Nd+2ceil(N/Br)Nd` 个元素，每个四字节。本练习采用 FP16 Q/K/V/O，假设物化路径的 S/P 为 FP32，则每个头的字节账本变为 **`8Nd+24N²`** 与 **`4Nd+4ceil(N/16)Nd`**，再乘 B×H。合成输入 `N=32,D=16` 分别为 **28672 B** 与 **6144 B**。账本包括稳定归一化对 S 的三次读取；其他库调度可能不同。它不计掩码存储、缓存事务、溢出、分配和主机传输，不是实测 DRAM 流量。因果内核仍扫描全部分块，不能把账本或执行 FLOPs 减半。
+
+## 正确性先于性能分析
+
+验收采集器在数值对照前精确检查输出形状、类型与设备。阻止启动的拒绝矩阵还要求无效布局、不同形状、梯度、类型/设备不匹配、非有限或越界数值、无效维度以及非布尔因果标志在到达内核前抛出错误。这些设备验收检查仍待执行；主机测试检查输出元数据拒绝，并在合法 JSON 报告中保留无效计时样本批次。
+
+规范参考解答位于 `scripts/attention-capstone/`；打开内核前先做[练习](/triton/attention-capstone/exercises/)。`contract.py` 对已经存为 FP16 的值用 Python 双精度独立实现稠密注意力，并提供另一种结构的在线模型。主机测试覆盖尾部长度、块划分、稳定极端 logits、因果首行行为、无效输出以及混合位宽 IO 账本。
+
+`check.py --mode cpu` 用 `atol=rtol=1e-10` 对照独立参考与 CPU FP64 SDPA MATH。运行模式 `verify` 按 FP16 容差检查 eager 适配器和带保护区的输出，对照独立参考；同时验证 Q/K/V 不变、尾部保护区不变，以及强制 SDPA MATH 和 FLASH_ATTENTION 输出。`(B,H,N,D)` 案例为 `(1,1,1,16)`、`(1,2,17,32)`、`(2,1,33,64)`、`(1,2,65,16)`、`(1,1,128,64)`，各有因果/非因果及混合/均匀/极端输入。末键高 logit 案例检查运行最大值改变；全零 Q 检查归一化与因果前缀均值。CPU 对照成功不能证明设备算术或内存安全。
+
+## 外部执行与软件门槛
+
+使用原生 Linux x86_64、普通 CPython **3.14.7**、Triton **3.7.1**、torch **2.13.0**、现有 EX23 完整哈希锁，一个可见 NVIDIA GPU，要求 **CC≥8.0、总内存 ≥8 GB、空闲 ≥2 GB**，驱动 **≥580.65.06**。在 CC9/10/更新架构上，验证固定编译器与内置汇编器接受实际目标；失败就停止。仅有显存容量不足以授权运行。审核的张量案例很小；内存门槛给框架、编译和分析工具保留空间。
+
+从仓库根目录先按 [EX23 设置](/examples/triton-vector-add/) 配置，再为各阶段选择新的输出目录：
+
+```bash
+PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+"$PYTHON" -m unittest discover -s scripts/attention-capstone -p 'test_*.py'
+"$PYTHON" -I scripts/attention-capstone/check.py --mode cpu --output /tmp/t08-cpu
+"$PYTHON" -I scripts/attention-capstone/check.py --mode compile --output /tmp/t08-compile
+"$PYTHON" -I scripts/attention-capstone/check.py --mode verify --output /tmp/t08-verify
+"$PYTHON" -I scripts/attention-capstone/check.py --mode benchmark --output /tmp/t08-benchmark
+```
+
+`compile` 使用 `ASTSource` 与显式 `GPUTarget('cuda',80,32)`，不请求活动驱动。它为 30 个 N/D/掩码特化保留 TTIR、TTGIR、LLVM IR、PTX 和 cubin 哈希。生成 SM80 产物与运行验证独立，也不证明其他目标受支持。各阶段写入本地通过/失败报告，不自动授予证据状态（Evidence Status）。证据采集器拒绝调试/编译覆盖变量；诊断使用独立学习者副本与报告。
+
+## 框架与后端对照
+
+把驻留张量传给 eager 适配器。验证会同步以拒绝无效数值与梯度请求，因此要排除在内核计时外。原生输出调用 `F.scaled_dot_product_attention(q,k,v,dropout_p=0.0,is_causal=causal,scale=D**-0.5)`，置于 `sdpa_kernel(backends=[SDPBackend.MATH])` 或 `[SDPBackend.FLASH_ATTENTION]` 内。不要把显式掩码与 `is_causal=True` 同用。SDPA dropout 由参数控制，不由模块 evaluation 模式控制。SDPA 布尔掩码中 true 表示允许，与某些 padding mask 的约定不同。
+
+只启用一个后端，避免静默选择其他已启用后端。采集器保留警告，把 FLASH 错误记为 **unavailable-or-failed**，绝不当作成功对照。MATH 失败以及任何数值不匹配都会使验收失败。另用分析器追踪识别实际派发内核；后端枚举不是追踪记录。自动派发可作为附加实验，但必须保持相同契约并记录选择。P12/L11 解释自定义注册与派发边界；本综合练习不注册全局算子覆盖。
+
+## 提出有边界的性能问题
+
+先问：对一个固定形状/掩码，避免完整 S/P 存储是否降低观察到的内存流量，是否伴随更低耗时？所有正确性案例完成后才能计时。区分设置、目标 JIT 编译、正确性、预热、稳态计时与分析器采集。不进行自动调优搜索。每个已检查提供方先预热 20 次并同步，再执行三轮交替顺序的 `do_bench(warmup=25,rep=100,return_mode='all')`，保留全部原始毫秒数及中位/最小/最大值。
+
+实现的对照对自定义与 SDPA 前向调用都计入输出分配，输入已驻留，排除验证/传输。这不是纯内核延迟，也不是端到端模型延迟。后端上下文与主机入队开销可能影响事件区间。记录此边界；不能把预分配自定义内核与包含分配的 SDPA 比较而不标注范围不同。采集器在计时后复查输出。自定义内核更慢同样是有效结果。
+
+另用 **Nsight Compute 2026.3**：在实际机器运行 `ncu --list-sections` 与 `ncu --query-metrics`，记录受支持的精确名称/单位，仅采集问题所需的内存工作负载、启动统计与占用率部分。先发现内核名，再过滤目标启动，排除参考/验证内核。记录重放/缓存策略、启动次数、共享内存/寄存器、计数器权限与工具开销。`ERR_NVGPUCTRPERM` 阻止计数器结论；仅有计时不能证明 IO 机制。[Q09](/correctness/occupancy-stalls-throughput/) 解释占用率/停顿，预测字节节省不是加速比。
+
+必需的环境清单（Environment Manifest）字段包括观察者/日期、基准环境（Reference Environment）身份或缺失、GPU/UUID/CC/SM 数/数量/内存、驱动、Toolkit、已加载组件、编译器/汇编器、OS/kernel/glibc、精确锁与源码哈希/提交/工作区差异、形状/类型/步长/缩放/掩码/容差、分块/网格配置、命令/退出码、时钟/功耗/竞争负载、同步/缓存/测量范围、分析器权限/版本/过滤器/重放/指标、原始产物与保管链，以及逐案例保留/拒绝/不确定决定。生成报告列出待补手工字段。缺字段、后端不可用或没有硬件时必须收窄结论；本页不提供任何配置、追踪、时间或加速比作为观察。只有维护者审核符合要求的基准环境证据后才能授予运行已验证（Runtime-Verified）。
+
+## 从第一个失败边界排障
+
+均匀输出错误：检查总质量与无效键掩码。新最大值后才错：检查 l 与 a 的重缩放。因果首行错误：检查 `key≤query`、缩放和先屏蔽再求最大值的顺序。尾部损坏：独立检查加载/存储掩码及批次/头偏移。NaN：检查有限输入、全屏蔽扩展和 `−∞−(−∞)`。小误差：先检查概率 FP16 转换与归约顺序，再考虑容差。编译/资源失败：检查精确目标和 IR；缩小活跃分块状态属于新候选，必须重新检查正确性。
+
+T06 的 `tl.static_assert` 在编译期执行；`tl.device_assert` 需要 `TRITON_DEBUG=1`。`TRITON_INTERPRET=1` 是 CPU 语义辅助，不是设备编译器或分析器，不能证明 Tensor Core 舍入、调度或竞争安全。调查内存错误时，在独立外部诊断副本上运行 Compute Sanitizer，保留命令/版本与非零退出。不要给插桩/调试输出计时，也不要静默删除失败案例。
+
+## 练习与检索
+
+完成[综合练习](/triton/attention-capstone/exercises/)，再看[独立复核解答](/triton/attention-capstone/solutions/)。解释为什么两个状态项都要重缩放、仅掩码加载为什么不够、VIS18 字节与内核有什么不同、强制后端不可用为什么不构成对照，以及发布 IO 或性能结论前还缺什么证据。
+
+## 来源与权利
+
+核查于 **2026-09-15**。[SRC-CUDA-092](/sources-and-versions/#src-cuda-092) 记录 Context7 检索及精确官方编译器、注意力、调试、框架与性能分析坐标。A11 论文仅用于算法动机。文字/VIS18 为原创 CC BY 4.0；新增标量模型、内核与采集器为原创 Apache-2.0 软件。上游教程仅作来源参考，精确 MIT 声明保留在 `examples/ex23-triton-vector-add/TRITON-LICENSE`，不把其基准或图重新发布为本站观察。

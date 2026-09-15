@@ -60,3 +60,9 @@ jobs:
           PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
           "$PYTHON" -m pip install --require-hashes -r scripts/triton-diagnostics/requirements.lock
           "$PYTHON" -m unittest discover -s scripts/triton-diagnostics -p 'test_*.py'
+      - name: Check T08 numerical and framework-output contract without GPU execution
+        run: |
+          PYTHON=examples/ex23-triton-vector-add/.venv/bin/python
+          "$PYTHON" -m unittest discover -s scripts/attention-capstone -p 'test_*.py'
+          "$PYTHON" -I scripts/attention-capstone/check.py --mode cpu --output "$RUNNER_TEMP/t08-cpu"
+          "$PYTHON" -I scripts/attention-capstone/check.py --mode compile --output "$RUNNER_TEMP/t08-compile"

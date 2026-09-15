@@ -3372,6 +3372,7 @@ const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-089', localized('分块矩阵乘法与可审查自动调优', 'Blocked matrix multiplication and auditable autotuning'), 'cuda-version-record', ['T04', 'T05', 'LAB16'], localized('Triton 3.7.1 dot、Config、选择缓存、JIT、事件计时；torch 2.13.0 FP16 mm。', 'Triton 3.7.1 dot, Config, selection cache, JIT and event timing; torch 2.13.0 FP16 mm.'), '2026-09-14', '2026-09-14'),
   sourceRecord('SRC-CUDA-090', localized('解释器、断言与 sanitizer 边界', 'Interpreter, assertion and sanitizer boundaries'), 'cuda-version-record', ['T06'], localized('Triton 3.7.1 精确源码与测试；Compute Sanitizer 2026.3；仅计数派生记录。', 'Exact Triton 3.7.1 source/tests; Compute Sanitizer 2026.3; counts-only derivatives.'), '2026-09-15', '2026-09-15'),
   sourceRecord('SRC-CUDA-091', localized('持久化调度与占用率门槛', 'Persistent scheduling and occupancy gates'), 'architecture-record', ['T07', 'LAB16'], localized('Triton 3.7.1 持久化教程与启动；Nsight Compute 2026.3 资源、重放和权限。', 'Triton 3.7.1 persistent tutorial and launch; Nsight Compute 2026.3 resources, replay and permissions.'), '2026-09-15', '2026-09-15'),
+  sourceRecord('SRC-CUDA-092', localized('融合注意力综合练习契约', 'Fused attention capstone contract'), 'architecture-record', ['T08', 'VIS18'], localized('Triton 3.7.1 注意力、编译、调试；PyTorch 2.13 SDPA 与 Nsight Compute 2026.3。', 'Triton 3.7.1 attention, compilation and debugging; PyTorch 2.13 SDPA and Nsight Compute 2026.3.'), '2026-09-15', '2026-09-15'),
 ];
 
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [

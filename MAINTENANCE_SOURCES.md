@@ -4,9 +4,18 @@
 
 Issue #49 publishes T06 `[T02,Q03,Q04]`, T07 `[T04,T05,Q09]`, their complete
 Exercise/solution pairs, PB-R5-019/020 and SRC-CUDA-090/091. Current scope is
-94 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers,
-102 Practice Bank entries, 207 terms, 107 sources, 452 catalog records,
-93 Exercise and 93 solution pairs, 342 Publication Pairs / 684 routes.
+95 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers,
+102 Practice Bank entries, 207 terms, 108 sources, 453 catalog records,
+94 Exercise and 94 solution pairs, 345 Publication Pairs / 690 routes.
+
+T08 (#50) adds the bounded FP16 forward capstone, exact prerequisites T03/T04/A11/P12,
+separate learner tasks and reviewed source, VIS18 reuse and SRC-CUDA-092. Context7
+queries covered fused attention, compiler/debugging and PyTorch 2.13 SDPA; exact
+owner source governs. The public source ledger retains interface hashes and rights.
+Thirty explicit SM80 compiler specializations were checked in Linux x86-64 emulation
+with CPython 3.14.7 and the EX23 compiler lock; no GPU was executed. CPU framework,
+browser and publication gates are separate from runtime evidence. Complete manifests
+and qualifying Reference Environment runs remain required; no timing or speedup is recorded.
 All inventories in earlier dated increments below are historical.
 
 Context7 queries covered interpreter/assert/print/sanitizer behavior, persistent
