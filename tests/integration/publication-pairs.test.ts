@@ -4843,6 +4843,7 @@ describe('published navigation', () => {
     }
   }, 30_000);
 
+  // Full-locale DOM scans cover 342 pages; keep the internal-link scan's CI budget.
   it.each(['zh', 'en'] as const)('uses valid HTTPS URLs for every external content link (%s)', async (locale) => {
     for (const route of publicationPairs.map((pair) => pair[locale])) {
       const document = await readRoute(route);
@@ -4856,7 +4857,7 @@ describe('published navigation', () => {
         expect(url.hostname, href).not.toMatch(/^(?:localhost|127\.0\.0\.1)$/);
       }
     }
-  }, 15_000);
+  }, 30_000);
 
   it.each(['zh', 'en'] as const)('resolves every built page asset and metadata link (%s)', async (locale) => {
     for (const route of publicationPairs.map((pair) => pair[locale])) {
