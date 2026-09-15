@@ -407,10 +407,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
   expect(counts.practice).toBe(102);
   expect(counts.visuals).toBe(20);
   expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
-  expect(counts.sources).toBe(107);
+  expect(counts.sources).toBe(108);
   expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(246 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
+    'SRC-CUDA-092',
     'LAB16', 'PB-R5-017', 'PB-R5-018', 'SRC-CUDA-089',
     'PB-R5-019', 'PB-R5-020', 'SRC-CUDA-090', 'SRC-CUDA-091',
     'LAB15', 'PB-R5-015', 'PB-R5-016', 'SRC-CUDA-088',
