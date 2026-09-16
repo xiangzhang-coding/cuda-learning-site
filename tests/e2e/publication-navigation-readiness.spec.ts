@@ -2,6 +2,23 @@
 import { expect, test } from '@playwright/test';
 import { collectBrowserFailures, settlePublicationPage } from '../helpers/browser-contract';
 
+for (const prefix of ['', 'en/']) {
+  test(`${prefix || 'zh-CN/'}publication navigation settles without an idle search preload`, async ({ page, baseURL }) => {
+    const failures = collectBrowserFailures(page, baseURL!);
+    // A busy browser need not deliver an idle callback within the assertion budget.
+    await page.addInitScript(() => { window.requestIdleCallback = () => 1; });
+    await page.goto(`/${prefix}libraries/cufft-plans-layouts-startup/solutions/`);
+    await settlePublicationPage(page);
+    await expect(page.locator('site-search input')).toHaveCount(1);
+    await expect(page.locator('site-search dialog')).not.toBeVisible();
+    await page.locator('[data-locale-counterpart]').click();
+    await settlePublicationPage(page);
+    await expect(page.locator('site-search input')).toHaveCount(1);
+    await expect(page.locator('site-search dialog')).not.toBeVisible();
+    expect(failures).toEqual([]);
+  });
+}
+
 test('a delayed Firefox favicon completes before the route sweep navigates again', async ({ page, browserName, baseURL }) => {
   test.skip(browserName !== 'firefox', 'Reproduce the Firefox NS_BINDING_ABORTED favicon trace.');
   const failures = collectBrowserFailures(page, baseURL!);
