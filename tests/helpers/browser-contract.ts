@@ -59,6 +59,17 @@ export async function expectRankedSearchResult(page: Page, scenario: SearchScena
 }
 
 export async function settlePublicationPage(page: Page) {
+  const search = page.locator('site-search');
+  // Idle preloading is opportunistic. A busy runner may never deliver its callback
+  // within the assertion budget, so exercise the public intent path if still cold.
+  if (await search.locator('input').count() === 0) {
+    await search.locator('button[data-open-modal]').click();
+    const dialog = search.getByRole('dialog');
+    await expect(dialog.getByRole('textbox')).toBeEditable();
+    await expect(dialog.getByRole('textbox')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+  }
   await expect(page.locator('site-search input'), 'publication initializes static search').toHaveCount(1);
   // Firefox can still be fetching the favicon after load and search UI creation.
   // Drain that page's requests before the sweep replaces its document; keep the
