@@ -47,10 +47,15 @@ type PublicationPair = {
 };
 
 const publicationPairFixtures: readonly PublicationPair[] = [
+  { pairId: 'ex24', unitId: 'EX24', resourceKind: 'runnable-example', prerequisites: 'G04', factCheckDate: '2026-09-19', canonicalExample: 'EX24', canonicalRanges: 'oracle,collective,completion', evidenceRuntime: 'Pending Hardware Verification', zh: '/examples/nccl-all-reduce/', en: '/en/examples/nccl-all-reduce/' },
+  { pairId: 'lab17', unitId: 'LAB17', resourceKind: 'lab', prerequisites: 'G04,G05', factCheckDate: '2026-09-19', evidenceRuntime: 'Pending Hardware Verification', zh: '/labs/nccl-all-reduce/', en: '/en/labs/nccl-all-reduce/' },
+  { pairId: 'vis16', unitId: 'VIS16', resourceKind: 'visual-explainer', prerequisites: 'G04', factCheckDate: '2026-09-19', hardwareGate: 'none', zh: '/visuals/collective-paths/', en: '/en/visuals/collective-paths/' },
   ...[
     { id: 'G01', slug: 'multi-gpu/devices-contexts-ownership', prerequisites: 'F07,M07' },
     { id: 'G02', slug: 'multi-gpu/peer-access-copies', prerequisites: 'G01,M01,M08' },
     { id: 'G03', slug: 'multi-gpu/topology-paths', prerequisites: 'G01,O03' },
+    { id: 'G04', slug: 'multi-gpu/nccl-communicators-collectives', prerequisites: 'G01,G03' },
+    { id: 'G05', slug: 'multi-gpu/nccl-stream-dependencies', prerequisites: 'G04,M07,M08' },
   ].flatMap(({ id, slug, prerequisites }) => [
     { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites,
       factCheckDate: '2026-09-19', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
@@ -4179,9 +4184,9 @@ const publicationPairFixtures: readonly PublicationPair[] = [
 // Explicit rolling additions keep long catalog fixtures readable without deriving
 // expected metadata from the implementation being tested.
 const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
-  if (['home', 'o01', 'about', 'labs-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-19' };
+  if (['home', 'o01', 'about', 'labs-index', 'visuals-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-19' };
   if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-19',
-    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,entry-pb-r5-013,entry-pb-r5-014,entry-pb-r5-015,entry-pb-r5-016,entry-pb-r5-017,entry-pb-r5-018,entry-pb-r5-019,entry-pb-r5-020,entry-pb-r6-001,entry-pb-r6-002,entry-pb-r6-003,review'),
+    structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,entry-pb-r5-013,entry-pb-r5-014,entry-pb-r5-015,entry-pb-r5-016,entry-pb-r5-017,entry-pb-r5-018,entry-pb-r5-019,entry-pb-r5-020,entry-pb-r6-001,entry-pb-r6-002,entry-pb-r6-003,entry-pb-r6-004,entry-pb-r6-005,review'),
     prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12,T01,T02,T03`,
     relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,T01,T02,T03,EX21') };
   if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-19',
@@ -4305,14 +4310,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(354);
-    expect(sourceRoutes.size).toBe(708);
+    expect(publicationPairs).toHaveLength(363);
+    expect(sourceRoutes.size).toBe(726);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['EX24', 'LAB17']) {
+    for (const absentUnitId of ['EX25', 'LAB18']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

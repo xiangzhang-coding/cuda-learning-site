@@ -1,0 +1,111 @@
+---
+title: 'EX24: Verify NCCL All-reduce on Every Rank'
+description: A canonical original C++17 client with pinned NCCL and independent integer correctness.
+pairId: ex24
+counterpart: /examples/nccl-all-reduce/
+factCheckDate: '2026-09-19'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, oracle, collective, completion, build, compatibility, evidence, sources]
+resourceKind: runnable-example
+unitId: EX24
+prerequisites: [G04]
+relatedUnits: []
+exampleIds: [EX24]
+canonicalExample: EX24
+canonicalRanges:
+  - oracle
+  - collective
+  - completion
+hardwareGate: 'Native Linux; 2–8 distinct full GPUs, each CC 7.5+, 8 GB total and 256 MiB free; CUDA 13.3.1 and NCCL 2.31.2'
+toolkitLanes: [cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8388608
+gpuCount: 2
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Every rank should have zero mismatches for all three counts after stream completion and successful cleanup.']
+  recordedObservations: []
+sources:
+  - { title: 'NCCL selected source', url: 'https://github.com/NVIDIA/nccl/tree/7b83616df3ae082a1f32bb74c27458bfe8153a13', version: '2.31.2', platform: 'native Linux', accessDate: '2026-09-19' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex24 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-19' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,oracle,collective,completion,build,compatibility,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX24 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: G04 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX24 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'oracle,collective,completion' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '1 declared expectation' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/nccl-all-reduce/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose
+
+Prerequisite **[G04]**: [communicators and collectives](/en/multi-gpu/nccl-communicators-collectives/). One process and one submitting host thread create 2–8 ranks on distinct full GPUs. Every element is checked on every rank. This is a correctness project, with no timer. [G05](/en/multi-gpu/nccl-stream-dependencies/) explains ordering; [LAB17](/en/labs/nccl-all-reduce/) supplies the execution and record protocol.
+
+## Canonical project
+
+[Fixed source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b/examples/ex24-nccl-all-reduce) · [same-revision download](https://github.com/xiangzhang-coding/cuda-learning-site/archive/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b.zip). Extract `examples/ex24-nccl-all-reduce/`. Both locales import these same build inputs; no second executable listing is maintained. The original software is Apache-2.0; this page is CC BY 4.0. External NCCL/CUDA packages are not distributed in the source archive.
+
+## Independent integer oracle
+
+<CanonicalCode exampleId="EX24" range="oracle" />
+
+Counts are 1, 257 and 1048576, datatype `ncclInt32`, reduction `ncclSum`. The input varies by rank and index; the closed-form CPU expectation is independent of a GPU result. For R=2/i=0 the expected result is -7; for R=4/i=16 it is 62. These are arithmetic expectations. All intermediate sums fit int32 for R=2–8. Host tests cover literal values, every-position corruption, empty outputs and invalid rank arguments. Host success is not GPU correctness.
+
+## Grouped collective and result checks
+
+<CanonicalCode exampleId="EX24" range="collective" />
+
+`ncclCommInitAll` associates rank r with CUDA-visible ordinal r; query APIs verify the mapping. Each rank owns one nonblocking CUDA stream and separate send/receive arrays. Upload → all-reduce → download follow the same stream. One host thread groups all ranks before waiting. Group end is checked even if an individual call fails. Downloads occur only after successful blocking group end. Host vectors and device arrays remain alive until all streams finish. Pageable host memory may make transfers block; no overlap is claimed.
+
+## Completion and failure
+
+Collective completion is polled before pageable downloads, which may block the submitting thread. A second poll after downloads establishes safe host comparison. This deliberately conservative boundary keeps asynchronous communication errors observable.
+
+<CanonicalCode exampleId="EX24" range="completion" />
+
+Poll all rank streams and both the query return and asynchronous NCCL state. The 60-second deadline bounds this polling loop. An external watchdog bounds blocking initialization/group/finalization/abort calls too. Fatal paths attempt communicator abort and terminate without freeing potentially live buffers; no success line is emitted. Normal cleanup groups `ncclCommFinalize`, destroys each communicator, frees both arrays and destroys streams; release errors fail the process. This bounded teaching client does not promise recovery from a failed communicator.
+
+## Build and run
+
+From the standalone directory, `make host-test` runs only the CPU oracle. Build the exact Linux/amd64 profile with:
+
+```sh
+docker build --platform linux/amd64 -t ex24-build .
+```
+
+The Dockerfile uses the declared digest-pinned CUDA 13.3.1 development image and SHA-256-checked `libnccl2`/`libnccl-dev` **2.31.2-1+cuda13.3** packages. It runs `make host-test preprocess inspect`: C++17 preprocessing, compilation, linking and `readelf`/`ldd` inspection. Only the host oracle executes. This API client has no device kernel and needs no project-owned cubin; g++ links `-lcudart -lnccl`. Record the actual compiler/package and image identity.
+
+On an equivalently provisioned native Linux machine, `make host-test preprocess inspect` builds the same files. After LAB17 preflight, run:
+
+```sh
+timeout --signal=TERM --kill-after=5s 180s env NCCL_DEBUG=INFO ./build/ex24-nccl-all-reduce 2 > rank-run.log 2>&1
+status=$?
+```
+
+Retain `status` and the private log. A watchdog expiration, failure or absent hardware is not a passing run. The program accepts only integer rank counts 2–8; R requires at least R qualifying visible GPUs. Expected output fields are rank/device assignment, version codes, count, datatype, operation and mismatches, with final success only after cleanup. No output is recorded here.
+
+## Compatibility and memory
+
+Selected profile: native Ubuntu 24.04 x86-64, C++17, Toolkit 13.3.1, independently pinned NCCL 2.31.2, driver ≥610.43.02. Each full GPU needs CC≥7.5, ≥8 GB total and ≥256 MiB free. The two maximum-count arrays occupy **8 MiB per rank**, plus library/context resources; host input/output occupy another 8 MiB per rank. No MIG, VM, multi-node, MPI, graph, registration or tuning profile is declared. Topology, IOMMU/ACS/P2P suitability and device identity require LAB17's operator-approved preflight.
+
+Header gates require `NCCL_VERSION_CODE=23102` and `CUDART_VERSION=13030`; loaded `ncclGetVersion` and `cudaRuntimeGetVersion` must match. These codes do not establish package suffixes, file hashes or installed driver versions. Record actual packages, loaded library paths/hashes and the full Environment Manifest. Existing Toolkit Lane or EX23 evidence does not transfer.
+
+## Evidence
+
+Expected: every rank should have zero mismatches for all three counts after stream completion and successful cleanup. **Recorded observations: none. Compilation: empty. Runtime: Pending Hardware Verification.** `environment-manifest.json` is an unfilled worksheet, not a captured run. Local host tests, container builds and browser checks do not publish Compile-Checked or Runtime-Verified status, algorithm choice, bandwidth or latency.
+
+## Sources and rights
+
+Reviewed **2026-09-19**: [SRC-CUDA-097](/en/sources-and-versions/#src-cuda-097), [SRC-CUDA-098](/en/sources-and-versions/#src-cuda-098). Exact NCCL source commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`; its root license includes Apache-2.0, retained BSD terms and per-file notices. No owner sample is adapted. Package and license hashes are declared in `project.json`.

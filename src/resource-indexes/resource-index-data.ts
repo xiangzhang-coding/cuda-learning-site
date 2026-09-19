@@ -434,6 +434,14 @@ const labs: readonly ResourceIndexRecord[] = [
     versionGate: same('CPython 3.14.7; Triton 3.7.1; torch 2.13.0; EX23 full hash lock'),
     evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-14',
   },
+  {
+    planningId: 'LAB17', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB17.title,
+    href: PUBLISHED_DESTINATIONS.LAB17.href, resourceType: 'guided-lab', difficulty: 'advanced',
+    prerequisites: ['G04', 'G05'], relatedUnits: ['EX24'],
+    hardwareGate: localized('原生 Linux；至少两个完整 GPU，各 CC 7.5+、总内存 8 GB+、空闲 256 MiB+。', 'Native Linux; at least two full GPUs, each CC 7.5+, 8 GB+ total and 256 MiB+ free.'),
+    versionGate: same('CUDA 13.3.1; NCCL 2.31.2-1+cuda13.3; driver >=610.43.02'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-19',
+  },
 ];
 
 const multiGpuPractice: readonly ResourceIndexRecord[] = [
@@ -454,6 +462,18 @@ const multiGpuPractice: readonly ResourceIndexRecord[] = [
     href: localized('/practice/#pb-r6-003', '/en/practice/#pb-r6-003'),
     resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['G03'], relatedUnits: ['G03'],
     hardwareGate: noHardware, versionGate: same('nvidia-smi owner manual reviewed 2026-09-19; installed CLI version required'), reviewedOn: '2026-09-19',
+  },
+  {
+    planningId: 'PB-R6-004', group: 'practice', title: localized('逐 rank 检查集合通信契约', 'Check the collective contract on every rank'),
+    href: localized('/practice/#pb-r6-004', '/en/practice/#pb-r6-004'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G04'], relatedUnits: ['G04', 'EX24'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2'), reviewedOn: '2026-09-19',
+  },
+  {
+    planningId: 'PB-R6-005', group: 'practice', title: localized('入队不是完成', 'Enqueue is not completion'),
+    href: localized('/practice/#pb-r6-005', '/en/practice/#pb-r6-005'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G05'], relatedUnits: ['G05', 'LAB17'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; CUDA 13.3.1'), reviewedOn: '2026-09-19',
   },
 ];
 
@@ -1893,6 +1913,13 @@ const practice: readonly ResourceIndexRecord[] = [
 
 const visuals: readonly ResourceIndexRecord[] = [
   {
+    planningId: 'VIS16', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS16.title,
+    href: PUBLISHED_DESTINATIONS.VIS16.href, resourceType: 'execution-model', difficulty: 'advanced',
+    prerequisites: ['G04'], relatedUnits: ['G05'], hardwareGate: noCudaHardware,
+    versionGate: localized('NCCL 2.31.2 集合通信语义；合成路由，不预测算法。', 'NCCL 2.31.2 collective semantics; synthetic routes, no algorithm prediction.'),
+    reviewedOn: '2026-09-19',
+  },
+  {
     planningId: 'VIS17', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS17.title,
     href: PUBLISHED_DESTINATIONS.VIS17.href, resourceType: 'indexing-model',
     prerequisites: ['T01'], relatedUnits: ['T02', 'EX23'], hardwareGate: noCudaHardware,
@@ -2413,6 +2440,8 @@ const multiGpuSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-094', localized('设备与上下文归属', 'Device and context ownership'), 'cuda-version-record', ['G01'], localized('Runtime API 13.3.1；归档多设备指南 13.2.0。', 'Runtime API 13.3.1; archived multi-device guide 13.2.0.'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-095', localized('有方向的 peer 访问与完成', 'Directional peer access and completion'), 'cuda-version-record', ['G02'], localized('Peer API 13.3.1；13.2.0 事件、拷贝与 Linux IOMMU 合同。', 'Peer API 13.3.1; 13.2.0 event, copy and Linux IOMMU contracts.'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-096', localized('拓扑工具与路径证据边界', 'Topology tools and path-evidence boundaries'), 'linux-tool-record', ['G03'], localized('NVIDIA 滚动手册，2026-09-19 复核；必须记录安装 CLI 版本。', 'NVIDIA rolling manual reviewed 2026-09-19; installed CLI version must be recorded.'), '2026-09-19', '2026-09-19'),
+  sourceRecord('SRC-CUDA-097', localized('NCCL 通信器、集合通信与独立版本', 'NCCL communicators, collectives and independent versions'), 'cuda-version-record', ['G04', 'EX24', 'LAB17', 'VIS16'], same('NCCL 2.31.2; CUDA 13.3.1; source 7b83616df3ae082a1f32bb74c27458bfe8153a13'), '2026-09-19', '2026-09-19'),
+  sourceRecord('SRC-CUDA-098', localized('NCCL 分组、流和错误进度', 'NCCL grouping, streams and error progress'), 'cuda-version-record', ['G05', 'EX24', 'LAB17'], same('NCCL 2.31.2; CUDA 13.3.1'), '2026-09-19', '2026-09-19'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [

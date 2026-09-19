@@ -212,6 +212,8 @@ export default defineConfig({
             { slug: 'multi-gpu/devices-contexts-ownership' },
             { slug: 'multi-gpu/peer-access-copies' },
             { slug: 'multi-gpu/topology-paths' },
+            { slug: 'multi-gpu/nccl-communicators-collectives' },
+            { slug: 'multi-gpu/nccl-stream-dependencies' },
           ],
         },
         {
@@ -221,6 +223,7 @@ export default defineConfig({
             { slug: 'examples/environment-report' },
             { slug: 'examples/vector-addition' },
             { slug: 'examples/triton-vector-add' },
+            { slug: 'examples/nccl-all-reduce' },
             { slug: 'examples/multidimensional-indexing' },
             { slug: 'examples/error-handling-lifecycle' },
             { slug: 'examples/coalesced-strided-access' },
@@ -248,6 +251,7 @@ export default defineConfig({
           translations: { en: 'Labs' },
           items: [
             { slug: 'labs' },
+            { slug: 'labs/nccl-all-reduce' },
             { slug: 'labs/record-cuda-environment' },
             { slug: 'labs/vector-addition' },
             { slug: 'labs/break-and-repair-indexing' },
@@ -269,6 +273,7 @@ export default defineConfig({
           translations: { en: 'Visual Explainers' },
           items: [
             { slug: 'visuals' },
+            { slug: 'visuals/collective-paths' },
             { slug: 'visuals/kernel-journey' },
             { slug: 'visuals/indexing' },
             { slug: 'visuals/warp-divergence' },

@@ -2,7 +2,11 @@
 
 # Cloudflare Deployment
 
-## Current G01–G03 publication — 2026-09-19
+## Current G04/G05 publication — 2026-09-19
+
+Issue #53 adds G04/G05, EX24/LAB17/VIS16 and their closed prerequisite/Exercise/solution paths. `/publication.json` now has 100 Learning Units, 24 examples, 363 Publication Pairs, 726 routes, 99 Exercise and 99 solution pairs, 465 catalog records (17 Labs, 107 practice entries, 21 visuals, 207 terms, 113 sources). `/release.json` stays frozen R5; R6 is pending. Forty subjects remain Pending Hardware Verification. The separate NCCL Example workflow verifies the pinned Toolkit 13.3.1 / NCCL 2.31.2-1+cuda13.3 build without executing a GPU binary. Both EX24/LAB17 have empty published compilation/recorded observations. Earlier dated current-scope sections below are historical.
+
+## Historical G01–G03 publication — 2026-09-19
 
 Current `/publication.json` extends the completed R5 snapshot with G01–G03, PB-R6-001/002/003 and SRC-CUDA-094/095/096: 98 Learning Units, 354 Publication Pairs, 708 source routes, 97 Exercise sets and 97 solution sets; 459 catalog records include 16 Labs, 105 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 111 source records. `/release.json` remains the exact R5 snapshot below. Validate all 708 routes against the current source and retain the frozen release comparison separately. R6 review remains pending. This increment changes no infrastructure or independently pinned execution environment and grants no two-GPU/topology runtime evidence. Earlier dated current-scope statements below describe their historical increments.
 

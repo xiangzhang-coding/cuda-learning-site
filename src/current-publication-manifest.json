@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 354,
-    "sourceRoutes": 708,
-    "exerciseSetPublicationPairs": 97,
-    "solutionSetPublicationPairs": 97,
+    "publicationPairs": 363,
+    "sourceRoutes": 726,
+    "exerciseSetPublicationPairs": 99,
+    "solutionSetPublicationPairs": 99,
     "learningUnits": [
       "O01",
       "O02",
@@ -113,10 +113,12 @@
       "T08",
       "G01",
       "G02",
-      "G03"
+      "G03",
+      "G04",
+      "G05"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22", "EX23"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16"],
+    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22", "EX23", "EX24"],
+    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16", "LAB17"],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -132,6 +134,7 @@
       "VIS12",
       "VIS13",
       "VIS14",
+      "VIS16",
       "VIS17",
       "VIS18",
       "VIS19",
@@ -139,7 +142,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 105,
+    "practiceBankEntries": 107,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -164,7 +167,7 @@
     ],
     "pytorchAndTritonPracticeEntries": ["PB-R5-004", "PB-R5-005", "PB-R5-006", "PB-R5-007", "PB-R5-008", "PB-R5-009", "PB-R5-010", "PB-R5-011", "PB-R5-012", "PB-R5-013", "PB-R5-014", "PB-R5-015", "PB-R5-016", "PB-R5-017", "PB-R5-018", "PB-R5-019", "PB-R5-020"],
     "glossaryTerms": 207,
-    "sourceRecords": 111
+    "sourceRecords": 113
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -237,6 +240,12 @@
       }
     ],
     "componentBoundaries": {
+      "nccl": {
+        "selection": "independently-pinned", "reviewedOn": "2026-09-19", "version": "2.31.2",
+        "commit": "7b83616df3ae082a1f32bb74c27458bfe8153a13", "package": "2.31.2-1+cuda13.3",
+        "toolkit": "13.3.1", "host": "Ubuntu 24.04 x86-64", "minimumDriver": "610.43.02",
+        "minimumComputeCapability": "7.5", "gpuCount": 2, "compileCheckedToolkitLanes": [], "runtimeVerified": false
+      },
       "triton": {
         "selection": "independently-pinned",
         "reviewedOn": "2026-09-19",
@@ -473,6 +482,8 @@
   "evidence": {
     "compileChecked": ["EX02", "EX10", "LAB02"],
     "noCompileCheckedClaim": [
+      "EX24",
+      "LAB17",
       "EX01",
       "EX03",
       "EX04",
@@ -511,6 +522,8 @@
       "LAB16"
     ],
     "pendingHardwareVerification": [
+      "EX24",
+      "LAB17",
       "EX01",
       "EX02",
       "EX03",
@@ -558,7 +571,7 @@
     "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
     "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"],
     "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10", "P11", "P12", "T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08"],
-    "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS17", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
+    "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS16", "VIS17", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
       "/assets/profiler-report-fixtures/lab08-nsight-compute.expected.json",
@@ -571,6 +584,7 @@
     "retainedCompileRuns": [32720214527, 33275734951]
   },
   "knownLimitations": [
+    "The current increment adds G04/G05, EX24, LAB17 and VIS16. NCCL 2.31.2 is independently pinned; EX24/LAB17 retain empty compilation and recorded observations with Pending Hardware Verification. No qualifying two-GPU rank log, algorithm, bandwidth, latency or collective result is published. R6 aggregate review is pending.",
     "R5 completes static dependency closure through P01-P12 and T01-T08. Issue #51 separately records source-bound CI, Preview and production acceptance. R6 and later material and multi-GPU support are outside this release.",
     "T08 publishes bounded FP16 forward attention, separate Exercises/solution and VIS18 reuse. Runtime remains Pending Hardware Verification; gradients, arbitrary masks and production integration are outside the contract.",
     "T06/T07 interpreter and host checks grant no GPU evidence. Sanitizer, occupancy, persistent scheduling and performance observations require qualifying Environment Manifests.",

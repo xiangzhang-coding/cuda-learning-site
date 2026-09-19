@@ -918,7 +918,7 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 ## 多 GPU 来源复核
 
-当前 `/publication.json` 在冻结的 R5 范围上增加 G01–G03，共 354 个双语发布对、708 条源路由和 459 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 98 个学习单元和 105 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
+当前 `/publication.json` 在冻结 R5 上增加 G01–G05、EX24/LAB17/VIS16，共 363 个双语发布对、726 条源路由和 465 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 100 个学习单元和 107 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
 
 <span id="src-cuda-094" class="resource-target"></span>
 
@@ -944,7 +944,29 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 **权利与数据：**NVIDIA 手册只链接并转述，不复制或重授许可。原创别名夹具校验器与测试采用 Apache-2.0，讲解采用 CC BY 4.0。合成夹具明确标为 synthetic。真实派生产物需要私有保留原件与派生哈希、别名映射、精确命令／版本、审核者和权限。结构校验不授予运行已验证（Runtime-Verified）状态。双 GPU 和拓扑观察仍为待硬件验证（Pending Hardware Verification）。
 
+<span id="src-cuda-097" class="resource-target"></span>
+
+### SRC-CUDA-097 — NCCL 通信器、集合通信与独立版本
+
+相关 ID：G04、EX24、LAB17、VIS16。复核／访问日期 **2026-09-19**。Context7 `/nvidia/nccl` 查询覆盖 `ncclCommInitAll`、`ncclAllReduce`、分组、CUDA 流、异步错误和 `ncclGetVersion`；返回 master 文档，仅用于发现来源。选定 **NCCL 2.31.2**，标签 `v2.31.2-1`，提交 `7b83616df3ae082a1f32bb74c27458bfe8153a13`。观察到 GitHub 最新发布为 2.32.3，但所选 Ubuntu 软件源提供 2.31.2，不自动升级。
+
+固定依据：[通信器创建／错误指南](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/communicators.rst)、[集合通信 API](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/api/colls.rst)、[公开头文件](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/nccl.h.in)、[初始化／版本源码](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/init.cc)。复核唯一 rank／设备归属、InitAll 单进程限制、InitRank 的带外 ID 分发、元素计数／结果放置／原地限制、版本代码、查询状态与通信器状态及致命分组 abort。实验性 MIG 与更新的可配置集合通信不成为先修。
+
+[Ubuntu 24.04 x86-64 包索引](https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages.gz) 声明 `libnccl2_2.31.2-1+cuda13.3_amd64.deb` 的 SHA-256 为 `e1c743dc848afb697d8311c575e4a728e0fff84ad2d4aa73b7c8b82d9ae83868`，`libnccl-dev_2.31.2-1+cuda13.3_amd64.deb` 为 `5c3d903e1f4a0174b28f02ed714b7ccd2ddd1c23a686e93afa0dedcacdf95643`。EX24 Dockerfile 在既有摘要固定 Toolkit 13.3.1 镜像中验证字节。所选原生运行配置要求驱动 ≥610.43.02、2–8 个完整 GPU，各 CC≥7.5、总内存 ≥8 GB、空闲 ≥256 MiB，平台／P2P 适用性仍由操作员评估。这些是项目门槛，不代表 NCCL 全部支持平台。EX24 独立主机测试验证有符号手算值和变异检测；官方文档／源码复核不等于执行官方测试或 GPU 正确性验证。
+
+**精确权利：** [所选提交 LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt)，SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`，包含 Apache-2.0、保留的 BSD 条款，并要求查看借用代码的逐文件许可。已核对实现头部带 NVIDIA Apache-2.0 声明。文档只链接和转述，不导入官方代码、测试、图示或日志。NCCL／CUDA 包保持外部依赖及自身声明，不统一改为项目许可。原创软件采用 Apache-2.0；正文／图示采用 CC BY 4.0。EX24／LAB17 保持待硬件验证（Pending Hardware Verification）。
+
+<span id="src-cuda-098" class="resource-target"></span>
+
+### SRC-CUDA-098 — NCCL 分组、流和错误进度
+
+相关 ID：G05、EX24、LAB17。复核／访问日期 **2026-09-19**，与 SRC-CUDA-097 使用相同 Context7 查询和 NCCL 2.31.2 提交。精确[流指南](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/streams.rst)、[分组指南](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/groups.rst)、[通信器 API](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/api/comms.rst)、[入队源码](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/enqueue/enqueue.cc) 确立延迟分组入队、最外层组语义、单线程多设备分组、一致操作顺序、混合流同步、非阻塞 `ncclInProgress` 轮询及分组 finalize。EX24 使用默认阻塞通信器和独立外部 watchdog，不承诺弹性恢复。CUDA 流在另一层意义上保持非阻塞。
+
+实际取得文件 SHA-256：streams `de2656dccc299a7594c6a90709f27f662fb7cd40240f64edd87086821475fc71`；groups `3c97d76b47d1339eb1b60c539e6f80af5c0636bb1311906f68dbdc7287261f44`；通信器指南 `9b513c465c2358929c1f3ccb3810210db8cdeb2db226d2be00702a79b24d5bb6`；集合通信 API `53c9aab75d41feedffb23e4e38ccfd66a528db260a37e6b5d8c0a48f5d0acf7c`；入队源码 `de837fdc280fa475b77fcb26597c3681828a16f9198699d778bdd6c6827b1536`。权利沿用 SRC-CUDA-097。静态事件图和 VIS16 路径不提供算法、重叠、延迟或带宽观察。
+
 ## 复核记录
+
+当前 #53 增量发布 G04/G05、EX24/LAB17/VIS16 与 SRC-CUDA-097/098。当前范围：100 个学习单元、363 个双语发布对、726 条源路由、99 组练习和 99 组解答、465 条目录记录：17 个实验、107 个练习题库条目、21 项可视化讲解、207 个术语表词条、113 条来源记录。40 个主体仍待硬件验证。下方较早增量统计保留为历史；R5 冻结，R6 待复核。
 
 2026-09-19 的 G01–G03 增量新增 SRC-CUDA-094/095/096，来源目录共 111 条。R5 已完成发布快照保留为历史，R6 待复核。不声称新的 CUDA 证据。
 
@@ -975,4 +997,4 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 不可变 `src/r3-release-manifest.json` 保留 62 个学习单元、16 个可运行示例、10 个实验、19 项可视化讲解、66 个练习题库条目（其中十道 Nsight 报告分析题）、176 个术语表词条、76 条来源记录、347 条目录记录、61 组练习、61 组解答、232 个双语发布对和 464 条源路由。[Issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 保留其动态验收。R4 另将八道既有题目列为符合库与算法选择分类的条目：`PB-R4-001`、`PB-R4-002`、`PB-R4-003`、`PB-R4-004`、`PB-R4-008`、`PB-R4-011`、`PB-R4-012` 和 `PB-R4-016`。R3 子集仍为 PB-R3-002 至 PB-R3-005 和 PB-R3-007 至 PB-R3-012；两个分类均属于既有的 82 个条目。
 
-只有 EX02、EX10、LAB02 保留编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable），其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量仍为零。L01-L13、P01-P12 和 T01-T08 保留空证据数组，T08 设备验收待完成。六份分析器计划只有预期内容，二十项浏览器讲解不授予 CUDA 证据。来源审查不产生 GPU、计时、性能观察。自动检查不建立 WCAG 一致性，CI 和动态验收单独记录。
+只有 EX02、EX10、LAB02 保留编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable），其余 23 个示例和 17 个实验共 40 个主体待硬件验证（Pending Hardware Verification）。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量仍为零。L01-L13、P01-P12、T01-T08 和 G01-G05 保留空证据数组。六份分析器计划只有预期内容，21 项浏览器讲解不授予 CUDA 证据。来源审查不产生 GPU、计时、性能观察。自动检查不建立 WCAG 一致性，CI 和动态验收单独记录。

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import { collectBrowserFailures } from '../helpers/browser-contract';
 
 for (const prefix of ['', 'en/']) {
-  for (const [id, slug] of [['G01', 'devices-contexts-ownership'], ['G02', 'peer-access-copies'], ['G03', 'topology-paths']]) {
+  for (const [id, slug] of [['G01', 'devices-contexts-ownership'], ['G02', 'peer-access-copies'], ['G03', 'topology-paths'], ['G04', 'nccl-communicators-collectives'], ['G05', 'nccl-stream-dependencies']]) {
     test(`${prefix}${id}: ownership, peer and topology learner journey`, async ({ page, baseURL }, info) => {
       const failures = collectBrowserFailures(page, baseURL!);
       await page.setViewportSize({ width: 360, height: 800 });
