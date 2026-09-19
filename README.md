@@ -2,6 +2,8 @@
 
 # CUDA Learning Site
 
+The 2026-09-19 current publication adds G01–G03: [devices and ownership](https://cuda-learning-site.hmzhangxiang.workers.dev/en/multi-gpu/devices-contexts-ownership/), [peer access and copies](https://cuda-learning-site.hmzhangxiang.workers.dev/en/multi-gpu/peer-access-copies/), and [topology](https://cuda-learning-site.hmzhangxiang.workers.dev/en/multi-gpu/topology-paths/). Current `/publication.json` has 98 Learning Units, 354 Publication Pairs, 708 source routes, 97 Exercise sets and 97 separate solution sets. There are 459 catalog records: 16 Labs, 105 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 111 source records. R5's `/release.json` remains frozen at the inventory below; R6 review is pending. Two-GPU/topology activities remain Pending Hardware Verification, with no new compilation or runtime evidence. Original topology-fixture validation is host-only.
+
 CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU programming. Chinese pages live at the root and English counterparts under `/en/`.
 
 R5 is the latest completed aggregate static release review, dated **2026-09-19**. Its schema 6 contract in `src/r5-release-manifest.json` freezes the complete path through P01-P12 and T01-T08. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) owns source-bound CI, Preview, production and remote smoke acceptance. Static review does not pre-certify those results. R1-R4 remain immutable history, including `src/r4-release-manifest.json` and the accepted [issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) record. R6 is next/pending; multi-GPU support is outside R5.

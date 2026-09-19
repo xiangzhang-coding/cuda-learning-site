@@ -1,5 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## G01–G03 original multi-GPU instruction — 2026-09-19
+
+The current inventory is 98 Learning Units, 354 Publication Pairs, 708 routes, 97 Exercise-set and 97 solution-set pairs, and 459 catalog records (16 Labs, 105 Practice Bank entries, 20 Visual Explainers, 207 terms, 111 sources). R5's frozen inventory and earlier dated scope statements below are historical. G01–G03, PB-R6-001/002/003 and SRC-CUDA-094/095/096 are original CC BY 4.0 prose, ledgers and Exercises. `scripts/lib/topology-fixture-policy.mjs` and its tests are original Apache-2.0 software. Synthetic alias fixtures are original and are not machine observations. No dependency or upstream adaptation is introduced.
+
+Reference-only sources are NVIDIA Runtime API **13.3.1** context and peer pages, Programming Guide **13.2.0** multi-GPU systems, and the rolling NVIDIA System Management Interface manual accessed **2026-09-19**. They retain NVIDIA's own copyright and terms; no upstream sample listing, table, figure, raw machine report or benchmark data is incorporated or relicensed. The exact project licenses remain `LICENSE` (Apache-2.0) and `LICENSE-CONTENT` (CC BY 4.0); existing upstream notices remain applicable to their respective files. Source records identify versions separately and require the installed CLI version for real topology. Rights review does not grant GPU evidence.
+
 ## R5 aggregate rights review — 2026-09-19
 
 R5 is the latest completed aggregate static review. Schema 6 `src/r5-release-manifest.json` supplies `/release.json`; R6 is next/pending. The frozen inventory is 345 Publication Pairs / 690 routes and 453 catalog records, including 102 original Practice Bank entries and the 17-entry PyTorch-and-Triton subset PB-R5-004 through PB-R5-020. R1-R4 snapshots and dated rights ledgers below remain historical. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records dynamic acceptance separately.

@@ -46,7 +46,7 @@ head:
 
 ## 当前发布路线
 
-截至 **2026-09-15**，当前发布在 R4 基础上扩展至 P01-P12 和 T01-T08，共 95 个学习单元（Learning Unit）、345 个双语发布对（Publication Pair）、690 条源路由和 453 条目录记录。[T08](/triton/attention-capstone/) 结合融合注意力、独立正确性、框架输出和有边界的性能分析，复用 VIS18。此前 Triton 单元讲解块值、向量加法、融合 Softmax、分块 GEMM、自动调优、调试与持久化调度。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
+截至 **2026-09-19**，当前发布包含 G01–G03，共 98 个学习单元（Learning Unit）、354 个双语发布对（Publication Pair）、708 条源路由和 459 条目录记录。按精确先修关系，从[设备归属](/multi-gpu/devices-contexts-ownership/)进入多 GPU 路径，再学习[对等访问](/multi-gpu/peer-access-copies/)和[拓扑](/multi-gpu/topology-paths/)。双 GPU 与真实拓扑观察仍待硬件验证（Pending Hardware Verification）。[T08](/triton/attention-capstone/) 保留融合注意力综合练习及 VIS18。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
 
 [P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含完整练习与独立解答。[EX22](/examples/adjacent-energy/)、[LAB13](/labs/build-custom-operator/)都依赖 `[P08,P09]`，扩展 Toolkit 独立固定为 12.8.1，匹配 torch 2.11.0+cu128。编译与运行证据保持独立。
 
@@ -98,7 +98,7 @@ EX17 的 bundled CUB 1.15.1/2.8.2/3.3.4 与 selected CCCL 3.4.2 五项 component
 
 A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。API 存在、上游测试或静态教学材料都不授予本站证据状态。EX17/LAB11、EX18/LAB12、EX19 与 EX20 的编译证据和实际观察记录为空，运行保持待硬件验证（Pending Hardware Verification）。当前发布没有 CUDA、CCCL、CUB、Thrust、libcu++、cuBLAS、cuBLASLt、CUTLASS、cuDNN、cuFFT 或 cuSPARSE 的执行记录，也没有采集到的分析报告、库输出、同步观察、实际流量、融合、计时、加速比、瓶颈、赢家、基准环境（Reference Environment）或 `performanceObservations`。L07 的发布不表示 EX18/LAB12 已实现或验证 Lt 选择。
 
-当前资源目录有 16 个实验、102 个练习题库（Practice Bank）条目、20 项可视化讲解（Visual Explainer）、207 个术语表（Glossary）词条、108 条来源，共 453 条记录。源文件形成 345 个双语发布对 / 690 条路由，含 94 组练习与 94 组独立解答。本增量增加 SRC-CUDA-092。R4 历史的 82 道题、196 个词条、92 条来源、401 条记录不变；其八道库与算法选择题及 R3 十道 Nsight 报告分析题仍列于[练习题库](/practice/)。
+当前资源目录有 16 个实验、105 个练习题库（Practice Bank）条目、20 项可视化讲解（Visual Explainer）、207 个术语表（Glossary）词条、111 条来源，共 459 条记录。源文件形成 354 个双语发布对 / 708 条路由，含 97 组练习与 97 组独立解答。本增量增加 PB-R6-001/002/003 与 SRC-CUDA-094/095/096。R4 历史的 82 道题、196 个词条、92 条来源、401 条记录不变；其八道库与算法选择题及 R3 十道 Nsight 报告分析题仍列于[练习题库](/practice/)。
 
 只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。P01-P12 和 T01-T08 四个证据数组为空，T08 设备验收待完成。EX21-EX23 与 LAB13-LAB16 编译、已记录观察为空。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察数量为零。六份分析器计划只有预期内容；来源、解释器和主机检查不授予 GPU 证据。
 
@@ -738,7 +738,7 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 102 道原创题练习证据、环境、架构、内核、库、PyTorch 和 Triton。</small>
+    <small>用 105 道原创题练习证据、归属、拓扑、内核、库、PyTorch 和 Triton。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 108 条接口与上游来源记录，以及各自复核日期。</small>
+    <small>查看当前发布依据的 111 条接口与上游来源记录，以及各自复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

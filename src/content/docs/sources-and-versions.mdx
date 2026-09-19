@@ -1,6 +1,6 @@
 ---
 title: 来源与版本记录
-description: 覆盖 T07 与 LAB16 的精确发布与技术来源，独立记录版本、权利和证据。
+description: 覆盖 G03 的精确发布与技术来源，独立记录版本、权利和证据。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
 factCheckDate: '2026-09-19'
@@ -40,6 +40,7 @@ structure:
   - entry-src-cuda-090
   - entry-src-cuda-091
   - content-sources
+  - multi-gpu-sources
   - review-record
 evidence:
   compilation: []
@@ -62,7 +63,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,entry-src-cuda-089,entry-src-cuda-090,entry-src-cuda-091,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,entry-src-cuda-089,entry-src-cuda-090,entry-src-cuda-091,content-sources,multi-gpu-sources,review-record'
 ---
 
 import ResourceIndex from '../../components/ResourceIndex.astro';
@@ -79,7 +80,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 ## R5 聚合复核 — 2026-09-19
 
-模式版本 6 的 `src/r5-release-manifest.json` 生成 `/release.json`；`/publication.json` 保留相同当前清单，记录 R5 已完成、下一阶段 R6 待复核。[Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) 单独记录同一提交的 CI、Preview、生产和冒烟验收。静态总结不预先证明这些动态结果。R1-R4 保留不可变历史。P01-P12 与 T01-T08 的公开先修、练习与独立解答形成闭包；不发布 R6 或多 GPU 占位目的地。既有 **PB-R5-004 至 PB-R5-020** 是 102 道题中的 17 道独立 PyTorch 和 Triton 题。
+模式版本 6 的 `src/r5-release-manifest.json` 生成冻结的 `/release.json`；`/publication.json` 跟踪后续完整增量，记录 R5 已完成、下一阶段 R6 待复核。[Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) 单独记录 R5 同一提交的 CI、Preview、生产和冒烟验收，不能沿用为新增量的动态结果。R1-R4 保留不可变历史。R5 中 P01-P12 与 T01-T08 的公开先修、练习与独立解答形成闭包；后续 G01–G03 完整增量见下方来源复核，不发布未完成目的地。既有 **PB-R5-004 至 PB-R5-020** 是 R5 的 102 道题中的 17 道独立 PyTorch 和 Triton 题。
 
 | 独立环境 | 选定边界 |
 | --- | --- |
@@ -915,7 +916,37 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 - 语言和搜索界面图标来自已安装的 Starlight 0.41.7 包，没有复制为项目素材；主题选择标记则是项目原创 CSS。Starlight 上游包声明 MIT 许可。
 - 技术链接用于核对发布接口与 CUDA 事实；公开文字、代码修复情景、术语定义、表格和可视化构图均为原创摘要与推导，只引用并改写 owner documentation，不镜像上游内容。
 
+## 多 GPU 来源复核
+
+当前 `/publication.json` 在冻结的 R5 范围上增加 G01–G03，共 354 个双语发布对、708 条源路由和 459 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 98 个学习单元和 105 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
+
+<span id="src-cuda-094" class="resource-target"></span>
+
+### SRC-CUDA-094 — 设备、上下文与归属
+
+相关 ID：G01。复核／访问日期 **2026-09-19**。当前 Context7 `/websites/nvidia_cuda` 查询覆盖主机线程设备选择与主上下文；精确一手复核采用 [Runtime API 13.3.1 上下文管理](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/driver-vs-runtime-api.html) 和[归档 Programming Guide 13.2.0 多 GPU 系统](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html)。两个版本分别标明。普通运行时路径每进程每设备使用一个主上下文；显式当前 Driver 或执行上下文会改变默认行为。G01 不使用预览或显式执行上下文接口。练习采用既有 Toolkit 13.3.1 通道、原生 Ubuntu 24.04 x86-64、C++17 和所选驱动 ≥610.43.02，要求精确安装编译器／驱动及两个设备的 CC／内存。双 GPU 执行仍为待硬件验证（Pending Hardware Verification）。
+
+**权利：**NVIDIA 文档保留自身版权与官方条款。只链接并转述，不纳入上游代码、图片、表格或输出。原创讲解／练习为 CC BY 4.0。本来源记录不是编译或运行证据。
+
+<span id="src-cuda-095" class="resource-target"></span>
+
+### SRC-CUDA-095 — 有方向的 peer 访问、拷贝与完成
+
+相关 ID：G02。复核／访问日期 **2026-09-19**。当前 Context7 查询覆盖 `cudaDeviceCanAccessPeer`、`cudaDeviceEnablePeerAccess`、跨设备等待与拷贝顺序。一手依据：[peer API 13.3.1](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__PEER.html)、[归档 13.2.0 多设备顺序及 Linux IOMMU 约束](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html)。复核区分查询返回状态与能力、单向启用与双向练习策略、已有启用的归属、生产／拷贝／消费生命周期、同设备事件计时及显式主机中转。裸机 IOMMU／ACS 配置不支持或未知时阻塞直接 PCIe peer 测试；课程不要求重新配置机器。原生 Linux 双 GPU 活动采用 G01 完整清单，保持待硬件验证（Pending Hardware Verification）。
+
+**权利：**遵循相同 NVIDIA 来源边界，只链接并原创转述，不重构样例或复用基准数据。原创讲解为 CC BY 4.0。不由能力位推断运行路径、原子支持或带宽。
+
+<span id="src-cuda-096" class="resource-target"></span>
+
+### SRC-CUDA-096 — 拓扑工具解释与脱敏
+
+相关 ID：G03。复核／访问日期 **2026-09-19**。精确来源：[NVIDIA System Management Interface 手册](https://docs.nvidia.com/deploy/nvidia-smi/index.html)，这是在该日复核的滚动官方手册，**不是固定 CLI 版本**。每份真实记录须附安装的 `nvidia-smi --version`、`topo -h` 和本地图例。复核选项为 `-L`、`topo -m`、`topo -mp`、`topo -p2p r/w`、`nvlink -h` 和 `nvlink --status`。覆盖纯 PCI 与含 NVLink 视图、PIX／PXB／PHB／NODE／SYS／NV# 边界、NIC／RDMA 限制、序号对齐、查询权限和不可用结果。当前 Context7 CUDA 查询以此精确手册及 [13.2.0 平台约束](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html) 补充。不公开真实拓扑；缺乏独立端点／接口／传输方式／路由证据时，网络路径保持未知。
+
+**权利与数据：**NVIDIA 手册只链接并转述，不复制或重授许可。原创别名夹具校验器与测试采用 Apache-2.0，讲解采用 CC BY 4.0。合成夹具明确标为 synthetic。真实派生产物需要私有保留原件与派生哈希、别名映射、精确命令／版本、审核者和权限。结构校验不授予运行已验证（Runtime-Verified）状态。双 GPU 和拓扑观察仍为待硬件验证（Pending Hardware Verification）。
+
 ## 复核记录
+
+2026-09-19 的 G01–G03 增量新增 SRC-CUDA-094/095/096，来源目录共 111 条。R5 已完成发布快照保留为历史，R6 待复核。不声称新的 CUDA 证据。
 
 <span id="r4-aggregate-review" class="resource-target" aria-hidden="true"></span>
 

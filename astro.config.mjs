@@ -206,6 +206,15 @@ export default defineConfig({
           ],
         },
         {
+          label: '多 GPU 编程',
+          translations: { en: 'Multi-GPU Programming' },
+          items: [
+            { slug: 'multi-gpu/devices-contexts-ownership' },
+            { slug: 'multi-gpu/peer-access-copies' },
+            { slug: 'multi-gpu/topology-paths' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [

@@ -436,6 +436,27 @@ const labs: readonly ResourceIndexRecord[] = [
   },
 ];
 
+const multiGpuPractice: readonly ResourceIndexRecord[] = [
+  {
+    planningId: 'PB-R6-001', group: 'practice', title: localized('插件无权重置共享上下文', 'A plugin cannot reset a shared context'),
+    href: localized('/practice/#pb-r6-001', '/en/practice/#pb-r6-001'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G01'], relatedUnits: ['G01'],
+    hardwareGate: noHardware, versionGate: same('CUDA Runtime API 13.3.1'), reviewedOn: '2026-09-19',
+  },
+  {
+    planningId: 'PB-R6-002', group: 'practice', title: localized('peer 权限不能延长分配寿命', 'Peer permission does not extend allocation lifetime'),
+    href: localized('/practice/#pb-r6-002', '/en/practice/#pb-r6-002'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G02'], relatedUnits: ['G02'],
+    hardwareGate: noHardware, versionGate: same('CUDA Runtime API 13.3.1'), reviewedOn: '2026-09-19',
+  },
+  {
+    planningId: 'PB-R6-003', group: 'practice', title: localized('本地邻近关系不能证明网络路由', 'Local proximity cannot prove a network route'),
+    href: localized('/practice/#pb-r6-003', '/en/practice/#pb-r6-003'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['G03'], relatedUnits: ['G03'],
+    hardwareGate: noHardware, versionGate: same('nvidia-smi owner manual reviewed 2026-09-19; installed CLI version required'), reviewedOn: '2026-09-19',
+  },
+];
+
 const practice: readonly ResourceIndexRecord[] = [
   {
     planningId: 'PB-R0-001',
@@ -2388,6 +2409,12 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-207', 'memory mask · 内存掩码', 'kernel-vocabulary', ['T02'], 'Triton 3.7.1；逐元素控制内存操作，不缩小形状。', 'Triton 3.7.1; elementwise control of memory operations without shrinking shape.', '2026-09-14'),
 ];
 
+const multiGpuSources: readonly ResourceIndexRecord[] = [
+  sourceRecord('SRC-CUDA-094', localized('设备与上下文归属', 'Device and context ownership'), 'cuda-version-record', ['G01'], localized('Runtime API 13.3.1；归档多设备指南 13.2.0。', 'Runtime API 13.3.1; archived multi-device guide 13.2.0.'), '2026-09-19', '2026-09-19'),
+  sourceRecord('SRC-CUDA-095', localized('有方向的 peer 访问与完成', 'Directional peer access and completion'), 'cuda-version-record', ['G02'], localized('Peer API 13.3.1；13.2.0 事件、拷贝与 Linux IOMMU 合同。', 'Peer API 13.3.1; 13.2.0 event, copy and Linux IOMMU contracts.'), '2026-09-19', '2026-09-19'),
+  sourceRecord('SRC-CUDA-096', localized('拓扑工具与路径证据边界', 'Topology tools and path-evidence boundaries'), 'linux-tool-record', ['G03'], localized('NVIDIA 滚动手册，2026-09-19 复核；必须记录安装 CLI 版本。', 'NVIDIA rolling manual reviewed 2026-09-19; installed CLI version must be recorded.'), '2026-09-19', '2026-09-19'),
+];
+
 const sources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-WEB-001', same('Astro'), 'publishing-interface', ['O01'], same('Astro 7.2.8; @astrojs/markdown-remark 7.2.4 unified({ rehypePlugins })'), '2026-09-09'),
   sourceRecord('SRC-WEB-002', same('Starlight'), 'publishing-interface', ['O01'], same('Starlight 0.41.7'), '2026-08-25'),
@@ -3378,7 +3405,9 @@ const sources: readonly ResourceIndexRecord[] = [
 export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [
   ...labs,
   ...practice,
+  ...multiGpuPractice,
   ...visuals,
   ...glossary,
   ...sources,
+  ...multiGpuSources,
 ];

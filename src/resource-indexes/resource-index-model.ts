@@ -73,6 +73,45 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  G01: {
+    href: { 'zh-CN': '/multi-gpu/devices-contexts-ownership/', en: '/en/multi-gpu/devices-contexts-ownership/' },
+    title: { 'zh-CN': 'G01：明确设备、上下文与资源归属', en: 'G01: Assign Devices, Contexts, and Owners' },
+    prerequisites: ['F07', 'M07'],
+  },
+  G02: {
+    href: { 'zh-CN': '/multi-gpu/peer-access-copies/', en: '/en/multi-gpu/peer-access-copies/' },
+    title: { 'zh-CN': 'G02：查询对等访问并排列跨设备拷贝', en: 'G02: Query Peer Access and Order Peer Copies' },
+    prerequisites: ['G01', 'M01', 'M08'],
+  },
+  G03: {
+    href: { 'zh-CN': '/multi-gpu/topology-paths/', en: '/en/multi-gpu/topology-paths/' },
+    title: { 'zh-CN': 'G03：读懂拓扑，再预测通信', en: 'G03: Read Topology Before Predicting Communication' },
+    prerequisites: ['G01', 'O03'],
+  },
+  'G01-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/devices-contexts-ownership/exercises/', en: '/en/multi-gpu/devices-contexts-ownership/exercises/' },
+    title: { 'zh-CN': 'G01 练习：证明资源归属', en: 'G01 Exercises: Prove Resource Ownership' }, prerequisites: ['G01'],
+  },
+  'G01-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/devices-contexts-ownership/solutions/', en: '/en/multi-gpu/devices-contexts-ownership/solutions/' },
+    title: { 'zh-CN': 'G01 解答：先确认归属，再清理资源', en: 'G01 Solutions: Ownership Before Cleanup' }, prerequisites: ['G01-EXERCISES'],
+  },
+  'G02-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/peer-access-copies/exercises/', en: '/en/multi-gpu/peer-access-copies/exercises/' },
+    title: { 'zh-CN': 'G02 练习：区分权限与完成', en: 'G02 Exercises: Separate Permission from Completion' }, prerequisites: ['G02'],
+  },
+  'G02-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/peer-access-copies/solutions/', en: '/en/multi-gpu/peer-access-copies/solutions/' },
+    title: { 'zh-CN': 'G02 解答：等到最后一次读取完成', en: 'G02 Solutions: Preserve the Last Read' }, prerequisites: ['G02-EXERCISES'],
+  },
+  'G03-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/topology-paths/exercises/', en: '/en/multi-gpu/topology-paths/exercises/' },
+    title: { 'zh-CN': 'G03 练习：限定拓扑结论', en: 'G03 Exercises: Bound a Topology Claim' }, prerequisites: ['G03'],
+  },
+  'G03-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/topology-paths/solutions/', en: '/en/multi-gpu/topology-paths/solutions/' },
+    title: { 'zh-CN': 'G03 解答：缺失路径保持未知', en: 'G03 Solutions: Keep Missing Paths Unknown' }, prerequisites: ['G03-EXERCISES'],
+  },
   T08: {
     href: { 'zh-CN': '/triton/attention-capstone/', en: '/en/triton/attention-capstone/' },
     title: { 'zh-CN': 'T08：实现并审查融合注意力', en: 'T08: Build and Audit Fused Attention' },

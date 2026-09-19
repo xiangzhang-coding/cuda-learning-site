@@ -17,7 +17,9 @@ describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R5', next: 'R6', status: 'pending' });
-    expect(release.scope).toEqual(current.scope);
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03']);
+    expect(current.scope).toMatchObject({ publicationPairs: 354, sourceRoutes: 708,
+      exerciseSetPublicationPairs: 97, solutionSetPublicationPairs: 97, practiceBankEntries: 105, sourceRecords: 111 });
     expect(release.compatibility).toEqual(current.compatibility);
     expect(release.evidence).toEqual(current.evidence);
     expect(release.scope.learningUnits).toEqual([...r4.scope.learningUnits, ...ids('P', 12), ...ids('T', 8)]);
