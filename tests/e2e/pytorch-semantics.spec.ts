@@ -33,19 +33,23 @@ for (const locale of ['', 'en/']) {
   const label = locale || 'zh-CN/';
 
   for (const unit of units) {
-    test(`${label}${unit.id} navigation reaches its unit and exact source/practice anchors`, async ({ page, baseURL }, info) => {
+    async function expectLoadedPage(page: Page) {
+      // A real result proves the focus-triggered search worker is ready before navigating away.
+      await expectSearchReadyForNavigation(page, {
+        label: locale ? 'Search' : '搜索', query: unit.id, href: `/${locale}${unit.slug}/`,
+      });
+    }
+
+    // Give each learner journey its own existing 30-second budget. The hosted
+    // WebKit trace spent 14.2s loading the large Practice Bank, then exhausted
+    // the old seven-navigation test's total deadline during its final search.
+    test(`${label}${unit.id} sidebar navigation reaches its exact unit`, async ({ page, baseURL }, info) => {
       test.skip(info.project.name === 'mobile-safari', 'The narrow-screen journey owns mobile navigation.');
       test.setTimeout(30_000);
       const failures = collectBrowserFailures(page, baseURL!);
-      async function expectLoadedPage() {
-        // A real result proves the focus-triggered search worker is ready before navigating away.
-        await expectSearchReadyForNavigation(page, {
-          label: locale ? 'Search' : '搜索', query: unit.id, href: `/${locale}${unit.slug}/`,
-        });
-      }
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(`/${locale}${units[0].slug}/`, { waitUntil: 'domcontentloaded' });
-      await expectLoadedPage();
+      await expectLoadedPage(page);
       const group = page.locator('nav details').filter({ has: page.locator('summary', { hasText: locale ? 'PyTorch CUDA Semantics' : 'PyTorch CUDA 语义' }) });
       await expect(group).toHaveCount(1);
       expect(await group.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href'))))
@@ -54,34 +58,52 @@ for (const locale of ['', 'en/']) {
       if (!(await group.evaluate((element) => element.hasAttribute('open')))) await group.locator('summary').click();
       await group.locator(`a[href="/${locale}${unit.slug}/"]`).click();
       await expect(page).toHaveURL(`${baseURL}/${locale}${unit.slug}/`);
-      await expectLoadedPage();
+      await expectLoadedPage(page);
       await expectPublication(page, unit.id, unit.prerequisites);
+      expect(failures).toEqual([]);
+    });
+
+    test(`${label}${unit.id} practice navigation reaches its exact anchor and returns to the unit`, async ({ page, baseURL }, info) => {
+      test.skip(info.project.name === 'mobile-safari', 'The narrow-screen journey owns mobile navigation.');
+      test.setTimeout(30_000);
+      const failures = collectBrowserFailures(page, baseURL!);
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(`/${locale}${unit.slug}/`, { waitUntil: 'domcontentloaded' });
+      await expectLoadedPage(page);
       await page.locator(`main a[href="/${locale}practice/#${unit.practice}"]`).first().click();
       await expect(page).toHaveURL(`${baseURL}/${locale}practice/#${unit.practice}`);
-      await expectLoadedPage();
+      await expectLoadedPage(page);
       await expect(page.locator(`main #${unit.practice}`)).toHaveCount(1);
       await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^${unit.practice.toUpperCase()}[:：]`) })).toBeVisible();
       await page.locator(`main a[href="/${locale}${unit.slug}/"]`).first().click();
       await expect(page).toHaveURL(`${baseURL}/${locale}${unit.slug}/`);
-      await expectLoadedPage();
-      await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-${unit.source}"]`).first().click();
-      await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-${unit.source}`);
-      await expectLoadedPage();
-      await expect(page.locator(`main #src-cuda-${unit.source}`)).toHaveCount(1);
-      await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^SRC-CUDA-${unit.source}[:：]`) })).toBeVisible();
-      if (unit.id === 'P07') {
-        await page.goto(`/${locale}${unit.slug}/`, { waitUntil: 'domcontentloaded' });
-        await expectLoadedPage();
-        await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-080"]`).first().click();
-        await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-080`);
-        await expectLoadedPage();
-        await expect(page.locator('main #src-cuda-080')).toHaveCount(1);
-        const artifact = 'https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl';
-        await expect(page.locator(`main a[href="${artifact}"]`)).toBeVisible();
-        await expect(page.locator('main a[href="https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/profile.json"]')).toBeVisible();
-      }
+      await expectLoadedPage(page);
+      await expectPublication(page, unit.id, unit.prerequisites);
       expect(failures).toEqual([]);
     });
+
+    for (const source of unit.id === 'P07' ? [unit.source, '080'] : [unit.source]) {
+      test(`${label}${unit.id} source navigation reaches SRC-CUDA-${source}`, async ({ page, baseURL }, info) => {
+        test.skip(info.project.name === 'mobile-safari', 'The narrow-screen journey owns mobile navigation.');
+        test.setTimeout(30_000);
+        const failures = collectBrowserFailures(page, baseURL!);
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await page.goto(`/${locale}${unit.slug}/`, { waitUntil: 'domcontentloaded' });
+        await expectLoadedPage(page);
+        await page.locator(`main a[href="/${locale}sources-and-versions/#src-cuda-${source}"]`).first().click();
+        await expect(page).toHaveURL(`${baseURL}/${locale}sources-and-versions/#src-cuda-${source}`);
+        await expectLoadedPage(page);
+        await expect(page.locator(`main #src-cuda-${source}`)).toHaveCount(1);
+        if (source !== '080') {
+          await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^SRC-CUDA-${source}[:：]`) })).toBeVisible();
+        } else {
+          const artifact = 'https://download.pytorch.org/whl/cu128/torch-2.11.0%2Bcu128-cp312-cp312-manylinux_2_28_x86_64.whl';
+          await expect(page.locator(`main a[href="${artifact}"]`)).toBeVisible();
+          await expect(page.locator('main a[href="https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/scripts/pytorch-environment/profile.json"]')).toBeVisible();
+        }
+        expect(failures).toEqual([]);
+      });
+    }
 
     test(`${label}${unit.id} mobile worksheet, counterpart round trips, keyboard hints and separate printable solutions`, async ({ page, baseURL }, info) => {
       const failures = collectBrowserFailures(page, baseURL!);
