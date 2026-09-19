@@ -142,8 +142,9 @@ int main(int argc, char** argv) {
     for (int rank = 0; rank < count; ++rank) {
       cuda(cudaSetDevice(rank), "select for cleanup");
       const auto status = ncclCommDestroy(comms[rank]);
-      nccl(status, "destroy communicator");
+      // NCCL forbids accessing the handle after Destroy returns, even on error.
       comms[rank] = nullptr;
+      nccl(status, "destroy communicator");
       cuda(cudaFree(send[rank]), "free send"); cuda(cudaFree(receive[rank]), "free receive");
       cuda(cudaStreamDestroy(streams[rank]), "destroy stream");
     }
