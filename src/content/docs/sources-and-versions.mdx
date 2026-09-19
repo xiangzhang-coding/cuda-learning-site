@@ -3,7 +3,7 @@ title: 来源与版本记录
 description: 覆盖 T07 与 LAB16 的精确发布与技术来源，独立记录版本、权利和证据。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
-factCheckDate: '2026-09-15'
+factCheckDate: '2026-09-19'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -54,7 +54,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-15'
+      content: '2026-09-19'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -69,11 +69,30 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录列出精确发布、主题、可视化接口，以及扩展至 P01-P12、T01-T03、EX01-EX23、LAB01-LAB15 的课程技术来源。二十项可视化讲解保持无 CUDA 证据。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
+这份记录列出精确发布、主题、可视化接口，以及扩展至 P01-P12、T01-T08、EX01-EX23、LAB01-LAB16 的课程技术来源。二十项可视化讲解保持无 CUDA 证据。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
 
 ## 记录范围
 
-**2026-09-15 当前发布**有 95 个学习单元（Learning Unit）、23 个可运行示例（Runnable Example）、16 个实验（Lab）、20 项可视化讲解（Visual Explainer）、94 组练习与 94 组独立解答的双语发布对（Publication Pair），共 **345 个发布对 / 690 条源路由**。**453 条目录记录**包括 16 个实验、102 个练习题库（Practice Bank）条目、20 项可视化讲解、207 个术语表（Glossary）词条和 108 条来源。Issue #50 增加 SRC-CUDA-092，既有逐项日期不变。R4 仍是最近完成的聚合复核（277 对、554 路由、401 条记录），R5 聚合复核待完成。[9 月 10 日复核](#r4-aggregate-review)保持历史记录。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+**2026-09-19 R5 聚合静态复核**冻结 95 个学习单元（Learning Unit）、23 个可运行示例（Runnable Example）、16 个实验（Lab）、20 项可视化讲解（Visual Explainer）、94 组练习与 94 组独立解答的双语发布对（Publication Pair），共 **345 个发布对 / 690 条源路由**。**453 条目录记录**包括 16 个实验、102 个练习题库（Practice Bank）条目、20 项可视化讲解、207 个术语表（Glossary）词条和 108 条来源。既有来源逐项日期不变。R5 是最近完成的聚合静态复核，下一阶段 R6 待复核。[9 月 10 日 R4 复核](#r4-aggregate-review)保持历史记录。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+
+<span id="r5-aggregate-review"></span>
+
+## R5 聚合复核 — 2026-09-19
+
+模式版本 6 的 `src/r5-release-manifest.json` 生成 `/release.json`；`/publication.json` 保留相同当前清单，记录 R5 已完成、下一阶段 R6 待复核。[Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) 单独记录同一提交的 CI、Preview、生产和冒烟验收。静态总结不预先证明这些动态结果。R1-R4 保留不可变历史。P01-P12 与 T01-T08 的公开先修、练习与独立解答形成闭包；不发布 R6 或多 GPU 占位目的地。既有 **PB-R5-004 至 PB-R5-020** 是 102 道题中的 17 道独立 PyTorch 和 Triton 题。
+
+| 独立环境 | 选定边界 |
+| --- | --- |
+| CUDA Python / EX21 | CPython 3.14.7、cuda-core 1.2.0、bindings 13.4.1、pathfinder 1.8.1、NumPy 2.5.3；Toolkit 13.3.1、NVRTC/nvJitLink 13.3.33；驱动目标 610.43.02 |
+| Eager PyTorch | CPython 3.12.14、torch 2.11.0+cu128、CUDA 元包 12.8.1、runtime/CUPTI 12.8.90、cuDNN 9.19.0.56；原生分配器；无需系统 nvcc |
+| 自定义算子 | 相同应用锁；独立 Toolkit 12.8.1、NVCC 12.8.93、GCC 13.3.0、C++17、8.0+PTX |
+| Triton | CPython 3.14.7、Triton 3.7.1、torch 2.13.0 与 EX23 完整哈希锁；CUDA 13.0.3 包家族、驱动下限 580.65.06；原生 Linux x86-64、CC 8.0+、至少 8 GB 的单 GPU；ptxas 12.8.93 与另受架构门槛约束的 Blackwell ptxas 13.1.80 |
+
+仅编译用 Triton 子集不能运行工作负载。诊断另行锁定 NumPy。实际加载库、设备、驱动、编译器/分析器、形状/类型、预热、样本和后端/配置选择必须写入环境清单（Environment Manifest）。缺失配置阻止执行，或使用显式检查过的基线；接口资格不等于成功派发。T08 限定为有边界的前向注意力。自动调优选择与性能不能跨形状、设备或构建转移。
+
+本次通过 Context7 `/nvidia/cuda-python`、`/pytorch/pytorch/v2.11.0` 与 `/triton-lang/triton` 查询编译/链接、扩展/SDPA 限制与自动调优/调试。混入的主分支和旧片段只用于发现资料。精确上游依据仍为 SRC-CUDA-077–092。本次重新检查 [cuda-core 安装契约](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/docs/source/install.rst)、[PyTorch 扩展源码](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py)、[SDPA 选择](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/transformers/cuda/sdp_utils.cpp)、[Triton 工具链](https://github.com/triton-lang/triton/blob/f797708c0626e5f9840ca5b0a98790e2c7cb09ad/cmake/nvidia-toolchain-version.json)及编译器/调试/测试文件，保留各自独立版本。[完整文件哈希与检索记录](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/MAINTENANCE_SOURCES.md#r5-aggregate-source-disposition)保留核查细节。SRC-CUDA-090/092 的 NVIDIA 2026.3 诊断引用不重写历史分析器日期。
+
+权利边界仍为 CUDA Python Apache-2.0、PyTorch BSD-3-Clause 及 NOTICE/传递条款、Triton MIT（EX23 中保留的精确声明），以及独立的 NVIDIA 专有 SDK/工具/文档条款。本次不复制或改编上游示例、题目、图示、基准或软件包，不改变锁文件和依赖。只有 EX02、EX10 与 LAB02 保留编译已检查（Compile-Checked）证据；EX10 无需运行验证（Runtime-Not-Applicable），**38 个对象仍待硬件验证（Pending Hardware Verification）**，六份分析器计划仍仅含预期。没有基准环境（Reference Environment）、运行已验证（Runtime-Verified）结果或已记录性能观察。网页/主机/编译门禁不授予 GPU 证据。
 
 ## 来源与版本索引
 

@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-09-15'
+factCheckDate: '2026-09-19'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-15'
+      content: '2026-09-19'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -50,7 +50,7 @@ As of **2026-09-15**, the current publication extends R4 through P01-P12 and T01
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
-**R4 remains the latest completed aggregate static review, dated 2026-09-10.** Schema 5 `src/r4-release-manifest.json` still supplies the frozen `/release.json`: 75 Learning Units, 277 Publication Pairs, 554 source routes, and 401 catalog records. `/publication.json` records the expanded current inventory, with R4 latest completed and the next R5 aggregate review pending. R1-R3 history is unchanged; R3 retains 62 units, 232 pairs, 464 routes, and 347 catalog records. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) and the [aggregate source disposition](/en/sources-and-versions/#r4-aggregate-review) retain their historical dates. Publishing the current pages does not pre-certify CI, Preview, production, or smoke acceptance, and technical sources retain their item-level dates.
+**R5 is the latest completed aggregate static review, dated 2026-09-19.** Schema 6 `src/r5-release-manifest.json` supplies `/release.json`: 95 Learning Units, 345 Publication Pairs, 690 source routes and 453 catalog records. `/publication.json` records R5 as latest completed and R6 as next/pending. The complete P01-P12 and T01-T08 path includes 102 original Practice Bank entries, 17 specifically covering PyTorch and Triton. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records source-bound CI, Preview, production and smoke acceptance separately from this [static source review](/en/sources-and-versions/#r5-aggregate-review). R1-R4 and [issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) remain historical. Independent Python environments inherit no CUDA evidence; 38 subjects remain Pending Hardware Verification. R6 and multi-GPU support are outside this release.
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) publishes [P01: The CUDA Python Bridge](/en/python/cuda-python-bridge/) with ordered direct prerequisites `[F04,M07]`; [P02: Devices, Contexts, and Launches](/en/python/devices-contexts-launches/) requires `[P01,F07]`; [P03: Runtime Compilation and Linking](/en/python/runtime-compilation-linking/) requires `[P02,M15,M16]`. Each has Exercises and separate solutions, all using [EX21: CUDA Python Explicit Launch](/en/examples/cuda-python-launch/), whose sole direct prerequisite is `[P02]`. EX21 independently pins its Python, package, and native Toolkit profile, inherits no C++ Toolkit Lane compilation evidence, and remains Pending Hardware Verification. This increment publishes no framework or Triton placeholder destinations.
 
@@ -106,7 +106,7 @@ Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; t
 
 [L13](/en/libraries/cusparse-descriptors-spmv-spmm/) has exactly `[A12,A13,L01]` as ordered prerequisites. [L13 Exercises](/en/libraries/cusparse-descriptors-spmv-spmm/exercises/) require `[L13]`; [separate solutions](/en/libraries/cusparse-descriptors-spmv-spmm/solutions/) require `[L13-EXERCISES]`. All L01-L13 are published. L13's four evidence arrays remain empty; EX20 has no retained compilation evidence and remains Pending Hardware Verification. Its three C++17 non-executing build gates pin Toolkit/cuSPARSE pairs 11.8.0/11.7.5.86, 12.9.2/12.5.10.65, and 13.3.1/12.8.2.51. The [SRC-CUDA-075/076 review](/en/sources-and-versions/#src-cuda-075) dated 2026-09-09 records available exact cuSPARSE archives, including 13.3.1, separately from EX19's older archive-failure record. Source review and build gates are not GPU evidence.
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) supplies [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`. Their twelve pairs include Exercises and separate solutions. The [independent eager environment](/en/sources-and-versions/#src-cuda-080) retains torch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1/runtime 12.8.90, cuDNN 9.19.0.56 and the native allocator, with no system Toolkit requirement. P08-P10 add the separately gated extension project. T01/T02 require `[F02,F03,M02]` and `[T01,A01]`; T03/LAB15 both require `[T02,A10,Q05]`. Further Triton units remain unpublished.
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) supplies [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`. Their twelve pairs include Exercises and separate solutions. The [independent eager environment](/en/sources-and-versions/#src-cuda-080) retains torch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1/runtime 12.8.90, cuDNN 9.19.0.56 and the native allocator, with no system Toolkit requirement. P08-P10 add the separately gated extension project. T01/T02 require `[F02,F03,M02]` and `[T01,A01]`; T03/LAB15 both require `[T02,A10,Q05]`. The complete Triton path now extends through T08.
 
 ## Boundaries first
 

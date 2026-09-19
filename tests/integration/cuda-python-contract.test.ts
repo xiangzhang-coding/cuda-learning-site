@@ -29,8 +29,8 @@ describe('issue #42 CUDA Python publication contract', () => {
     const [current, r4] = await Promise.all(['current-publication', 'r4-release'].map(async (name) =>
       JSON.parse(await readFile(path.join(root, `src/${name}-manifest.json`), 'utf8'))));
     expect(current).toMatchObject({
-      reviewDate: '2026-09-15',
-      releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
+      reviewDate: '2026-09-19',
+      releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
       scope: { publicationPairs: 345, sourceRoutes: 690, exerciseSetPublicationPairs: 94,
         solutionSetPublicationPairs: 94, practiceBankEntries: 102, sourceRecords: 108 },
     });

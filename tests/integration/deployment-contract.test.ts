@@ -10,21 +10,21 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 
 describe('Cloudflare assets-only deployment contract', () => {
-  it('accepts frozen R4 plus current Python publication inputs and rejects stale metadata before upload', async () => {
+  it('accepts frozen R5 plus current publication inputs and rejects stale metadata before upload', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'r4-release-source-'));
     const sourceCommit = '0000000000000000000000000000000000000041';
     try {
       await Promise.all(['src', 'dist', 'bin'].map((directory) => mkdir(path.join(root, directory))));
       await cp(path.join(projectRoot, 'scripts'), path.join(root, 'scripts'), { recursive: true });
       const historical = JSON.parse(await readFile(path.join(projectRoot, 'src/r3-release-manifest.json'), 'utf8'));
-      const reviewed = JSON.parse(await readFile(path.join(projectRoot, 'src/r4-release-manifest.json'), 'utf8'));
+      const reviewed = JSON.parse(await readFile(path.join(projectRoot, 'src/r5-release-manifest.json'), 'utf8'));
       const current = {
         ...JSON.parse(await readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8')),
-        releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
+        releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
       };
       await Promise.all([
         writeFile(path.join(root, 'src/r3-release-manifest.json'), JSON.stringify(historical)),
-        writeFile(path.join(root, 'src/r4-release-manifest.json'), JSON.stringify(reviewed)),
+        writeFile(path.join(root, 'src/r5-release-manifest.json'), JSON.stringify(reviewed)),
         writeFile(path.join(root, 'src/current-publication-manifest.json'), JSON.stringify(current)),
         writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...reviewed, sourceCommit })),
         writeFile(path.join(root, 'dist/publication.json'), JSON.stringify({ ...current, sourceCommit })),
@@ -39,7 +39,7 @@ describe('Cloudflare assets-only deployment contract', () => {
       await writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...historical, sourceCommit }));
       await expect(check()).rejects.toMatchObject({ stderr: expect.stringContaining('Built release metadata does not match the reviewed source manifest.') });
       await writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...reviewed, sourceCommit }));
-      await writeFile(path.join(root, 'dist/publication.json'), JSON.stringify({ ...current, scope: reviewed.scope, sourceCommit }));
+      await writeFile(path.join(root, 'dist/publication.json'), JSON.stringify({ ...current, scope: historical.scope, sourceCommit }));
       await expect(check()).rejects.toMatchObject({ stderr: expect.stringContaining('Built publication metadata does not match the current source manifest.') });
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -81,7 +81,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("['status', '--porcelain=v1', '--untracked-files=all']");
     expect(guard).toContain("['rev-parse', 'HEAD']");
     expect(guard).toContain("['branch', '--show-current']");
-    expect(guard).toContain("'src/r4-release-manifest.json'");
+    expect(guard).toContain("'src/r5-release-manifest.json'");
     expect(guard).toContain("'src/current-publication-manifest.json'");
     expect(guard).toContain("'dist/publication.json'");
     expect(guard).toContain("scanDirectory(path.join(projectRoot, 'dist'))");
@@ -107,7 +107,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     const [release, publication, sourceManifest, currentSourceManifest] = await Promise.all([
       readFile(path.join(projectRoot, 'dist/release.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8').then(JSON.parse),
-      readFile(path.join(projectRoot, 'src/r4-release-manifest.json'), 'utf8').then(JSON.parse),
+      readFile(path.join(projectRoot, 'src/r5-release-manifest.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8').then(JSON.parse),
     ]);
     const builtFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true })).map((file) =>
@@ -136,37 +136,37 @@ describe('Cloudflare assets-only deployment contract', () => {
     });
     expect(publication.sourceCommit).toBe(release.sourceCommit);
     expect(release).toMatchObject({
-      releaseId: 'R4',
-      schemaVersion: 5,
-      reviewDate: '2026-09-10',
+      releaseId: 'R5',
+      schemaVersion: 6,
+      reviewDate: '2026-09-19',
       scope: {
-        publicationPairs: 277,
-        sourceRoutes: 554,
-        exerciseSetPublicationPairs: 74,
-        solutionSetPublicationPairs: 74,
-        practiceBankEntries: 82,
+        publicationPairs: 345,
+        sourceRoutes: 690,
+        exerciseSetPublicationPairs: 94,
+        solutionSetPublicationPairs: 94,
+        practiceBankEntries: 102,
         nsightReportAnalysisPracticeEntries: expect.arrayContaining(['PB-R3-002', 'PB-R3-012']),
         libraryAlgorithmChoicePracticeEntries: ['PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-008', 'PB-R4-011', 'PB-R4-012', 'PB-R4-016'],
-        glossaryTerms: 196,
-        sourceRecords: 92,
+        glossaryTerms: 207,
+        sourceRecords: 108,
       },
     });
-    expect(release.scope.learningUnits).toHaveLength(75);
-    expect(release.scope.runnableExamples).toHaveLength(20);
-    expect(release.scope.labs).toHaveLength(12);
-    expect(release.scope.visualExplainers).toHaveLength(19);
+    expect(release.scope.learningUnits).toHaveLength(95);
+    expect(release.scope.runnableExamples).toHaveLength(23);
+    expect(release.scope.labs).toHaveLength(16);
+    expect(release.scope.visualExplainers).toHaveLength(20);
     expect(
       release.scope.labs.length +
       release.scope.practiceBankEntries +
       release.scope.visualExplainers.length +
       release.scope.glossaryTerms +
       release.scope.sourceRecords,
-    ).toBe(401);
+    ).toBe(453);
     expect(publication).toMatchObject({
       publicationId: 'current',
       schemaVersion: 1,
-      reviewDate: '2026-09-15',
-      releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
+      reviewDate: '2026-09-19',
+      releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
       scope: {
         publicationPairs: 345,
         sourceRoutes: 690,
@@ -273,7 +273,7 @@ describe('Cloudflare assets-only deployment contract', () => {
       'EX19 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned Toolkit Lane C++17 build gates provide no retained evidence; callbacks, low precision, multi-GPU execution, and timing are outside its contract.',
       'L13 uses the archived 12.9.2 cuSPARSE teaching baseline and exact 13.3.1 archive reviewed 2026-09-09. SpMV and SpMM preprocessing, algorithm determinism, narrow precision, and structured sparsity retain distinct version and hardware gates.',
       'EX20 has empty compilation and recorded observations and remains Pending Hardware Verification. Its three pinned C++17 build gates do not execute CUDA; the FP32 non-transposed CSR SpMV path excludes preprocessing, SpMM, mixed precision, structured sparsity, and timing.',
-      'P01-P12 have all four evidence arrays empty and grant no Evidence Status. P08-P10, EX22 and LAB13 publish the first original adjacent-energy custom operator and its independent extension build profile. P11/P12 and LAB14 add profile-led optimization and exact-build beta SDPA dispatch verification without backend, trace, timing or speedup observations. The R5 aggregate review and later Triton units remain pending.',
+      'P01-P12 have all four evidence arrays empty and grant no Evidence Status. P08-P10, EX22 and LAB13 publish the original adjacent-energy custom operator and its independent extension build profile. P11/P12 and LAB14 add profile-led optimization and exact-build beta SDPA dispatch verification without backend, trace, timing or speedup observations. Fallback must be explicit and verified in the selected build, never inferred from API presence.',
     ]));
     expect(publication.knownLimitations).not.toContain(
       'Q11 and LAB10 have no current public destination; LAB10 remains unpublished until Q11 supplies its evidence-based optimization prerequisite.',
@@ -375,7 +375,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(deployment).toMatch(/No Reference Environment.*performance observation/i);
     expect(deployment).toMatch(/R4.*latest completed aggregate static review/i);
     expect(deployment).toContain('schema 5 R4 contract');
-    expect(deployment).toContain('releaseReview.next: R5');
+    expect(deployment).toContain('releaseReview.next: R6');
     expect(deployment).toContain('releaseReview.status: pending');
     expect(deployment).not.toMatch(/R4 aggregate review remains pending/i);
     expect(deployment).toContain('does not certify framework/Triton completion');

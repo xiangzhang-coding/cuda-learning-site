@@ -1,5 +1,31 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R5 aggregate source disposition
+
+**2026-09-19.** R5 is the latest completed aggregate static review; schema 6 `src/r5-release-manifest.json` freezes the dependency-closed P01-P12/T01-T08 publication. R6 is next/pending. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) separately owns dynamic acceptance. Earlier dated increments and R1-R4 remain historical.
+
+Fresh Context7 discovery used `/nvidia/cuda-python` (Program/NVRTC/nvJitLink and installation), `/pytorch/pytorch/v2.11.0` (extension build and SDPA/profiler constraints), and `/triton-lang/triton` (autotuning and interpreter/device debugging). Results mixed main-branch snippets, older CUDA Python extras and a generic benchmark description. They do not establish exact selected-version support. No discovery snippet was copied. Existing SRC-CUDA-077–092 and their item-level dates retain the complete API, support, tests, artifacts and file-specific license reviews.
+
+Fresh owner checks confirm cuda-core 1.2.0 commit `53b43746e501f1a0b627f951604991636f77cd9c` installation supports Python 3.10–3.14 and CUDA 12/13, with experimental free-threading excluded by EX21. The initial obsolete `cuda/core/experimental/_program.py` URL returned 404; it is not a verified source. Triton 3.7.1 commit `f797708c0626e5f9840ca5b0a98790e2c7cb09ad` README selects Linux/NVIDIA CC 8.0+ and CPython 3.10–3.14; its exact toolchain JSON pins ptxas 12.8.93, Blackwell ptxas/cuobjdump/nvdisasm/cudacrt/cudart 13.1.80 and CUPTI 12.8.90. These compiler-package coordinates do not replace the full torch 2.13.0 runtime lock or the independent torch 2.11.0+cu128 profile.
+
+Freshly retrieved whole-file SHA-256 values (HTTP 200) below confirm the already reviewed owner coordinates; owner tests were not executed:
+
+| Owner coordinate | SHA-256 |
+| --- | --- |
+| PyTorch `70d99e998b4955e0049d13a98d77ae1b14db1f45`, `torch/utils/cpp_extension.py` | `1517eb2ac276065210d7c861becc5bf3a5404796da16d35af9b9466667fef904` |
+| Same, `torch/nn/attention/__init__.py` | `56e10b6f965cc050db782dd4dc472097c9b02ec5b5fe3ab2c8b04055c0b0bbe0` |
+| Same, `aten/src/ATen/native/transformers/cuda/sdp_utils.cpp` | `b3147692c23222489ec3864d2272b0d83110310a7a064e1a9e73e5bcb9f25ba2` |
+| Same, `torch/profiler/profiler.py` | `ee59c2a780b5a01039bc35f179f738e2eee01b6797b50ac14ac3891f0aa6bff6` |
+| Same, BSD-3-Clause `LICENSE` | `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43` |
+| PyTorch v2.13.0, `torch/nn/functional.py` | `990a8b717645fa603b0dd2957b7b3ed68c5fb937fa205048c096ac8bb532510e` |
+| Triton selected commit, `python/triton/runtime/autotuner.py` | `40f5e142806219942585a16742e9f3721d5bfef88145b571cf389f9aec6460bb` |
+| Same, `python/triton/compiler/compiler.py` | `021a45ca590052ab6ca6d850eb0a102abf542165836ad92bfb3bb573218fc5d3` |
+| Same, `python/triton/testing.py` | `15e46e471ac9ecd221e9837e07eb626e88f0047c079612be44c28168a5427002` |
+| Same, `docs/programming-guide/chapter-3/debugging.rst` | `0d3037966d87cd2f729d64322b9daec4e89d43a68d1e74a0934f76a809a77c25` |
+| Same, MIT `LICENSE`, matching retained EX23 notice | `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946` |
+
+No dependency or lockfile was upgraded. Exact binary/package hashes and proprietary SDK notices remain in SRC-CUDA-079/080/085/087; the NVIDIA 2026.3 diagnostic references in SRC-CUDA-090/092 remain separate from historical Nsight 2026.2.1 records. Source review creates no installation, backend, autotune choice, captured report, timing or GPU Evidence Status. Published performance observations remain empty; six profiler plans remain expected-only. The 17-entry PyTorch-and-Triton subset PB-R5-004–020 counts existing distinct questions, not duplicated new entries.
+
 ## Triton debugging and persistence — 2026-09-15
 
 Issue #49 publishes T06 `[T02,Q03,Q04]`, T07 `[T04,T05,Q09]`, their complete

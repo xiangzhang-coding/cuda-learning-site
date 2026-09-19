@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-15'
+factCheckDate: '2026-09-19'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-15'
+      content: '2026-09-19'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -98,9 +98,9 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 截至 **2026-09-12**，稳定课程（Stable Curriculum）的当前发布完整双语覆盖 82 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07。可复用库路线保留 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)及各自示例；Python 桥接从 [P01](/python/cuda-python-bridge/)进入，仍需满足已有 CUDA 生命周期与流的先修条件。P04-P07 将这些概念用于 eager PyTorch。下面列出当前完整发布的严格先修关系。
 
-最近完成的聚合静态复核仍是 2026-09-10 的 R4。冻结的 `/release.json` 保留 75 个学习单元、277 个双语发布对、554 条源路由、74 组练习、74 组独立解答、401 条目录记录。R1-R3 是不变的历史快照。`/publication.json` 当前记录 345 个双语发布对、690 条源路由、94 组练习和 94 组独立参考解答。R5 聚合复核仍待完成，发布不升级运行证据。
+最近完成的聚合静态复核是 2026-09-19 的 R5。冻结的 `/release.json` 与当前 `/publication.json` 均记录 95 个学习单元、345 个双语发布对、690 条源路由、94 组练习、94 组独立解答与 453 条目录记录。R1-R4 保留不变历史。下一阶段 R6 待复核；发布不升级运行证据。
 
-**R4 聚合静态复核日期：2026-09-10。** [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41)和当时的[聚合复核结论](/sources-and-versions/#r4-aggregate-review)保留为历史记录，不覆盖本次 [issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42)的 Python 桥接增量。当前页面发布不预先证明 CI、Preview、生产部署或远程冒烟检查已通过，也不表示框架或 Triton 路线已完成。技术来源仍保留逐项访问与复核日期。
+**R5 静态复核与动态验收分开记录。** [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51)负责同一提交的 CI、Preview、生产与冒烟结果，[聚合来源复核](/sources-and-versions/#r5-aggregate-review)记录独立环境和回退边界。P01-P12 与 T01-T08 已完整发布，不包含多 GPU 支持。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41)与 R4 的 2026-09-10 复核保留历史日期，技术来源也保留逐项日期。
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -139,7 +139,7 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 当前 95 个学习单元扩展至 P12 和 T08。[T08](/triton/attention-capstone/) 依赖 `[T03,T04,A11,P12]`，结合前向注意力与 VIS18。[实验索引](/labs/)列出 16 个实验，[可视化讲解索引](/visuals/)列出 20 项讲解。有 102 个[练习题库](/practice/)条目、207 个[术语表](/glossary/)词条、108 条[来源记录](/sources-and-versions/)，共 453 条资源目录记录。SRC-CUDA-092 记录综合练习接口；R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题不变。
 
-P04-P07 的证据数组为空，[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、随包 CUDA 12.8.1/runtime 12.8.90 与 native 分配器。Eager 工作不需要系统 Toolkit。[P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含练习和独立解答。扩展项目另行要求 Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0。T01-T03、EX23 与 LAB15 使用独立 Triton 3.7.1 环境；更后续 Triton 单元尚未发布。
+P04-P07 的证据数组为空，[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、随包 CUDA 12.8.1/runtime 12.8.90 与 native 分配器。Eager 工作不需要系统 Toolkit。[P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含练习和独立解答。扩展项目另行要求 Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0。T01-T08、EX23 与 LAB15-LAB16 使用独立 Triton 3.7.1 环境。
 
 只有 EX02、EX10、LAB02 编译已检查（Compile-Checked）。EX10 无需运行验证（Runtime-Not-Applicable）；其余 22 个示例和 16 个实验共 38 个主体待硬件验证（Pending Hardware Verification）。P01-P12 和 T01-T08 证据数组为空，T08 设备验收待完成。EX21-EX23 与 LAB13-LAB16 编译/已记录观察为空，仍待硬件验证。运行已验证（Runtime-Verified）、社区已观察（Community-Observed）、基准环境（Reference Environment）、性能观察均为零；来源和主机检查不是 GPU 证据。
 
@@ -191,4 +191,4 @@ L13 使用归档的 12.9.2 cuSPARSE 教学基线；[SRC-CUDA-075/076 复核](/so
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**当前发布摘要核对日期：2026-09-12。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。R4 聚合复核和各项来源的历史日期不变。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**当前发布摘要核对日期：2026-09-19。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。R4 聚合复核和各项来源的历史日期不变。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
