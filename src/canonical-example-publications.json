@@ -2,6 +2,11 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "examples": {
+    "EX24": {
+      "sourceCommit": "9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b/examples/ex24-nccl-all-reduce",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b.zip"
+    },
     "EX23": {
       "sourceCommit": "5f830b8ec77dedb42e851ff03201e4cf968d10e9",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/5f830b8ec77dedb42e851ff03201e4cf968d10e9/examples/ex23-triton-vector-add",

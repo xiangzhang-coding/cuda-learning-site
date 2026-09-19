@@ -1,0 +1,70 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX24",
+  "title": "NCCL all-reduce",
+  "purpose": "Verify every element on every rank with a bounded integer oracle and explicit CUDA stream completion.",
+  "root": "examples/ex24-nccl-all-reduce",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": ["include/oracle.hpp", "src/all_reduce.cpp"],
+    "hostTestInputs": ["include/oracle.hpp", "tests/host.cpp"],
+    "contractFiles": ["Makefile", "Dockerfile", ".dockerignore"],
+    "stages": ["preprocess", "compile", "link", "inspect"],
+    "commands": {"preprocess": "make preprocess", "compile": "make compile", "link": "make link", "inspect": "make inspect", "hostTest": "make host-test"},
+    "artifacts": ["build/all_reduce.ii", "build/all_reduce.o", "build/ex24-nccl-all-reduce", "build/dynamic-section.txt", "build/dynamic-linkage.txt"]
+  },
+  "correctness": {
+    "cpuReference": "include/oracle.hpp",
+    "ranks": {"minimum": 2, "maximum": 8},
+    "counts": [1, 257, 1048576],
+    "datatype": "ncclInt32",
+    "operation": "ncclSum",
+    "input": "3*(rank+1)+(i%17)-8",
+    "oracle": "3*R*(R+1)/2+R*((i%17)-8)",
+    "comparison": "exact equality for every element of every rank; integer sums are bounded without overflow",
+    "processes": 1,
+    "submittingHostThreads": 1,
+    "streamsPerRank": 1,
+    "completionDeadlineSeconds": 60,
+    "externalWatchdogSeconds": 180
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "minimumComputeCapability": "7.5",
+    "minimumDeviceMemoryBytes": 8000000000,
+    "minimumFreeDeviceMemoryBytes": 268435456,
+    "requiredGpuCount": 2,
+    "maximumGpuCount": 8,
+    "maximumProblemMemoryBytes": 8388608,
+    "minimumDriver": "610.43.02",
+    "processModel": "one process, one submitting thread, distinct full GPUs; visible ordinals 0..R-1; no MIG",
+    "nccl": {
+      "version": "2.31.2", "versionCode": 23102, "package": "2.31.2-1+cuda13.3",
+      "commit": "7b83616df3ae082a1f32bb74c27458bfe8153a13",
+      "runtimeSha256": "e1c743dc848afb697d8311c575e4a728e0fff84ad2d4aa73b7c8b82d9ae83868",
+      "developmentSha256": "5c3d903e1f4a0174b28f02ed714b7ccd2ddd1c23a686e93afa0dedcacdf95643",
+      "licenseSha256": "c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be"
+    },
+    "lanes": [{
+      "id": "cuda-13.3", "toolkit": "13.3.1", "operatingSystem": "Ubuntu 24.04 x86-64",
+      "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+      "manifestDigest": "sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87",
+      "amd64Digest": "sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+      "dialects": ["c++17"]
+    }],
+    "checks": [{"id": "cuda-13-3-nccl-2-31-2", "toolkitLane": "cuda-13.3", "dialect": "c++17", "kind": "ex24", "allowedResults": ["pass"]}]
+  },
+  "ranges": {
+    "oracle": {"file": "include/oracle.hpp", "startMarker": "// [ex24-oracle-start]", "endMarker": "// [ex24-oracle-end]", "language": "cpp"},
+    "collective": {"file": "src/all_reduce.cpp", "startMarker": "// [ex24-collective-start]", "endMarker": "// [ex24-collective-end]", "language": "cpp"},
+    "completion": {"file": "src/all_reduce.cpp", "startMarker": "// [ex24-completion-start]", "endMarker": "// [ex24-completion-end]", "language": "cpp"}
+  },
+  "evidence": {
+    "compilation": [], "runtime": "Pending Hardware Verification",
+    "expectedObservations": ["Every rank should have zero mismatches for all three counts after stream completion and successful cleanup."],
+    "recordedObservations": []
+  }
+}

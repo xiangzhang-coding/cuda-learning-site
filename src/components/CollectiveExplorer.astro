@@ -1,0 +1,88 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import { collectiveModel } from '../visuals/collective-model';
+import { collectiveCopy } from '../visuals/collective-copy';
+interface Props { locale: 'zh-CN' | 'en' }
+const { locale } = Astro.props;
+const copy = collectiveCopy[locale];
+const initial = collectiveModel('all-reduce', 4, 'ring');
+---
+<collective-explorer data-locale={locale} data-visual-id="VIS16">
+  <h3>{copy.title}</h3>
+  <p>{copy.notice}</p><p>{copy.instruction}</p>
+  <fieldset>
+    <legend>{copy.controls}</legend>
+    <label>{copy.collective}<select data-collective><option>all-reduce</option><option>broadcast</option><option>all-gather</option></select></label>
+    <label>{copy.ranks}<select data-ranks>{[2, 4, 8].map(n => <option selected={n === 4}>{n}</option>)}</select></label>
+    <label>{copy.topology}<select data-topology><option value="ring">{copy.ring}</option><option value="star">{copy.star}</option></select></label>
+    <button type="button" data-previous disabled>{copy.previous}</button><button type="button" data-next>{copy.next}</button><button type="button" data-reset>{copy.reset}</button>
+  </fieldset>
+  <p data-hop role="status" aria-live="polite" aria-atomic="true">{copy.hop} 1 / {initial.hops.length}: 1 → 2 · {copy.gather} · {copy.payload} [2]</p>
+  <div data-route aria-hidden="true" class="route">1 <span>→</span> 2</div>
+  <div class="ledger" tabindex="0" role="region" aria-label={copy.output}>
+    <table><caption>{copy.output}</caption><thead><tr><th scope="col">{copy.rank}</th><th scope="col">{copy.input}</th><th scope="col">{copy.output}</th></tr></thead>
+      <tbody data-ledger>{initial.inputs.map((input, rank) => <tr><th scope="row">{rank}</th><td>[{input.join(', ')}]</td><td>[{initial.outputs[rank].join(', ')}]</td></tr>)}</tbody>
+    </table>
+  </div>
+  <h3>{copy.static}</h3>
+  <div class="diagrams" aria-hidden="true">
+    <pre>0 → 1<br/>↑   ↓<br/>3 ← 2</pre>
+    <pre>    1<br/>    ↕<br/>2 ↔ 0 ↔ 3</pre>
+  </div>
+  <p>{copy.fallback}</p><p>{copy.boundary}</p>
+</collective-explorer>
+<script>
+  import { collectiveModel, type Collective, type Topology } from '../visuals/collective-model';
+  import { collectiveCopy } from '../visuals/collective-copy';
+  class CollectiveExplorer extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return;
+      this.dataset.ready = 'true';
+      const copy = collectiveCopy[this.dataset.locale === 'en' ? 'en' : 'zh-CN'];
+      const collective = this.querySelector<HTMLSelectElement>('[data-collective]')!;
+      const ranks = this.querySelector<HTMLSelectElement>('[data-ranks]')!;
+      const topology = this.querySelector<HTMLSelectElement>('[data-topology]')!;
+      const previous = this.querySelector<HTMLButtonElement>('[data-previous]')!;
+      const next = this.querySelector<HTMLButtonElement>('[data-next]')!;
+      let step = 0;
+      const render = () => {
+        const model = collectiveModel(collective.value as Collective, Number(ranks.value), topology.value as Topology);
+        const hop = model.hops[step];
+        previous.disabled = step === 0; next.disabled = step === model.hops.length - 1;
+        this.querySelector('[data-hop]')!.textContent = `${copy.hop} ${step + 1} / ${model.hops.length}: ${hop.from} → ${hop.to} · ${copy[hop.phase]} · ${copy.payload} [${hop.payload.join(', ')}]`;
+        this.querySelector('[data-route]')!.textContent = `${hop.from} → ${hop.to}`;
+        this.querySelector('[data-ledger]')!.replaceChildren(...model.inputs.map((input, rank) => {
+          const row = document.createElement('tr');
+          [String(rank), `[${input.join(', ')}]`, `[${model.outputs[rank].join(', ')}]`].forEach((value, index) => {
+            const cell = document.createElement(index ? 'td' : 'th');
+            if (!index) cell.setAttribute('scope', 'row');
+            cell.textContent = value; row.append(cell);
+          });
+          return row;
+        }));
+      };
+      for (const select of [collective, ranks, topology]) select.addEventListener('change', () => { step = 0; render(); });
+      previous.addEventListener('click', () => { step--; render(); });
+      next.addEventListener('click', () => { step++; render(); });
+      this.querySelector('[data-reset]')!.addEventListener('click', () => {
+        collective.value = 'all-reduce'; ranks.value = '4'; topology.value = 'ring'; step = 0; render();
+      });
+    }
+  }
+  if (!customElements.get('collective-explorer')) customElements.define('collective-explorer', CollectiveExplorer);
+</script>
+<style>
+  collective-explorer { display: block; padding: 1rem; border: 1px solid var(--sl-color-gray-4); margin-block: 1.5rem; }
+  fieldset { display: flex; flex-wrap: wrap; gap: 1rem; border: 1px solid var(--sl-color-gray-4); }
+  label { display: grid; gap: .4rem; }
+  select, button { font: inherit; color: var(--sl-color-text); background: var(--sl-color-bg); min-height: 44px; padding: .5rem; border: 1px solid var(--sl-color-gray-3); border-radius: .25rem; }
+  button:disabled { opacity: .6; }
+  :is(select, button, .ledger):focus-visible { outline: 3px solid var(--sl-color-text-accent); outline-offset: 3px; }
+  .route { font: 700 3rem var(--sl-font-mono); color: var(--sl-color-text-accent); border-inline-start: 4px solid currentColor; padding: .5rem 1rem; margin-block: 1rem; }
+  .ledger { overflow-x: auto; max-width: 100%; } table { width: 100%; font-variant-numeric: tabular-nums; }
+  .diagrams { display: flex; gap: 1rem; flex-wrap: wrap; } pre { padding: 1rem; margin: 0; font-size: 1.2rem; }
+  @media (max-width: 42rem) { fieldset { flex-direction: column; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (forced-colors: active) { .route { color: CanvasText; } }
+  @media print { fieldset, [data-hop], [data-route] { display: none; } .ledger { overflow: visible; } }
+</style>

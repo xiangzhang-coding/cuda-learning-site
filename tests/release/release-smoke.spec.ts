@@ -23,6 +23,7 @@ import ex20Project from '../../examples/ex20-cusparse-spmv/project.json' with { 
 import ex21Project from '../../examples/ex21-cuda-python-launch/project.json' with { type: 'json' };
 import ex22Project from '../../examples/ex22-adjacent-energy/project.json' with { type: 'json' };
 import ex23Project from '../../examples/ex23-triton-vector-add/project.json' with { type: 'json' };
+import ex24Project from '../../examples/ex24-nccl-all-reduce/project.json' with { type: 'json' };
 import canonicalExamplePublications from '../../src/canonical-example-publications.json' with { type: 'json' };
 import currentPublicationManifest from '../../src/current-publication-manifest.json' with { type: 'json' };
 import r3ReleaseManifest from '../../src/r3-release-manifest.json' with { type: 'json' };
@@ -126,6 +127,7 @@ const projectExamples = [
   { suffix: 'examples/cuda-python-launch/', project: ex21PublishedProject },
   { suffix: 'examples/adjacent-energy/', project: { ...ex22Project, ...publicationPins.EX22 } },
   { suffix: 'examples/triton-vector-add/', project: { ...ex23Project, ...publicationPins.EX23 } },
+  { suffix: 'examples/nccl-all-reduce/', project: { ...ex24Project, ...publicationPins.EX24 } },
 ] as const;
 const learningUnits = [
   'O01', 'O02', 'O03', 'O04', 'O05', 'O06', 'O07', 'O08',
@@ -139,21 +141,21 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
 const r4RunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX20'] as const;
-const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23'] as const;
+const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23', 'EX24'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r4Labs = [...r3Labs, 'LAB11', 'LAB12'] as const;
-const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16'] as const;
+const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17'] as const;
 const historicalVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
 ] as const;
-const currentVisualExplainers = [...historicalVisualExplainers, 'VIS17'].sort();
+const currentVisualExplainers = [...historicalVisualExplainers, 'VIS16', 'VIS17'].sort();
 const r3EvidenceNeutralLearningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
   'A10', 'A11', 'A12', 'A13', 'A14',
@@ -182,23 +184,26 @@ const currentProfilerReportPlans = [
   '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
 ] as const;
 const currentNoCompileCheckedClaim = [
+  'EX24', 'LAB17',
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14', 'LAB15', 'LAB16',
 ] as const;
 const currentPendingHardwareVerification = [
+  'EX24', 'LAB17',
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
-  ...currentLabs,
+  ...currentLabs.filter(id => id !== 'LAB17'),
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 16 },
-  { suffix: 'practice/', count: 105 },
-  { suffix: 'visuals/', count: 20 },
+  { suffix: 'labs/', count: 17 },
+  { suffix: 'practice/', count: 107 },
+  { suffix: 'visuals/', count: 21 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 111 },
+  { suffix: 'sources-and-versions/', count: 113 },
 ] as const;
 const exampleRouteSlugs = [
+  'nccl-all-reduce',
   'triton-vector-add',
   'adjacent-energy',
   'coalesced-strided-access',
@@ -494,20 +499,20 @@ test('serves the exact R5 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 354,
-    sourceRoutes: 708,
-    exerciseSetPublicationPairs: 97,
-    solutionSetPublicationPairs: 97,
+    publicationPairs: 363,
+    sourceRoutes: 726,
+    exerciseSetPublicationPairs: 99,
+    solutionSetPublicationPairs: 99,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 105,
+    practiceBankEntries: 107,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 111,
+    sourceRecords: 113,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -639,8 +644,8 @@ test('serves the exact R5 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '354 Publication Pairs' : '354 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '708 source routes' : '708 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '363 Publication Pairs' : '363 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '726 source routes' : '726 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -1044,13 +1049,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(708);
-    expect(new Set(routes).size).toBe(708);
+    expect(routes).toHaveLength(726);
+    expect(new Set(routes).size).toBe(726);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(60);
+    expect(routeBatches).toHaveLength(62);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(354);
+      expect(localized).toHaveLength(363);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }
@@ -2027,7 +2032,7 @@ test('serves immutable canonical downloads, preserves evidence boundaries, and r
       );
       await expect(page.locator('meta[name="cuda:expected-observations"]')).toHaveAttribute(
         'content',
-        `${project.evidence.expectedObservations.length} ${project.id === 'EX10' ? 'artifact expectations' : 'declared expectations'}`,
+        `${project.evidence.expectedObservations.length} ${project.id === 'EX10' ? 'artifact expectations' : project.evidence.expectedObservations.length === 1 ? 'declared expectation' : 'declared expectations'}`,
       );
       await expect(page.locator('meta[name="cuda:recorded-observations"]')).toHaveAttribute('content', 'none');
       const canonicalCode = page.locator(`[data-canonical-example="${project.id}"]`);

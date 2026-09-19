@@ -73,6 +73,42 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  G04: {
+    href: { 'zh-CN': '/multi-gpu/nccl-communicators-collectives/', en: '/en/multi-gpu/nccl-communicators-collectives/' },
+    title: { 'zh-CN': 'G04：让所有 rank 遵守同一集合通信契约', en: 'G04: Give Every Rank the Same Collective Contract' }, prerequisites: ['G01', 'G03'],
+  },
+  G05: {
+    href: { 'zh-CN': '/multi-gpu/nccl-stream-dependencies/', en: '/en/multi-gpu/nccl-stream-dependencies/' },
+    title: { 'zh-CN': 'G05：把 NCCL 工作排进 CUDA 流', en: 'G05: Order NCCL Work on CUDA Streams' }, prerequisites: ['G04', 'M07', 'M08'],
+  },
+  'G04-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/nccl-communicators-collectives/exercises/', en: '/en/multi-gpu/nccl-communicators-collectives/exercises/' },
+    title: { 'zh-CN': 'G04 练习：核对参与者与结果', en: 'G04 Exercises: Audit Participation and Results' }, prerequisites: ['G04'],
+  },
+  'G04-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/nccl-communicators-collectives/solutions/', en: '/en/multi-gpu/nccl-communicators-collectives/solutions/' },
+    title: { 'zh-CN': 'G04 解答：先匹配，再测量', en: 'G04 Solutions: Match Before Measuring' }, prerequisites: ['G04-EXERCISES'],
+  },
+  'G05-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/nccl-stream-dependencies/exercises/', en: '/en/multi-gpu/nccl-stream-dependencies/exercises/' },
+    title: { 'zh-CN': 'G05 练习：找出缺失的完成依赖', en: 'G05 Exercises: Find the Missing Completion Edge' }, prerequisites: ['G05'],
+  },
+  'G05-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/nccl-stream-dependencies/solutions/', en: '/en/multi-gpu/nccl-stream-dependencies/solutions/' },
+    title: { 'zh-CN': 'G05 解答：入队以后，还要证明完成', en: 'G05 Solutions: Enqueue, Then Prove Completion' }, prerequisites: ['G05-EXERCISES'],
+  },
+  EX24: {
+    href: { 'zh-CN': '/examples/nccl-all-reduce/', en: '/en/examples/nccl-all-reduce/' },
+    title: { 'zh-CN': 'EX24：逐 rank 验证 NCCL 全归约', en: 'EX24: Verify NCCL All-reduce on Every Rank' }, prerequisites: ['G04'],
+  },
+  LAB17: {
+    href: { 'zh-CN': '/labs/nccl-all-reduce/', en: '/en/labs/nccl-all-reduce/' },
+    title: { 'zh-CN': 'LAB17：运行并解释 NCCL 全归约', en: 'LAB17: Run and Explain NCCL All-reduce' }, prerequisites: ['G04', 'G05'], indexGroup: 'labs',
+  },
+  VIS16: {
+    href: { 'zh-CN': '/visuals/collective-paths/', en: '/en/visuals/collective-paths/' },
+    title: { 'zh-CN': 'VIS16：沿路径理解集合通信', en: 'VIS16: Follow Collective Message Paths' }, prerequisites: ['G04'], indexGroup: 'visuals',
+  },
   G01: {
     href: { 'zh-CN': '/multi-gpu/devices-contexts-ownership/', en: '/en/multi-gpu/devices-contexts-ownership/' },
     title: { 'zh-CN': 'G01：明确设备、上下文与资源归属', en: 'G01: Assign Devices, Contexts, and Owners' },

@@ -14,6 +14,10 @@ The new softmax Lab kernel, scalar oracle, harness and teaching materials are
 original project work; no owner code listing, fixture, plot, benchmark output or
 binary is copied or redistributed. Source review grants no runtime evidence.
 
+## NCCL 2.31.2 — external EX24 dependency
+
+Selected source: [NVIDIA/nccl at 7b83616df3ae082a1f32bb74c27458bfe8153a13](https://github.com/NVIDIA/nccl/tree/7b83616df3ae082a1f32bb74c27458bfe8153a13). Its exact [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt) has SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`: Apache-2.0, retained BSD terms, and additional borrowed-file notices. NCCL/CUDA packages are installed externally and retain all shipped notices; they are not redistributed by this source or website. EX24 code, rank-sensitive workload, oracle, VIS16 model and tests are original Apache-2.0, not adapted NVIDIA examples. Instruction/diagrams are original CC BY 4.0. Exact review: SRC-CUDA-097/098, 2026-09-19.
+
 ## Triton 3.7.1 — external EX23 dependency
 
 T01/T02, VIS17 and EX23 reference Triton v3.7.1 at `f797708c0626e5f9840ca5b0a98790e2c7cb09ad`. Its [complete root MIT license](https://github.com/triton-lang/triton/blob/v3.7.1/LICENSE), copyright 2018–2020 Philippe Tillet and 2020–2022 OpenAI, is retained byte-for-byte in `examples/ex23-triton-vector-add/TRITON-LICENSE` (SHA-256 `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946`) and protected by the file-license gate. EX23's kernel, signed fixtures, oracle, guards and host tooling are original Apache-2.0; owner tutorial code and benchmarks are not copied. The notice does not relicense bundled NVIDIA tools, PyTorch or their transitive packages. These dependencies are installed externally; no wheel or assembler is redistributed in the site. Source and rights review: 2026-09-14; see SRC-CUDA-087.

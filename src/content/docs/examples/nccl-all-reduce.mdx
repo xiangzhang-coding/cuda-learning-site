@@ -1,0 +1,111 @@
+---
+title: 'EX24：逐 rank 验证 NCCL 全归约'
+description: 固定 NCCL 的规范原创 C++17 程序，使用独立整数参考核对正确性。
+pairId: ex24
+counterpart: /en/examples/nccl-all-reduce/
+factCheckDate: '2026-09-19'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, oracle, collective, completion, build, compatibility, evidence, sources]
+resourceKind: runnable-example
+unitId: EX24
+prerequisites: [G04]
+relatedUnits: []
+exampleIds: [EX24]
+canonicalExample: EX24
+canonicalRanges:
+  - oracle
+  - collective
+  - completion
+hardwareGate: '原生 Linux；2–8 个独立完整 GPU，各 CC 7.5+、总内存 8 GB、空闲 256 MiB；CUDA 13.3.1 与 NCCL 2.31.2'
+toolkitLanes: [cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 8388608
+gpuCount: 2
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Every rank should have zero mismatches for all three counts after stream completion and successful cleanup.']
+  recordedObservations: []
+sources:
+  - { title: 'NCCL selected source', url: 'https://github.com/NVIDIA/nccl/tree/7b83616df3ae082a1f32bb74c27458bfe8153a13', version: '2.31.2', platform: 'native Linux', accessDate: '2026-09-19' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex24 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-19' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,oracle,collective,completion,build,compatibility,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX24 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: G04 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX24 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'oracle,collective,completion' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '1 declared expectation' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/nccl-all-reduce/" lang="en">Read the English counterpart</a>
+
+## 用途
+
+先修 **[G04]**：[通信器与集合通信](/multi-gpu/nccl-communicators-collectives/)。一个进程、一个提交主机线程，在独立完整 GPU 上创建 2–8 个 rank，检查每个 rank 的所有元素。这是正确性项目，没有计时器。[G05](/multi-gpu/nccl-stream-dependencies/) 解释顺序，[LAB17](/labs/nccl-all-reduce/) 提供执行与记录协议。
+
+## 规范项目
+
+[固定源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b/examples/ex24-nccl-all-reduce) · [同版本下载](https://github.com/xiangzhang-coding/cuda-learning-site/archive/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b.zip)。提取 `examples/ex24-nccl-all-reduce/`。两种语言引用相同构建输入，不维护另一份可执行代码。原创软件采用 Apache-2.0，本页采用 CC BY 4.0；源码归档不分发外部 NCCL／CUDA 包。
+
+## 独立整数参考
+
+<CanonicalCode exampleId="EX24" range="oracle" />
+
+计数为 1、257、1048576，数据类型 `ncclInt32`，归约 `ncclSum`。输入随 rank 和索引变化；闭式 CPU 预期独立于 GPU 结果。R=2/i=0 的预期为 -7，R=4/i=16 为 62；它们是算术预期。R=2–8 时所有中间和均能用 int32 表示。主机测试覆盖手算值、逐位置损坏、空输出及无效 rank 参数。主机成功不等于 GPU 正确。
+
+## 分组集合通信与结果检查
+
+<CanonicalCode exampleId="EX24" range="collective" />
+
+`ncclCommInitAll` 让 rank r 对应 CUDA 可见序号 r，查询 API 验证该映射。每个 rank 拥有一个非阻塞 CUDA 流及独立发送／接收数组；上传 → 全归约（All-reduce）→ 下载在同一流排序。一个主机线程先对所有 rank 分组，再等待。即使单次调用失败，也检查 group end。只有阻塞 group end 成功后才下载。主机向量与设备数组存活到所有流完成。可分页主机内存可能让传输阻塞；不声称重叠。
+
+## 完成与失败
+
+可分页下载可能阻塞提交线程，因此先轮询集合通信完成，再下载；下载后再次轮询，确立安全的主机比较边界。这个有意保守的边界使异步通信错误仍能被监控。
+
+<CanonicalCode exampleId="EX24" range="completion" />
+
+轮询所有 rank 的流，同时检查查询返回和 NCCL 异步状态。60 秒期限限制该轮询循环，外部 watchdog 还覆盖阻塞的初始化／分组／finalize／abort 调用。致命路径尝试 abort 通信器，然后退出，不释放可能仍在使用的缓冲区，也不输出成功行。正常清理分组调用 `ncclCommFinalize`，销毁各通信器，释放两个数组并销毁流；释放错误使进程失败。这份有限范围教学程序不承诺从通信器失败中恢复。
+
+## 构建与执行
+
+在独立项目目录，`make host-test` 只执行 CPU 参考测试。构建精确 Linux/amd64 配置：
+
+```sh
+docker build --platform linux/amd64 -t ex24-build .
+```
+
+Dockerfile 使用声明的摘要固定 CUDA 13.3.1 开发镜像，以及 SHA-256 检查的 `libnccl2`／`libnccl-dev` **2.31.2-1+cuda13.3**。执行 `make host-test preprocess inspect`，完成 C++17 预处理、编译、链接与 `readelf`／`ldd` 检查。只运行主机参考测试。该 API 程序没有设备内核，不需项目自有 cubin；g++ 链接 `-lcudart -lnccl`。记录实际编译器／软件包和镜像身份。
+
+等价配置的原生 Linux 主机可用 `make host-test preprocess inspect` 构建相同文件。完成 LAB17 预检后运行：
+
+```sh
+timeout --signal=TERM --kill-after=5s 180s env NCCL_DEBUG=INFO ./build/ex24-nccl-all-reduce 2 > rank-run.log 2>&1
+status=$?
+```
+
+保留 `status` 与私有日志。Watchdog 到期、失败或缺少硬件都不算通过。程序仅接受整数 rank 数 2–8；R 要求至少 R 个合格可见 GPU。预期输出字段为 rank／设备分配、版本代码、count、datatype、操作及不匹配数量，最终成功仅在清理之后。本页没有记录任何执行输出。
+
+## 兼容性与内存
+
+选定原生 Ubuntu 24.04 x86-64、C++17、Toolkit 13.3.1、独立 NCCL 2.31.2、驱动 ≥610.43.02。各完整 GPU 需 CC≥7.5、总内存 ≥8 GB、空闲 ≥256 MiB。最大计数的两个数组占**每 rank 8 MiB**，库／上下文另需资源；主机输入／输出另占每 rank 8 MiB。不声明 MIG、虚拟机、多节点、MPI、graph、注册缓冲区或调优配置。拓扑、IOMMU／ACS／P2P 适用性及设备身份须经过 LAB17 的操作员授权预检。
+
+头文件门槛为 `NCCL_VERSION_CODE=23102`、`CUDART_VERSION=13030`；加载的 `ncclGetVersion` 与 `cudaRuntimeGetVersion` 必须匹配。这些代码不能确立包后缀、文件哈希或已安装驱动版本。记录实际软件包、加载库路径／哈希及完整环境清单（Environment Manifest）。既有工具包通道或 EX23 证据不转移到这里。
+
+## 证据
+
+预期：流完成并成功清理后，所有 rank 在全部三种计数下均无不匹配。**已记录观察：无。编译：空。运行：待硬件验证（Pending Hardware Verification）。** `environment-manifest.json` 是未填工作表，不是采集的运行记录。本地主机测试、容器构建与浏览器检查不会发布编译已检查（Compile-Checked）、运行已验证（Runtime-Verified）、算法选择、带宽或延迟结果。
+
+## 来源与权利
+
+复核日期 **2026-09-19**：[SRC-CUDA-097](/sources-and-versions/#src-cuda-097)、[SRC-CUDA-098](/sources-and-versions/#src-cuda-098)。精确 NCCL 提交为 `7b83616df3ae082a1f32bb74c27458bfe8153a13`；根许可包含 Apache-2.0、保留的 BSD 条款和逐文件声明。未改编上游示例。`project.json` 声明软件包与许可哈希。

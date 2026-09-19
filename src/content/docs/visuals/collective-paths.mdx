@@ -1,0 +1,53 @@
+---
+title: 'VIS16：沿路径理解集合通信'
+description: 改变集合通信、rank 数和合成拓扑，不预测 NCCL 派发。
+pairId: vis16
+counterpart: /en/visuals/collective-paths/
+factCheckDate: '2026-09-19'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, model, interpretation, sources]
+resourceKind: visual-explainer
+unitId: VIS16
+prerequisites: [G04]
+relatedUnits: [G05]
+hardwareGate: none
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'NCCL collective semantics', url: 'https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/api/colls.rst', version: '2.31.2', platform: 'browser-only model', accessDate: '2026-09-19' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis16 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-19' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,model,interpretation,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS16 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: G04 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import CollectiveExplorer from '../../../components/CollectiveExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/collective-paths/" lang="en">Read the English counterpart</a>
+
+## 用途与先修
+
+先修 **[G04]**：[集合通信契约](/multi-gpu/nccl-communicators-collectives/)。先预测结果应放在哪里，再只改变路由约束。无需 GPU。[G05](/multi-gpu/nccl-stream-dependencies/) 单独解释流顺序。
+
+## 确定性模型
+
+<CollectiveExplorer locale="zh-CN" />
+
+## 解释路径，不声称选中了算法
+
+每个 rank r 贡献单元素向量 `[r+1]`。选择全归约（All-reduce）、rank 0 广播（Broadcast）或全收集（All-gather），选择 2、4、8 个 rank 及有向环或星形拓扑（Topology）。除广播外，模型先把贡献收集到 rank 0，在那里计算，再分发。All-gather 按 rank 拼接，all-reduce 求和。每一步沿一条允许边转发一份载荷。改变控件会返回第一跳，重置恢复四 rank 环形 all-reduce。
+
+环形路径从源沿正向走到目标；星形经 rank 0 中转。两者都不是 NCCL 实现或实测拓扑。步数不代表延迟，载荷是合成值，不是 EX24 日志。表格标注的是**预期最终输出**，不是部分完成的设备状态。静态图与文字在禁用 JavaScript 及打印时仍可使用。这里有意不使用动画，也适用于减少动态效果模式。键盘控件与文字提供和大号路径显示相同的信息。
+
+## 来源与权利
+
+复核日期 **2026-09-19**，[SRC-CUDA-097](/sources-and-versions/#src-cuda-097)。图示与讲解原创，采用 CC BY 4.0；模型／界面原创，采用 Apache-2.0。不复制 NVIDIA 图示或算法代码，四个证据数组均为空。

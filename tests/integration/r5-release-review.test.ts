@@ -17,11 +17,17 @@ describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R5', next: 'R6', status: 'pending' });
-    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03']);
-    expect(current.scope).toMatchObject({ publicationPairs: 354, sourceRoutes: 708,
-      exerciseSetPublicationPairs: 97, solutionSetPublicationPairs: 97, practiceBankEntries: 105, sourceRecords: 111 });
-    expect(release.compatibility).toEqual(current.compatibility);
-    expect(release.evidence).toEqual(current.evidence);
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05']);
+    expect(current.scope).toMatchObject({ publicationPairs: 363, sourceRoutes: 726,
+      exerciseSetPublicationPairs: 99, solutionSetPublicationPairs: 99, practiceBankEntries: 107, sourceRecords: 113 });
+    const { nccl, ...priorComponents } = current.compatibility.componentBoundaries;
+    expect({ ...current.compatibility, componentBoundaries: priorComponents }).toEqual(release.compatibility);
+    expect(nccl.version).toBe('2.31.2');
+    expect(current.evidence).toEqual({ ...release.evidence,
+      noCompileCheckedClaim: ['EX24', 'LAB17', ...release.evidence.noCompileCheckedClaim],
+      pendingHardwareVerification: ['EX24', 'LAB17', ...release.evidence.pendingHardwareVerification],
+      evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS16'].sort(),
+    });
     expect(release.scope.learningUnits).toEqual([...r4.scope.learningUnits, ...ids('P', 12), ...ids('T', 8)]);
     expect(release.scope.practiceBankEntries).toBeGreaterThanOrEqual(95);
     expect(release.scope).toMatchObject({ publicationPairs: 345, sourceRoutes: 690, practiceBankEntries: 102 });
@@ -29,7 +35,7 @@ describe('R5 aggregate release review', () => {
       expect(PUBLISHED_DESTINATIONS[id], id).toBeDefined();
       for (const prerequisite of PUBLISHED_DESTINATIONS[id].prerequisites) expect(PUBLISHED_DESTINATIONS[prerequisite], id).toBeDefined();
     }
-    for (const id of ['D01', 'EX24', 'LAB17', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
+    for (const id of ['D01', 'EX25', 'LAB18', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
     expect(r4.scope.learningUnits).toHaveLength(75);
   });
 

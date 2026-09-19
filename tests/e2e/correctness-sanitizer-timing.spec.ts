@@ -132,6 +132,7 @@ const issue19MemorySlugs = [
 ] as const;
 const issue19MemorySlugSet = new Set<string>(issue19MemorySlugs);
 const exampleSlugs = [
+  'nccl-all-reduce',
   'triton-vector-add',
   'adjacent-energy',
   'environment-report',
@@ -157,6 +158,7 @@ const exampleSlugs = [
   'cuda-python-launch',
 ] as const;
 const labSlugs = [
+  'nccl-all-reduce',
   'verify-fused-softmax',
   'autotune-triton-gemm',
   'profile-custom-operator',
@@ -180,8 +182,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(708);
-  expect(publishedRoutes.length / 2).toBe(354);
+  expect(publishedRoutes).toHaveLength(726);
+  expect(publishedRoutes.length / 2).toBe(363);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

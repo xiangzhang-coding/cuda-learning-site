@@ -1,5 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## NCCL source and build disposition — 2026-09-19
+
+G04/G05, EX24/LAB17 and VIS16 use independently selected NCCL 2.31.2, commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`. Context7 `/nvidia/nccl` queried communicator initialization, all-reduce, group/stream synchronization and error/version APIs. Current master results were discovery; exact pinned docs/source and the Ubuntu 24.04 package index govern SRC-CUDA-097/098. The public bilingual records retain exact source/license/package hashes and rights boundaries. NCCL 2.32.3 was available on GitHub but absent from the selected binary repository at review time.
+
+The EX24 digest-pinned Dockerfile's Linux/amd64 build passed on the local emulated Linux build host: SHA-256 checks for both NCCL 2.31.2-1+cuda13.3 packages, CPU oracle, real-header C++17 preprocessing/compilation/linking, and readelf/ldd resolution. No GPU binary was executed. Review corrected a pageable D2H monitoring gap by polling collective completion before download. A second review suggestion about destruction ownership was rejected on rechecking the pinned public API: a communicator must not be accessed after `ncclCommDestroy` returns, even on error. The handle is cleared before fatal cleanup, with an explicit source comment. This local build is not a Reference Environment or retained Compile-Checked evidence. EX24/LAB17 compilation/recorded arrays remain empty and runtime Pending Hardware Verification. No rank log, topology, algorithm, latency, bandwidth or collective result was produced.
+
 ## R5 aggregate source disposition
 
 **2026-09-19.** R5 is the latest completed aggregate static review; schema 6 `src/r5-release-manifest.json` freezes the dependency-closed P01-P12/T01-T08 publication. R6 is next/pending. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) separately owns dynamic acceptance. Earlier dated increments and R1-R4 remain historical.

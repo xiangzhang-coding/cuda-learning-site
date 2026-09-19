@@ -1,0 +1,53 @@
+---
+title: 'VIS16: Follow Collective Message Paths'
+description: Change collective, rank count and a synthetic topology without predicting NCCL dispatch.
+pairId: vis16
+counterpart: /visuals/collective-paths/
+factCheckDate: '2026-09-19'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, model, interpretation, sources]
+resourceKind: visual-explainer
+unitId: VIS16
+prerequisites: [G04]
+relatedUnits: [G05]
+hardwareGate: none
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'NCCL collective semantics', url: 'https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/api/colls.rst', version: '2.31.2', platform: 'browser-only model', accessDate: '2026-09-19' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis16 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-19' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,model,interpretation,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS16 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: G04 } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import CollectiveExplorer from '../../../../components/CollectiveExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/collective-paths/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose and prerequisite
+
+Prerequisite **[G04]**: [collective contracts](/en/multi-gpu/nccl-communicators-collectives/). Predict where the result belongs, then change only the routing constraint. No GPU is required. [G05](/en/multi-gpu/nccl-stream-dependencies/) separately explains stream ordering.
+
+## Deterministic model
+
+<CollectiveExplorer locale="en" />
+
+## Interpret the path without claiming an algorithm
+
+Each rank r contributes the one-element vector `[r+1]`. Choose all-reduce, rank-zero broadcast or all-gather; choose 2, 4 or 8 ranks and directed ring or star topology. Except broadcast, the model gathers contributions at rank 0, computes the result there, then distributes it. All-gather concatenates in rank order; all-reduce sums. Every step forwards one payload over one allowed edge. Changing controls resets the hop to the first step; reset restores four-rank ring all-reduce.
+
+The ring routes from each source forward until the destination; the star goes through rank 0. Neither is an NCCL implementation or a measured topology. Step count is not latency, and payload values are synthetic, not EX24 logs. The table labels **expected final output**, not partially completed device state. The static diagrams and text remain available without JavaScript and in print. Motion is deliberately absent, including reduced-motion mode. Keyboard controls and text give the same information as the large path display.
+
+## Sources and rights
+
+Reviewed **2026-09-19**, [SRC-CUDA-097](/en/sources-and-versions/#src-cuda-097). Original CC BY 4.0 diagrams and instruction; original Apache-2.0 model/UI. No NVIDIA diagram or algorithm listing is copied, and all four evidence arrays remain empty.

@@ -453,6 +453,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R5-017', 'PB-R5-018',
       'PB-R5-019', 'PB-R5-020',
       'PB-R6-001', 'PB-R6-002', 'PB-R6-003',
+      'PB-R6-004', 'PB-R6-005',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -550,6 +551,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-001': 'multi-gpu/devices-contexts-ownership',
       'PB-R6-002': 'multi-gpu/peer-access-copies',
       'PB-R6-003': 'multi-gpu/topology-paths',
+      'PB-R6-004': 'multi-gpu/nccl-communicators-collectives',
+      'PB-R6-005': 'multi-gpu/nccl-stream-dependencies',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -834,9 +837,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-001': ['multi-gpu/devices-contexts-ownership'],
       'PB-R6-002': ['multi-gpu/peer-access-copies'],
       'PB-R6-003': ['multi-gpu/topology-paths'],
+      'PB-R6-004': ['multi-gpu/nccl-communicators-collectives', 'examples/nccl-all-reduce'],
+      'PB-R6-005': ['multi-gpu/nccl-stream-dependencies', 'labs/nccl-all-reduce'],
     };
 
-    expect(entrySections).toHaveLength(105);
+    expect(entrySections).toHaveLength(107);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];

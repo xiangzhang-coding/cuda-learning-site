@@ -121,7 +121,7 @@ describe('published resource indexes', () => {
     const practiceIds = RESOURCE_INDEX_RECORDS
       .filter(({ group }) => group === 'practice')
       .map(({ planningId }) => planningId);
-    expect(practiceIds).toHaveLength(105);
+    expect(practiceIds).toHaveLength(107);
 
     const localeContracts = [
       {
@@ -176,7 +176,7 @@ describe('published resource indexes', () => {
         expect(prompts.has(prompt ?? ''), `${contract.locale} duplicate prompt: ${prompt}`).toBe(false);
         prompts.add(prompt ?? '');
       }
-      expect(prompts.size).toBe(105);
+      expect(prompts.size).toBe(107);
     }
   });
 
@@ -184,8 +184,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 16, practice: 105, visuals: 20, glossary: currentPublication.scope.glossaryTerms, sources: 111 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(252 + currentPublication.scope.glossaryTerms);
+    expect(counts).toEqual({ labs: 17, practice: 107, visuals: 21, glossary: currentPublication.scope.glossaryTerms, sources: 113 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(258 + currentPublication.scope.glossaryTerms);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));
@@ -193,7 +193,7 @@ describe('published resource indexes', () => {
     const indexedIds = indexDocuments.flatMap((document) =>
       [...document.querySelectorAll<HTMLElement>('[data-resource-card]')].map((card) => card.dataset.resourceId),
     );
-    for (const absentId of ['LAB17', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
+    for (const absentId of ['LAB18', 'LAB99', 'VIS99', 'PB-R0-999', 'TERM-999']) {
       expect(indexedIds).not.toContain(absentId);
     }
     expect(indexedText).not.toMatch(/coming soon|即将推出/i);
@@ -474,7 +474,7 @@ describe('published resource indexes', () => {
     for (const route of ['/visuals/', '/en/visuals/']) {
       const document = await readRoute(route);
       expect(document.querySelectorAll('[data-resource-evidence]').length).toBe(0);
-      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(20);
+      expect(document.querySelectorAll('[data-resource-card] [data-no-evidence]').length).toBe(21);
       for (const card of document.querySelectorAll('[data-resource-card]')) {
         expect(card.textContent).not.toMatch(/Compile-Checked|Community-Observed|Runtime-Verified/);
         const href = card.querySelector('h3 a')?.getAttribute('href');

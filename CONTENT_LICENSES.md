@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## NCCL publication — 2026-09-19
+
+G04/G05, EX24/LAB17/VIS16, PB-R6-004/005 and SRC-CUDA-097/098 add nine Publication Pairs. Current totals are 100 Learning Units, 24 Runnable Examples, 363 pairs, 726 routes, 99 Exercise and 99 solution pairs, and 465 catalog records (17 Labs, 107 practice entries, 21 visuals, 207 terms, 113 sources). Earlier increment inventories below are historical. Original software/model/UI/tests are Apache-2.0; original instruction and static diagrams are CC BY 4.0. NCCL 2.31.2 stays external, with exact LICENSE.txt SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`, Apache-2.0 plus retained BSD and per-file notices. No upstream sample, figure, fixture, header or library is redistributed. CUDA retains separate NVIDIA terms.
+
 ## G01–G03 original multi-GPU instruction — 2026-09-19
 
 The current inventory is 98 Learning Units, 354 Publication Pairs, 708 routes, 97 Exercise-set and 97 solution-set pairs, and 459 catalog records (16 Labs, 105 Practice Bank entries, 20 Visual Explainers, 207 terms, 111 sources). R5's frozen inventory and earlier dated scope statements below are historical. G01–G03, PB-R6-001/002/003 and SRC-CUDA-094/095/096 are original CC BY 4.0 prose, ledgers and Exercises. `scripts/lib/topology-fixture-policy.mjs` and its tests are original Apache-2.0 software. Synthetic alias fixtures are original and are not machine observations. No dependency or upstream adaptation is introduced.
