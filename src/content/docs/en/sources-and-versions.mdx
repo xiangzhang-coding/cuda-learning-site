@@ -3,7 +3,7 @@ title: Sources and Version Record
 description: Exact publishing and technical sources through T07 and LAB16, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-15'
+factCheckDate: '2026-09-19'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -54,7 +54,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-15'
+      content: '2026-09-19'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -69,11 +69,30 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, T01-T03, EX01-EX23 and LAB01-LAB15. Twenty Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
+This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, T01-T08, EX01-EX23 and LAB01-LAB16. Twenty Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
 
 ## Scope of this record
 
-The **2026-09-15 current publication** has 95 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 94 Exercise-set and 94 separate solution-set Publication Pairs: **345 Publication Pairs / 690 source routes**. Its **453 catalog records** contain 16 Labs, 102 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 108 source records. Issue #50 adds SRC-CUDA-092; prior item dates stay unchanged. R4 remains the latest completed aggregate review (277 pairs, 554 routes, 401 records), and R5 aggregate review is pending. The [September 10 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-19 R5 aggregate static review** freezes 95 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 94 Exercise-set and 94 separate solution-set Publication Pairs: **345 Publication Pairs / 690 source routes**. Its **453 catalog records** contain 16 Labs, 102 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 108 source records. Item-level source dates remain unchanged. R5 is the latest completed aggregate static review; R6 is next/pending. The [September 10 R4 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+
+<span id="r5-aggregate-review"></span>
+
+## R5 aggregate review — 2026-09-19
+
+Schema 6 `src/r5-release-manifest.json` supplies `/release.json`; `/publication.json` retains the same current inventory with R5 completed and R6 next/pending. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records same-commit CI, Preview, production and smoke acceptance separately. No static summary pre-certifies those results. R1-R4 remain immutable. P01-P12 and T01-T08 close their public prerequisites, Exercises and separate solutions; R6 and multi-GPU destinations are excluded. The existing **PB-R5-004 through PB-R5-020** form 17 distinct PyTorch-and-Triton questions within the 102-entry Practice Bank.
+
+| Independent environment | Selected boundary |
+| --- | --- |
+| CUDA Python / EX21 | CPython 3.14.7, cuda-core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3; Toolkit 13.3.1, NVRTC/nvJitLink 13.3.33; driver target 610.43.02 |
+| Eager PyTorch | CPython 3.12.14, torch 2.11.0+cu128, CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56; native allocator; no system nvcc requirement |
+| Custom operator | Same application lock; independent Toolkit 12.8.1, NVCC 12.8.93, GCC 13.3.0, C++17, 8.0+PTX |
+| Triton | CPython 3.14.7, Triton 3.7.1, torch 2.13.0 and full EX23 hash lock; CUDA 13.0.3 package family, driver floor 580.65.06; native Linux x86-64, CC 8.0+, one GPU with at least 8 GB; ptxas 12.8.93 and separately gated Blackwell ptxas 13.1.80 |
+
+The compiler-only Triton subset cannot run workloads. Diagnostics separately lock NumPy. Actual loaded libraries, device, driver, compiler/profiler, shape/dtype, warm-up, samples and backend/configuration selection require an Environment Manifest. A missing configuration blocks execution or uses an explicitly checked baseline; API eligibility is not successful dispatch. T08 is bounded forward-only attention. Autotune choices and performance do not transfer across shapes, devices or builds.
+
+Fresh Context7 queries to `/nvidia/cuda-python`, `/pytorch/pytorch/v2.11.0` and `/triton-lang/triton` covered compilation/linking, extension/SDPA constraints and autotuning/debugging. Mixed main-branch and older snippets were discovery only. Exact owner authority remains SRC-CUDA-077–092. Fresh checks of the [cuda-core installation contract](https://github.com/NVIDIA/cuda-python/blob/53b43746e501f1a0b627f951604991636f77cd9c/cuda_core/docs/source/install.rst), [PyTorch extension source](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/utils/cpp_extension.py), [SDPA selection](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/aten/src/ATen/native/transformers/cuda/sdp_utils.cpp), [Triton toolchain](https://github.com/triton-lang/triton/blob/f797708c0626e5f9840ca5b0a98790e2c7cb09ad/cmake/nvidia-toolchain-version.json) and compiler/debug/testing files retain their separate versions. The [whole-file hash and discovery record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/MAINTENANCE_SOURCES.md#r5-aggregate-source-disposition) preserves the verification detail. NVIDIA 2026.3 diagnostic references in SRC-CUDA-090/092 do not rewrite historical profiler dates.
+
+Rights remain CUDA Python Apache-2.0, PyTorch BSD-3-Clause plus NOTICE/transitive terms, Triton MIT (the exact EX23 notice), and separate proprietary NVIDIA SDK/tool/document terms. No owner example, question, figure, benchmark or package is copied or adapted here. No lock or dependency changes. Only EX02, EX10 and LAB02 retain Compile-Checked evidence; EX10 is Runtime-Not-Applicable, **38 subjects remain Pending Hardware Verification**, and six profiler plans remain expected-only. There is no Reference Environment, Runtime-Verified result or recorded performance observation. Web/host/compiler gates do not grant GPU evidence.
 
 ## Source and version index
 

@@ -27,6 +27,7 @@ import canonicalExamplePublications from '../../src/canonical-example-publicatio
 import currentPublicationManifest from '../../src/current-publication-manifest.json' with { type: 'json' };
 import r3ReleaseManifest from '../../src/r3-release-manifest.json' with { type: 'json' };
 import r4ReleaseManifest from '../../src/r4-release-manifest.json' with { type: 'json' };
+import r5ReleaseManifest from '../../src/r5-release-manifest.json' with { type: 'json' };
 import { hashCanonicalBuildContract, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
@@ -252,7 +253,7 @@ async function expectCanonicalRanges(page: Page, project: { id: string; sourceUr
   }
 }
 
-test('serves the exact R4 release and current publication with production canonicals', async ({ page, request }) => {
+test('serves the exact R5 release and current publication with production canonicals', async ({ page, request }) => {
   test.setTimeout(600_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
@@ -262,8 +263,8 @@ test('serves the exact R4 release and current publication with production canoni
   const release = JSON.parse(releaseBody.toString('utf8'));
   const r4Bytes = await readFile(path.join(projectRoot, 'src/r4-release-manifest.json'));
   expect(createHash('sha256').update(r4Bytes).digest('hex')).toBe('26b0897efbfed9d697570f475e25fd88dbd3442b13357581f9ff96b87c098df7');
-  expect(release).toEqual({ ...r4ReleaseManifest, sourceCommit: expectedSourceCommit });
-  expect(release.scope).toEqual({
+  expect(release).toEqual({ ...r5ReleaseManifest, sourceCommit: expectedSourceCommit });
+  expect(r4ReleaseManifest.scope).toEqual({
     publicationPairs: 277, sourceRoutes: 554, exerciseSetPublicationPairs: 74, solutionSetPublicationPairs: 74,
     learningUnits: r4LearningUnits, runnableExamples: r4RunnableExampleIds, labs: r4Labs,
     visualExplainers: historicalVisualExplainers, practiceBankEntries: 82,
@@ -271,9 +272,9 @@ test('serves the exact R4 release and current publication with production canoni
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds, glossaryTerms: 196, sourceRecords: 92,
   });
   expect(release).toMatchObject({
-    schemaVersion: 5,
-    releaseId: 'R4',
-    reviewDate: '2026-09-10',
+    schemaVersion: 6,
+    releaseId: 'R5',
+    reviewDate: '2026-09-19',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -313,7 +314,7 @@ test('serves the exact R4 release and current publication with production canoni
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'R4 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
-      'R5 framework-integration and Triton Learning Units, Labs, Runnable Examples, and all later curriculum material are outside this release; library-selection comparisons grant no framework or Triton destination, compilation, runtime, or performance evidence.',
+      'R5 completes static dependency closure through P01-P12 and T01-T08. Issue #51 separately records source-bound CI, Preview and production acceptance. R6 and later material and multi-GPU support are outside this release.',
     ]),
   });
   // R4 advances the active contract without rewriting the completed R3 snapshot.
@@ -359,11 +360,11 @@ test('serves the exact R4 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-15',
+    reviewDate: '2026-09-19',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    releaseReview: { latestCompleted: 'R4', next: 'R5', status: 'pending' },
+    releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
     compatibility: {
       componentBoundaries: {
         cudnn: {
@@ -504,6 +505,7 @@ test('serves the exact R4 release and current publication with production canoni
     practiceBankEntries: 102,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
+    pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
     sourceRecords: 108,
   });

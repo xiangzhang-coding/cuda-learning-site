@@ -1,5 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R5 aggregate rights review — 2026-09-19
+
+R5 is the latest completed aggregate static review. Schema 6 `src/r5-release-manifest.json` supplies `/release.json`; R6 is next/pending. The frozen inventory is 345 Publication Pairs / 690 routes and 453 catalog records, including 102 original Practice Bank entries and the 17-entry PyTorch-and-Triton subset PB-R5-004 through PB-R5-020. R1-R4 snapshots and dated rights ledgers below remain historical. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records dynamic acceptance separately.
+
+The aggregate review retains the exact CUDA Python Apache-2.0, PyTorch BSD-3-Clause plus NOTICE and transitive-package notices, Triton MIT and NVIDIA proprietary SDK/tool/document terms recorded in SRC-CUDA-077 through SRC-CUDA-092. The EX23 Triton license bytes and existing Starlight MIT adaptation remain covered by their exact notices. No dependency, lock, owner code, tutorial, figure, benchmark or package is added or adapted in this review. New release summaries and tests are original; evidence and deployment scans do not replace file-specific rights review.
+
 ## Triton debugging and persistence increment — 2026-09-15
 
 Current scope is 95 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 102 Practice Bank entries, 207 Glossary terms, 108 source records, 453 catalog records, 94 Exercise-set and 94 solution-set pairs, 345 Publication Pairs and 690 source routes. Earlier dated scope statements below are historical. T08 adds three complete Publication Pairs and reuses original VIS18. New prose and Exercises are original CC BY 4.0; `scripts/attention-capstone/` and tests are original Apache-2.0. SRC-CUDA-092 records reference-only Triton 3.7.1 attention/compiler/debug/testing, PyTorch 2.13 SDPA and NVIDIA 2026.3 profiling sources. No owner listing, fixture, graph, binary or timing is redistributed. The exact Triton MIT notice remains in EX23; external dependencies retain the existing full-lock license inventory.

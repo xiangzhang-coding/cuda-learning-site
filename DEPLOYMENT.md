@@ -2,6 +2,23 @@
 
 # Cloudflare Deployment
 
+## R5 release acceptance
+
+R5 is the latest completed aggregate static review, **2026-09-19**. Schema 6 `src/r5-release-manifest.json` now supplies `/release.json`; `/publication.json` records `releaseReview.latestCompleted: R5`, `releaseReview.next: R6`, and `releaseReview.status: pending`. Both name the exact deployed Git commit. The R5/current inventory is 345 Publication Pairs / 690 routes / 453 catalog records: 95 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 94 Exercise and 94 solution pairs, 102 Practice Bank entries, 207 terms and 108 sources. R1-R4 and [issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) remain historical; the earlier dated instructions below describe that historical rollout and are superseded by this section for release selection.
+
+[Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) must retain same-commit Web Quality, CUDA Compile Evidence, PyTorch Operator and Triton Example runs, scanned artifacts, Preview URL/version and smoke, production URL/version/deployment and smoke. The full remote harness still covers every source route, both locales, search, keyboard, mobile, print/theme, canonical downloads, framework and Triton journeys. No source document pre-certifies these dynamic results. Use the existing pinned deploy commands and clean-main guard below, now comparing both built manifests to R5/current source. Promote only after all required checks and Preview smoke pass.
+
+| Independent environment | Exact boundary |
+| --- | --- |
+| CUDA Python / EX21 | Ordinary CPython 3.14.7; cuda-core 1.2.0, bindings 13.4.1, pathfinder 1.8.1, NumPy 2.5.3; native Toolkit 13.3.1, NVRTC/nvJitLink 13.3.33, driver target 610.43.02 |
+| Eager PyTorch / P04-P07 | CPython 3.12.14, torch 2.11.0+cu128, CUDA metapackage 12.8.1, runtime/CUPTI 12.8.90, cuDNN 9.19.0.56; native allocator; no system nvcc requirement |
+| Extension / EX22, LAB13-LAB14 | Same application lock, separately installed Toolkit 12.8.1 / NVCC 12.8.93 / GCC 13.3.0 / C++17 / 8.0+PTX |
+| Triton / EX23, LAB15-LAB16, T08 | Ordinary CPython 3.14.7, Triton 3.7.1, torch 2.13.0; full EX23 hash lock with CUDA 13.0.3 package family; driver floor 580.65.06, CC 8.0+, single GPU with at least 8 GB; ptxas 12.8.93, separately gated Blackwell ptxas 13.1.80; no system nvcc invocation |
+
+The compiler-only Triton lock cannot run workloads. Diagnostics add a separately locked NumPy dependency. Actual loaded libraries, driver, hardware, profiler, workload, warm-up, sample reduction and selected backend/configuration require a complete Environment Manifest. Missing/unsupported configurations block the activity or use an explicitly verified baseline; eligibility is not execution and fallback cannot silently become an optimized-backend result. T08 is bounded forward-only attention, not general production attention. No multi-GPU claim is made. Only EX02/EX10/LAB02 retain Compile-Checked evidence; EX10 is Runtime-Not-Applicable, 38 subjects remain Pending Hardware Verification, and no runtime/performance observation is added.
+
+## Historical R4 deployment record
+
 The production Learning Site origin is <https://cuda-learning-site.hmzhangxiang.workers.dev>. R4 is the latest completed aggregate static review, dated **2026-09-10**. Schema 5 `src/r4-release-manifest.json` supplies the frozen `/release.json`. R4 dynamic acceptance is complete in the closed [issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) record. That existing acceptance applies to its recorded R4 source and deployment coordinates, not to this expanded current publication. No new deployment or infrastructure inspection is claimed by this scope update.
 
 The frozen R4 inventory remains historical: 75 Learning Units including L01-L13, 20 Runnable Examples, 12 Labs, 19 Visual Explainers, 82 Practice Bank entries, 196 Glossary terms, 92 source records, 401 catalog records, 74 Exercise-set and 74 solution-set Publication Pairs, 277 Publication Pairs, and 554 source routes. Its manifest, source-item dates, and accepted issue #41 record are unchanged.

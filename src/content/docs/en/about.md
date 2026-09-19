@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-09-15'
+factCheckDate: '2026-09-19'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-15'
+      content: '2026-09-19'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -42,7 +42,7 @@ The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable E
 
 The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. [A12](/en/algorithms/sparse-formats-spmv/) establishes COO and CSR, storage, and SpMV contracts. [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/) establishes SpMM, descriptor, workspace, and preprocessing decision boundaries.
 
-R4 remains the latest completed aggregate static release review, dated 2026-09-10. Schema 5 `src/r4-release-manifest.json` still supplies the frozen `/release.json`: 75 Learning Units, 277 Publication Pairs, 554 source routes, and 401 catalog records including 82 practice entries, 196 terms, and 92 sources. `/publication.json` records the expanded current Python bridge inventory, with R4 latest completed and the next R5 aggregate review pending. R1-R3 remain exact historical snapshots; R3 retains 232 pairs, 464 source routes, 347 catalog records, 61 Exercise sets, 61 separate reviewed-solution sets, and ten Nsight report-analysis Practice Bank entries.
+R5 is the latest completed aggregate static release review, dated 2026-09-19. Schema 6 `src/r5-release-manifest.json` supplies `/release.json`: 95 Learning Units, 345 Publication Pairs, 690 source routes and 453 catalog records, including 102 practice entries, 207 terms and 108 sources. `/publication.json` records R5 as latest completed and R6 as next/pending. P01-P12 and T01-T08 are complete; 17 existing questions form the PyTorch-and-Triton subset. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) separately records dynamic acceptance. R1-R4 remain exact historical snapshots. Independent environments, 38 Pending Hardware Verification subjects and the single-GPU boundary are summarized in the [release review](/en/sources-and-versions/#r5-aggregate-review).
 
 Issue #31 adds `A12<-[M01,M02]` and `A13<-[A12,A08]` to the strict graph. [Issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33) adds [L01](/en/libraries/library-primitive-dsl-custom-kernel/) and [L02](/en/libraries/thrust-algorithm-vocabulary/) to the rolling R4 publication. [Issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34) publishes [L03: CUB Device Primitives](/en/libraries/cub-device-primitives/), [L04: CUB Warp and Block Primitives](/en/libraries/cub-warp-block-primitives/), [EX17: CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/), and [LAB11: Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/), followed by [L05: libcu++ Synchronization Abstractions](/en/libraries/libcu-plus-plus-synchronization/) with strict prerequisites M05, M13, and M19. [Issue #36](https://github.com/xiangzhang-coding/cuda-learning-site/issues/36) adds [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/)`<-[A08,Q01]`, [L07: cuBLASLt Matmul](/en/libraries/cublaslt-matmul/)`<-[L06,Q05]`, [EX18](/en/examples/cublas-gemm/)`<-[L06]`, and [LAB12](/en/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`.
 
@@ -60,13 +60,13 @@ As of **2026-09-15**, the current publication has 95 Learning Units, 23 Runnable
 
 Issue #44 adds [P08](/en/frameworks/first-custom-operator/) with `[O04,F04,Q01,P04]`, [P09](/en/frameworks/operator-registration/) with `[P08,Q01]`, and [P10](/en/frameworks/operator-packaging/) with `[P08,M18]`. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) require `[P08,P09]`; the original adjacent-energy operator has CPU/CUDA paths and an independently pinned extension Toolkit. Both retain empty compilation/recorded observations and Pending Hardware Verification runtime.
 
-[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) retains [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`, with complete Exercises/solutions and empty evidence arrays. Their [independent eager profile](/en/sources-and-versions/#src-cuda-080) needs no system Toolkit. Issue #44 adds the independent extension toolchain; Triton destinations remain absent.
+[Issue #43](https://github.com/xiangzhang-coding/cuda-learning-site/issues/43) retains [P04](/en/frameworks/queued-work-timing/) `[M07,Q05]`, [P05](/en/frameworks/streams-and-storage-lifetime/) `[P04,M08]`, [P06](/en/frameworks/mixed-precision-contracts/) `[Q02,P04,L08]`, and [P07](/en/frameworks/python-to-cuda-profiling/) `[P04,Q07,Q08]`, with complete Exercises/solutions and empty evidence arrays. Their [independent eager profile](/en/sources-and-versions/#src-cuda-080) needs no system Toolkit. Issue #44 adds the independent extension toolchain; the separately pinned Triton path is now complete through T08.
 
 **R4 aggregate static review: 2026-09-10.** Technical sources retain their individual access and review dates; that review's retrievals have a separate [aggregate disposition](/en/sources-and-versions/#r4-aggregate-review), not a review of the current Python bridge increment. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) records CI, Preview, production, and smoke acceptance only after those results exist. R4 does not imply completion of framework or Triton tracks or publish placeholder destinations for them.
 
 The current 102-entry Practice Bank includes PB-R5-001 through PB-R5-020. R4's eight library-and-algorithm-choice entries and R3's ten Nsight report-analysis entries remain unchanged. Only EX02, EX10 and LAB02 are Compile-Checked; EX10 is Runtime-Not-Applicable. The other 22 examples and all 16 Labs remain Pending Hardware Verification, 38 subjects total. P01-P12 and T01-T08 keep four empty evidence arrays; T08 device acceptance remains pending. EX21-EX23 have empty compilation/recorded observations; host checks grant no GPU evidence. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only.
 
-Q06-Q13, A10-A14, and L01-L13 have all four evidence arrays empty and grant no Evidence Status. L03-L05 only link and paraphrase exact owner source and test contracts; API presence and owner tests are not site compilation or runtime evidence. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime; no timing, speedup, or winner is recorded, and publishing L07 supplies no Lt selection runtime evidence. The selected CCCL v3.4.2 coordinate is independent from Toolkit labels, applies only to 12.9.2/13.3.1 evaluation, and excludes 11.8. All 19 Visual Explainers remain evidence-neutral browser models.
+Q06-Q13, A10-A14, and L01-L13 have all four evidence arrays empty and grant no Evidence Status. L03-L05 only link and paraphrase exact owner source and test contracts; API presence and owner tests are not site compilation or runtime evidence. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime; no timing, speedup, or winner is recorded, and publishing L07 supplies no Lt selection runtime evidence. The selected CCCL v3.4.2 coordinate is independent from Toolkit labels, applies only to 12.9.2/13.3.1 evaluation, and excludes 11.8. All 20 Visual Explainers remain evidence-neutral browser models.
 
 L08 separates input conversion, accumulation, output conversion, and WMMA architecture contracts. L09's structural reading is pinned to CUTLASS C++ v4.7.0 commit `dcf215af68a2d08d305076c152a06f201728cd53`, not a promise of DSL or executable support. Neither supplies local compilation, a real-instruction observation, CUDA runtime, or a performance result. VIS12's model is unchanged: its instruction panel remains a source-level scalar operation slot, not a real Tensor Core instruction.
 
@@ -82,4 +82,4 @@ L13 uses the archived 12.9.2 cuSPARSE teaching baseline with exact 11.8.0 and 13
 
 ## Feedback
 
-For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). The current publication summary was checked on **2026-09-12**; this does not change the historical R4 aggregate review or individual technical source dates.
+For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). The current publication summary was checked on **2026-09-19**; this does not change the historical R4 aggregate review or individual technical source dates.

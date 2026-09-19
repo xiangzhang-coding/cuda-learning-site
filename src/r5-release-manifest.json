@@ -1,15 +1,8 @@
 {
   "SPDX-License-Identifier": "Apache-2.0",
-  "schemaVersion": 1,
-  "publicationId": "current",
   "reviewDate": "2026-09-19",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
-  "releaseReview": {
-    "latestCompleted": "R5",
-    "next": "R6",
-    "status": "pending"
-  },
   "scope": {
     "publicationPairs": 345,
     "sourceRoutes": 690,
@@ -112,8 +105,49 @@
       "T07",
       "T08"
     ],
-    "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22", "EX23"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16"],
+    "runnableExamples": [
+      "EX01",
+      "EX02",
+      "EX03",
+      "EX04",
+      "EX05",
+      "EX06",
+      "EX07",
+      "EX08",
+      "EX09",
+      "EX10",
+      "EX11",
+      "EX12",
+      "EX13",
+      "EX14",
+      "EX15",
+      "EX16",
+      "EX17",
+      "EX18",
+      "EX19",
+      "EX20",
+      "EX21",
+      "EX22",
+      "EX23"
+    ],
+    "labs": [
+      "LAB01",
+      "LAB02",
+      "LAB03",
+      "LAB04",
+      "LAB05",
+      "LAB06",
+      "LAB07",
+      "LAB08",
+      "LAB09",
+      "LAB10",
+      "LAB11",
+      "LAB12",
+      "LAB13",
+      "LAB14",
+      "LAB15",
+      "LAB16"
+    ],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -159,7 +193,25 @@
       "PB-R4-012",
       "PB-R4-016"
     ],
-    "pytorchAndTritonPracticeEntries": ["PB-R5-004", "PB-R5-005", "PB-R5-006", "PB-R5-007", "PB-R5-008", "PB-R5-009", "PB-R5-010", "PB-R5-011", "PB-R5-012", "PB-R5-013", "PB-R5-014", "PB-R5-015", "PB-R5-016", "PB-R5-017", "PB-R5-018", "PB-R5-019", "PB-R5-020"],
+    "pytorchAndTritonPracticeEntries": [
+      "PB-R5-004",
+      "PB-R5-005",
+      "PB-R5-006",
+      "PB-R5-007",
+      "PB-R5-008",
+      "PB-R5-009",
+      "PB-R5-010",
+      "PB-R5-011",
+      "PB-R5-012",
+      "PB-R5-013",
+      "PB-R5-014",
+      "PB-R5-015",
+      "PB-R5-016",
+      "PB-R5-017",
+      "PB-R5-018",
+      "PB-R5-019",
+      "PB-R5-020"
+    ],
     "glossaryTerms": 207,
     "sourceRecords": 108
   },
@@ -188,7 +240,9 @@
         "nvcc": "11.8.89",
         "pairedDriver": "520.61.05",
         "driverFloor": "450.80.02",
-        "dialects": ["c++17"]
+        "dialects": [
+          "c++17"
+        ]
       },
       {
         "id": "cuda-12.9",
@@ -197,7 +251,10 @@
         "nvcc": "12.9.86",
         "pairedDriver": "575.57.08",
         "driverFloor": "525.60.13",
-        "dialects": ["c++17", "c++20"]
+        "dialects": [
+          "c++17",
+          "c++20"
+        ]
       },
       {
         "id": "cuda-13.3",
@@ -206,7 +263,10 @@
         "nvcc": "13.3.73",
         "pairedDriver": "610.43.02",
         "driverFloor": "580",
-        "dialects": ["c++17", "c++20"]
+        "dialects": [
+          "c++17",
+          "c++20"
+        ]
       }
     ],
     "dialectProbes": [
@@ -278,7 +338,11 @@
         "reviewedOn": "2026-09-12",
         "version": "2.11.0+cu128",
         "commit": "70d99e998b4955e0049d13a98d77ae1b14db1f45",
-        "python": { "implementation": "CPython", "version": "3.12.14", "abi": "cp312-cp312" },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.14",
+          "abi": "cp312-cp312"
+        },
         "host": "native Linux x86-64, glibc 2.28 or newer",
         "proposedHost": "Ubuntu 24.04 x86-64",
         "buildCudaFamily": "12.8",
@@ -307,10 +371,23 @@
       "cudaPython": {
         "selection": "independently-pinned",
         "reviewedOn": "2026-09-12",
-        "core": { "version": "1.2.0", "commit": "53b43746e501f1a0b627f951604991636f77cd9c" },
-        "bindings": { "version": "13.4.1", "commit": "0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa" },
-        "python": { "version": "3.14.7", "abi": "cp314-cp314", "freeThreaded": false },
-        "runtimeDependencies": { "cuda-pathfinder": "1.8.1", "numpy": "2.5.3" },
+        "core": {
+          "version": "1.2.0",
+          "commit": "53b43746e501f1a0b627f951604991636f77cd9c"
+        },
+        "bindings": {
+          "version": "13.4.1",
+          "commit": "0770ab6ced8931ae8b6c6e5f622f48cb07ea99fa"
+        },
+        "python": {
+          "version": "3.14.7",
+          "abi": "cp314-cp314",
+          "freeThreaded": false
+        },
+        "runtimeDependencies": {
+          "cuda-pathfinder": "1.8.1",
+          "numpy": "2.5.3"
+        },
         "exampleProfile": {
           "environmentId": "cpython-3-14-7-cuda-13-3-1",
           "host": "Ubuntu 24.04 x86-64",
@@ -360,47 +437,97 @@
         "selection": "independent",
         "commit": "d36012203ef73ac7f966e848dd88482273e91e02",
         "releasedOn": "2026-08-05",
-        "toolkitLanes": ["cuda-12.9", "cuda-13.3"],
-        "excludedToolkitLanes": ["cuda-11.8"],
+        "toolkitLanes": [
+          "cuda-12.9",
+          "cuda-13.3"
+        ],
+        "excludedToolkitLanes": [
+          "cuda-11.8"
+        ],
         "excludedLaneRequires": "separately reviewed library versions"
       },
       "cublas": {
         "bundled": [
-          { "toolkitLane": "cuda-11.8", "version": "11.11.3.6" },
-          { "toolkitLane": "cuda-12.9", "version": "12.9.2.10" },
-          { "toolkitLane": "cuda-13.3", "version": "13.6.0.2" }
+          {
+            "toolkitLane": "cuda-11.8",
+            "version": "11.11.3.6"
+          },
+          {
+            "toolkitLane": "cuda-12.9",
+            "version": "12.9.2.10"
+          },
+          {
+            "toolkitLane": "cuda-13.3",
+            "version": "13.6.0.2"
+          }
         ],
         "apiTeachingBaseline": "Toolkit 12.9.2 archived cuBLAS guide, label 12.9",
         "currentApiComparison": "Live cuBLAS guide label 13.3, accessed 2026-09-06",
         "currentReleaseNotes": "Live CUDA 13.3 Update 1 release notes, accessed 2026-09-06",
         "exact1331Archive": "API and release-note archives returned HTTP 404 on 2026-09-06; both returned HTTP 200 on 2026-09-10. The earlier live comparison remains historical.",
-        "exampleToolkitLanes": ["cuda-11.8", "cuda-12.9", "cuda-13.3"],
-        "labToolkitLanes": ["cuda-13.3"]
+        "exampleToolkitLanes": [
+          "cuda-11.8",
+          "cuda-12.9",
+          "cuda-13.3"
+        ],
+        "labToolkitLanes": [
+          "cuda-13.3"
+        ]
       },
       "cufft": {
         "bundled": [
-          { "toolkitLane": "cuda-11.8", "version": "10.9.0.58" },
-          { "toolkitLane": "cuda-12.9", "version": "11.4.1.4" },
-          { "toolkitLane": "cuda-13.3", "version": "12.3.0.29" }
+          {
+            "toolkitLane": "cuda-11.8",
+            "version": "10.9.0.58"
+          },
+          {
+            "toolkitLane": "cuda-12.9",
+            "version": "11.4.1.4"
+          },
+          {
+            "toolkitLane": "cuda-13.3",
+            "version": "12.3.0.29"
+          }
         ],
         "apiTeachingBaseline": "Toolkit 12.9.2 archived cuFFT guide, label 12.9",
         "currentApiComparison": "Live cuFFT guide label 13.3, accessed 2026-09-08",
         "currentReleaseNotes": "Live CUDA 13.3 Update 1 release notes, accessed 2026-09-08",
         "exact1331Archive": "API and release-note archives returned HTTP 404 on 2026-09-08; both returned HTTP 200 on 2026-09-10. The earlier live comparison remains historical.",
-        "exampleToolkitLanes": ["cuda-11.8", "cuda-12.9", "cuda-13.3"],
-        "exampleDialects": ["c++17"]
+        "exampleToolkitLanes": [
+          "cuda-11.8",
+          "cuda-12.9",
+          "cuda-13.3"
+        ],
+        "exampleDialects": [
+          "c++17"
+        ]
       },
       "cusparse": {
         "bundled": [
-          { "toolkitLane": "cuda-11.8", "version": "11.7.5.86" },
-          { "toolkitLane": "cuda-12.9", "version": "12.5.10.65" },
-          { "toolkitLane": "cuda-13.3", "version": "12.8.2.51" }
+          {
+            "toolkitLane": "cuda-11.8",
+            "version": "11.7.5.86"
+          },
+          {
+            "toolkitLane": "cuda-12.9",
+            "version": "12.5.10.65"
+          },
+          {
+            "toolkitLane": "cuda-13.3",
+            "version": "12.8.2.51"
+          }
         ],
         "apiTeachingBaseline": "Toolkit 12.9.2 archived cuSPARSE guide",
         "currentApiComparison": "Exact Toolkit 13.3.1 archived cuSPARSE guide, accessed 2026-09-09",
         "currentReleaseNotes": "Exact CUDA 13.3 Update 1 archived release notes, accessed 2026-09-09",
-        "exampleToolkitLanes": ["cuda-11.8", "cuda-12.9", "cuda-13.3"],
-        "exampleDialects": ["c++17"],
+        "exampleToolkitLanes": [
+          "cuda-11.8",
+          "cuda-12.9",
+          "cuda-13.3"
+        ],
+        "exampleDialects": [
+          "c++17"
+        ],
         "examplePreprocessing": "not used; SpMV preprocessing is absent in the 11.8 lane"
       },
       "cub": {
@@ -428,7 +555,10 @@
           "version": "3.4.2",
           "versionMacro": 300402,
           "commit": "d36012203ef73ac7f966e848dd88482273e91e02",
-          "toolkitLanes": ["cuda-12.9", "cuda-13.3"]
+          "toolkitLanes": [
+            "cuda-12.9",
+            "cuda-13.3"
+          ]
         }
       }
     },
@@ -468,7 +598,11 @@
     }
   },
   "evidence": {
-    "compileChecked": ["EX02", "EX10", "LAB02"],
+    "compileChecked": [
+      "EX02",
+      "EX10",
+      "LAB02"
+    ],
     "noCompileCheckedClaim": [
       "EX01",
       "EX03",
@@ -547,15 +681,87 @@
       "LAB15",
       "LAB16"
     ],
-    "runtimeNotApplicable": ["EX10"],
+    "runtimeNotApplicable": [
+      "EX10"
+    ],
     "communityObserved": [],
     "runtimeVerified": [],
     "referenceEnvironments": [],
     "performanceObservations": [],
-    "r3EvidenceNeutralLearningUnits": ["Q06", "Q07", "Q08", "Q09", "Q10", "Q11", "Q12", "Q13", "A10", "A11", "A12", "A13", "A14"],
-    "r4EvidenceNeutralLearningUnits": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13"],
-    "r5EvidenceNeutralLearningUnits": ["P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10", "P11", "P12", "T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08"],
-    "evidenceNeutralVisualExplainers": ["VIS01", "VIS02", "VIS03", "VIS04", "VIS05", "VIS06", "VIS07", "VIS08", "VIS09", "VIS10", "VIS11", "VIS12", "VIS13", "VIS14", "VIS17", "VIS18", "VIS19", "VIS20", "VIS21", "VIS22"],
+    "r3EvidenceNeutralLearningUnits": [
+      "Q06",
+      "Q07",
+      "Q08",
+      "Q09",
+      "Q10",
+      "Q11",
+      "Q12",
+      "Q13",
+      "A10",
+      "A11",
+      "A12",
+      "A13",
+      "A14"
+    ],
+    "r4EvidenceNeutralLearningUnits": [
+      "L01",
+      "L02",
+      "L03",
+      "L04",
+      "L05",
+      "L06",
+      "L07",
+      "L08",
+      "L09",
+      "L10",
+      "L11",
+      "L12",
+      "L13"
+    ],
+    "r5EvidenceNeutralLearningUnits": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09",
+      "P10",
+      "P11",
+      "P12",
+      "T01",
+      "T02",
+      "T03",
+      "T04",
+      "T05",
+      "T06",
+      "T07",
+      "T08"
+    ],
+    "evidenceNeutralVisualExplainers": [
+      "VIS01",
+      "VIS02",
+      "VIS03",
+      "VIS04",
+      "VIS05",
+      "VIS06",
+      "VIS07",
+      "VIS08",
+      "VIS09",
+      "VIS10",
+      "VIS11",
+      "VIS12",
+      "VIS13",
+      "VIS14",
+      "VIS17",
+      "VIS18",
+      "VIS19",
+      "VIS20",
+      "VIS21",
+      "VIS22"
+    ],
     "expectedOnlyProfilerReportPlans": [
       "/assets/profiler-report-fixtures/lab06-nsight-systems.expected.json",
       "/assets/profiler-report-fixtures/lab08-nsight-compute.expected.json",
@@ -565,7 +771,10 @@
       "/assets/profiler-report-fixtures/q13-nsight-compute.expected.json"
     ],
     "capturedProfilerReports": [],
-    "retainedCompileRuns": [32720214527, 33275734951]
+    "retainedCompileRuns": [
+      32720214527,
+      33275734951
+    ]
   },
   "knownLimitations": [
     "R5 completes static dependency closure through P01-P12 and T01-T08. Issue #51 separately records source-bound CI, Preview and production acceptance. R6 and later material and multi-GPU support are outside this release.",
@@ -605,5 +814,7 @@
     "P04-P07 independently select PyTorch 2.11.0+cu128, CPython 3.12.14, CUDA metapackage 12.8.1, packaged runtime/CUPTI 12.8.90, and cuDNN 9.19.0.56 with the native allocator. Their eager activities require no system Toolkit or nvcc and inherit no existing CUDA Python, Toolkit Lane, or library evidence. Artifact metadata and source/license inspection are not a Linux installation, GPU run, timing result, AMP result, or captured CUPTI trace.",
     "EX21 has empty compilation and recorded observations and remains Pending Hardware Verification. Host tests, Python syntax checks, package installation, canonical imports, and browser rendering grant no CUDA compilation, linking, launch, correctness, or performance evidence.",
     "EX21 selects ordinary CPython 3.14.7, cuda-core 1.2.0, cuda-bindings 13.4.1, cuda-pathfinder 1.8.1, and NumPy 2.5.3 independently from system Toolkit 13.3.1. Only the declared native Linux x86-64 profile is selected; no CUDA 11.8 or 12.9 combination is implied, and optional Toolkit extras are excluded. Actual loaded native libraries, driver, supported target, and GPU coordinates still require an Environment Manifest."
-  ]
+  ],
+  "schemaVersion": 6,
+  "releaseId": "R5"
 }

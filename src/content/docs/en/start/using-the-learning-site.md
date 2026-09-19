@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-09-15'
+factCheckDate: '2026-09-19'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-15'
+      content: '2026-09-19'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -98,9 +98,9 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 As of **2026-09-12**, the current Stable Curriculum publication covers 82 Learning Units in both languages: O01-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, and P01-P07. The reusable-library path retains [L12: cuFFT Plans, Layouts, and Startup](/en/libraries/cufft-plans-layouts-startup/), [L13: cuSPARSE Descriptors, SpMV, and SpMM](/en/libraries/cusparse-descriptors-spmv-spmm/), and their examples. The Python bridge starts at [P01](/en/python/cuda-python-bridge/) after the existing CUDA lifecycle and stream prerequisites. P04-P07 apply those concepts to eager PyTorch. The complete strict prerequisite graph currently published follows.
 
-R4 remains the latest completed aggregate static review, dated 2026-09-10. Its frozen `/release.json` retains 75 Learning Units, 277 Publication Pairs, 554 source routes, 74 Exercise sets, 74 separate solution sets and 401 catalog records. R1-R3 are unchanged historical snapshots. `/publication.json` now records 345 Publication Pairs and 690 source routes, with 94 Exercise sets and 94 separate reviewed-solution sets. R5 aggregate review remains pending; publication does not upgrade runtime evidence.
+R5 is the latest completed aggregate static review, dated 2026-09-19. Frozen `/release.json` and current `/publication.json` both record 95 Learning Units, 345 Publication Pairs, 690 source routes, 94 Exercise sets, 94 separate solution sets and 453 catalog records. R1-R4 remain unchanged history. R6 is next/pending; publication does not upgrade runtime evidence.
 
-**R4 aggregate static review date: 2026-09-10.** [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) and its [aggregate disposition](/en/sources-and-versions/#r4-aggregate-review) remain historical records, not a review of the current [issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) Python bridge increment. Publishing these pages does not pre-certify CI, Preview, production, or smoke acceptance, or imply completion of framework or Triton tracks. Technical sources retain their item-level access and review dates.
+**R5 static review and dynamic acceptance are separate records.** [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) owns same-commit CI, Preview, production and smoke results; the [aggregate source review](/en/sources-and-versions/#r5-aggregate-review) records independent environments and fallback boundaries. P01-P12 and T01-T08 are complete, without multi-GPU support. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) and R4's 2026-09-10 review retain their historical dates, as do individual technical sources.
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
@@ -139,7 +139,7 @@ The reusable-library route links to [L01 Exercises](/en/libraries/library-primit
 
 The current 95 Learning Units extend through P12 and T08. [T08](/en/triton/attention-capstone/) requires `[T03,T04,A11,P12]` and integrates forward attention with VIS18. The [Lab Index](/en/labs/) lists 16 Labs and the [Visual Explainer Index](/en/visuals/) lists 20 explainers. There are 102 [Practice Bank](/en/practice/) entries, 207 [Glossary](/en/glossary/) terms and 108 [source records](/en/sources-and-versions/): 453 catalog records. SRC-CUDA-092 records the capstone interfaces; the ten R3 Nsight report-analysis and eight R4 library-and-algorithm-choice entries remain unchanged.
 
-P04-P07 keep empty evidence arrays and the [independent eager environment](/en/sources-and-versions/#src-cuda-080): torch 2.11.0+cu128, CPython 3.12.14, packaged CUDA 12.8.1/runtime 12.8.90 and the native allocator. Eager work needs no system Toolkit. [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`, [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`, and [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`; each includes Exercises and separate solutions. Their extension project separately requires Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0. T01-T03, EX23 and LAB15 use the independent Triton 3.7.1 profile; further Triton units remain unpublished.
+P04-P07 keep empty evidence arrays and the [independent eager environment](/en/sources-and-versions/#src-cuda-080): torch 2.11.0+cu128, CPython 3.12.14, packaged CUDA 12.8.1/runtime 12.8.90 and the native allocator. Eager work needs no system Toolkit. [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`, [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`, and [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`; each includes Exercises and separate solutions. Their extension project separately requires Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0. T01-T08, EX23 and LAB15-LAB16 use the independent Triton 3.7.1 profile.
 
 Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; 22 other examples and 16 Labs remain Pending Hardware Verification, 38 subjects total. P01-P12 and T01-T08 keep empty evidence arrays; T08 device acceptance remains pending. EX21-EX23 and LAB13-LAB16 remain Pending Hardware Verification with empty compilation/recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts stay zero. Source review and host checks are not GPU evidence.
 
@@ -191,4 +191,4 @@ You are ready to move on when you can answer these five questions:
 4. How does the theme control fall back when scripts or persistence are unavailable?
 5. Why does publishing a page not grant CUDA evidence?
 
-**Current publication summary checked: 2026-09-12.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. The R4 aggregate review and individual source dates remain historical. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources.
+**Current publication summary checked: 2026-09-19.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. The R4 aggregate review and individual source dates remain historical. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources.
