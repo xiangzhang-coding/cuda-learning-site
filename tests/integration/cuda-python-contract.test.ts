@@ -31,10 +31,10 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current).toMatchObject({
       reviewDate: '2026-09-19',
       releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
-      scope: { publicationPairs: 345, sourceRoutes: 690, exerciseSetPublicationPairs: 94,
-        solutionSetPublicationPairs: 94, practiceBankEntries: 102, sourceRecords: 108 },
+      scope: { publicationPairs: 354, sourceRoutes: 708, exerciseSetPublicationPairs: 97,
+        solutionSetPublicationPairs: 97, practiceBankEntries: 105, sourceRecords: 111 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23']);
     expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16']);
     expect(current.scope.visualExplainers).toEqual([...r4.scope.visualExplainers, 'VIS17'].sort());
@@ -174,7 +174,7 @@ describe('issue #42 CUDA Python publication contract', () => {
   });
 
   it('static: gives each Python Practice Bank entry and source record a published prerequisite destination', async () => {
-    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-15T12:00:00Z') })).not.toThrow();
+    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-19T12:00:00Z') })).not.toThrow();
     const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R5-00[1-3]$/.test(planningId));
     expect(practice.map(({ planningId }) => planningId)).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
     for (const [index, record] of practice.entries()) {

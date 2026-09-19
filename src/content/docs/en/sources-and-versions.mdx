@@ -1,6 +1,6 @@
 ---
 title: Sources and Version Record
-description: Exact publishing and technical sources through T07 and LAB16, with independent version, rights and evidence records.
+description: Exact publishing and technical sources through G03, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
 factCheckDate: '2026-09-19'
@@ -40,6 +40,7 @@ structure:
   - entry-src-cuda-090
   - entry-src-cuda-091
   - content-sources
+  - multi-gpu-sources
   - review-record
 evidence:
   compilation: []
@@ -62,7 +63,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:structure'
-      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,entry-src-cuda-089,entry-src-cuda-090,entry-src-cuda-091,content-sources,review-record'
+      content: 'scope,lookup-index,verified-interfaces,entry-src-cuda-063,entry-src-cuda-064,entry-src-cuda-065,entry-src-cuda-066,entry-src-cuda-067,entry-src-cuda-068,entry-src-cuda-069,entry-src-cuda-070,entry-src-cuda-071,entry-src-cuda-072,entry-src-cuda-073,entry-src-cuda-074,entry-src-cuda-075,entry-src-cuda-076,entry-src-cuda-077,entry-src-cuda-078,entry-src-cuda-079,entry-src-cuda-080,entry-src-cuda-081,entry-src-cuda-082,entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,entry-src-cuda-089,entry-src-cuda-090,entry-src-cuda-091,content-sources,multi-gpu-sources,review-record'
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
@@ -79,7 +80,7 @@ The **2026-09-19 R5 aggregate static review** freezes 95 Learning Units, 23 Runn
 
 ## R5 aggregate review — 2026-09-19
 
-Schema 6 `src/r5-release-manifest.json` supplies `/release.json`; `/publication.json` retains the same current inventory with R5 completed and R6 next/pending. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records same-commit CI, Preview, production and smoke acceptance separately. No static summary pre-certifies those results. R1-R4 remain immutable. P01-P12 and T01-T08 close their public prerequisites, Exercises and separate solutions; R6 and multi-GPU destinations are excluded. The existing **PB-R5-004 through PB-R5-020** form 17 distinct PyTorch-and-Triton questions within the 102-entry Practice Bank.
+Schema 6 `src/r5-release-manifest.json` supplies frozen `/release.json`; `/publication.json` tracks subsequent complete increments with R5 completed and R6 next/pending. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records R5 same-commit CI, Preview, production and smoke acceptance separately; it does not certify a new increment's dynamic results. R1-R4 remain immutable. R5's P01-P12 and T01-T08 close their public prerequisites, Exercises and separate solutions; the subsequent complete G01–G03 increment is documented below, with no unfinished destinations. The existing **PB-R5-004 through PB-R5-020** form 17 distinct PyTorch-and-Triton questions within R5's 102-entry Practice Bank.
 
 | Independent environment | Selected boundary |
 | --- | --- |
@@ -916,7 +917,37 @@ The diagnostic interpreter additionally pins **NumPy 2.5.3** in `scripts/triton-
 - Language and search interface icons come from the installed Starlight 0.41.7 package and are not copied into project source; the theme-control mark is original project CSS. The upstream Starlight package declares the MIT license.
 - Technical links support publishing-interface and CUDA-fact verification. Public prose, code-repair scenarios, term definitions, tables, and visual compositions are original summaries and derivations that cite and paraphrase owner documentation rather than mirroring it.
 
+## Multi-GPU source review
+
+Current `/publication.json` extends the frozen R5 scope with G01–G03: 354 Publication Pairs, 708 source routes and 459 catalog records. The R5 inventory and 95-unit rights census above describe that completed snapshot. Current instruction has 98 Learning Units and 105 Practice Bank entries; the same original-content licenses apply. This increment is not the R6 release review.
+
+<span id="src-cuda-094" class="resource-target"></span>
+
+### SRC-CUDA-094 — Devices, contexts and ownership
+
+Related IDs: G01. Reviewed/accessed **2026-09-19**. Current Context7 `/websites/nvidia_cuda` discovery covered host-thread device selection and primary contexts; exact owner review used [Runtime API 13.3.1 context management](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/driver-vs-runtime-api.html) and [archived Programming Guide 13.2.0 multi-GPU systems](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html). The versions are intentionally named separately. The ordinary runtime path uses one primary context per device per process; explicit current Driver or execution contexts change that default. G01 does not use preview or explicit execution-context interfaces. The exercise uses the existing Toolkit 13.3.1 lane, native Ubuntu 24.04 x86-64, C++17 and selected driver ≥610.43.02; exact installed compiler/driver and both devices' CC/memory are required. Two-GPU execution remains Pending Hardware Verification.
+
+**Rights:** NVIDIA documentation retains its copyright and owner terms. Link-and-paraphrase review only; no upstream code, figure, table or output is incorporated. Original prose/Exercises are CC BY 4.0. This source record is not compilation or runtime evidence.
+
+<span id="src-cuda-095" class="resource-target"></span>
+
+### SRC-CUDA-095 — Directional peer access, copies and completion
+
+Related IDs: G02. Reviewed/accessed **2026-09-19**. Current Context7 discovery covered `cudaDeviceCanAccessPeer`, `cudaDeviceEnablePeerAccess`, cross-device waits and copy ordering. Owner authority: [peer API 13.3.1](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__PEER.html), [archived multi-device ordering and Linux IOMMU constraints 13.2.0](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html). Review distinguishes query return status from capability, unidirectional enablement from bidirectional exercise policy, already-enabled ownership, producer/copy/consumer lifetime, same-device event timing and explicit host staging. Unsupported or unknown bare-metal IOMMU/ACS configuration blocks direct PCIe peer testing; the curriculum does not prescribe machine reconfiguration. Native Linux two-GPU activities use G01's full manifest and remain Pending Hardware Verification.
+
+**Rights:** link and original paraphrase under the same NVIDIA source boundary; no sample reconstruction or benchmark reuse. Original instruction is CC BY 4.0. No runtime path, atomic support or bandwidth is inferred from a capability bit.
+
+<span id="src-cuda-096" class="resource-target"></span>
+
+### SRC-CUDA-096 — Topology-tool interpretation and sanitization
+
+Related IDs: G03. Reviewed/accessed **2026-09-19**. Exact source: [NVIDIA System Management Interface manual](https://docs.nvidia.com/deploy/nvidia-smi/index.html), a rolling owner manual reviewed on this date, **not a pinned CLI release**. The installed `nvidia-smi --version`, `topo -h` and local legends must accompany each real record. Reviewed flags: `-L`, `topo -m`, `topo -mp`, `topo -p2p r/w`, `nvlink -h` and `nvlink --status`. Review includes PCI-only versus NVLink-inclusive views, PIX/PXB/PHB/NODE/SYS/NV# boundaries, NIC/RDMA limitations, ordinal reconciliation, query permissions and unavailable results. Current Context7 CUDA discovery was supplemented by this exact owner manual and the [13.2.0 platform constraints](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html). No real topology is published; network paths stay unknown without separate endpoint/interface/transport/route evidence.
+
+**Rights and data:** NVIDIA's manual is linked and paraphrased, not copied or relicensed. Original alias-fixture validation and tests use Apache-2.0; instructional prose uses CC BY 4.0. Synthetic fixtures are marked synthetic. A real derivative needs privately retained original and derivative hashes, alias mapping, exact command/version, reviewer and permissions. Schema validation does not grant Runtime-Verified status. Two-GPU and topology observations remain Pending Hardware Verification.
+
 ## Review record
+
+The 2026-09-19 G01–G03 increment adds SRC-CUDA-094/095/096, bringing the source catalog to 111 records. R5's completed release snapshot remains historical; R6 is pending. No new CUDA evidence is claimed.
 
 <span id="r4-aggregate-review" class="resource-target" aria-hidden="true"></span>
 
