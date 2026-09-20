@@ -73,6 +73,18 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  G07: {
+    href: { 'zh-CN': '/multi-gpu/pytorch-ddp-nccl/', en: '/en/multi-gpu/pytorch-ddp-nccl/' },
+    title: { 'zh-CN': 'G07：把 PyTorch DDP 看作 NCCL 客户端', en: 'G07: Read PyTorch DDP as an NCCL Client' }, prerequisites: ['P04', 'P05', 'G04'],
+  },
+  'G07-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/pytorch-ddp-nccl/exercises/', en: '/en/multi-gpu/pytorch-ddp-nccl/exercises/' },
+    title: { 'zh-CN': 'G07 练习：所有权、梯度与最早失败', en: 'G07 Exercises: Ownership, Gradients and First Failures' }, prerequisites: ['G07'],
+  },
+  'G07-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/pytorch-ddp-nccl/solutions/', en: '/en/multi-gpu/pytorch-ddp-nccl/solutions/' },
+    title: { 'zh-CN': 'G07 解答：对齐所有权、算术与证据', en: 'G07 Solutions: Match Ownership, Arithmetic and Evidence' }, prerequisites: ['G07-EXERCISES'],
+  },
   G06: {
     href: { 'zh-CN': '/multi-gpu/communication-computation-overlap/', en: '/en/multi-gpu/communication-computation-overlap/' },
     title: { 'zh-CN': 'G06：先证明依赖，再判断通信与计算重叠', en: 'G06: Prove Dependencies Before Claiming Overlap' }, prerequisites: ['G05', 'Q05', 'Q07'],

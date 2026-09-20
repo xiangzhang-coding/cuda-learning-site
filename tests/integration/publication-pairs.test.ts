@@ -48,6 +48,9 @@ type PublicationPair = {
 
 const publicationPairFixtures: readonly PublicationPair[] = [
   { pairId: 'g06', unitId: 'G06', resourceKind: 'learning-unit', prerequisites: 'G05,Q05,Q07', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/communication-computation-overlap/', en: '/en/multi-gpu/communication-computation-overlap/' },
+  { pairId: 'g07', unitId: 'G07', resourceKind: 'learning-unit', prerequisites: 'P04,P05,G04', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/pytorch-ddp-nccl/', en: '/en/multi-gpu/pytorch-ddp-nccl/' },
+  { pairId: 'g07-exercises', unitId: 'G07-EXERCISES', resourceKind: 'exercise-set', prerequisites: 'G07', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/pytorch-ddp-nccl/exercises/', en: '/en/multi-gpu/pytorch-ddp-nccl/exercises/' },
+  { pairId: 'g07-solutions', unitId: 'G07-SOLUTIONS', resourceKind: 'solution-set', prerequisites: 'G07-EXERCISES', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/pytorch-ddp-nccl/solutions/', en: '/en/multi-gpu/pytorch-ddp-nccl/solutions/' },
   { pairId: 'g06-exercises', unitId: 'G06-EXERCISES', resourceKind: 'exercise-set', prerequisites: 'G06', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/communication-computation-overlap/exercises/', en: '/en/multi-gpu/communication-computation-overlap/exercises/' },
   { pairId: 'g06-solutions', unitId: 'G06-SOLUTIONS', resourceKind: 'solution-set', prerequisites: 'G06-EXERCISES', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/communication-computation-overlap/solutions/', en: '/en/multi-gpu/communication-computation-overlap/solutions/' },
   { pairId: 'lab18', unitId: 'LAB18', resourceKind: 'lab', prerequisites: 'G05,Q05,Q07', factCheckDate: '2026-09-20', evidenceRuntime: 'Pending Hardware Verification', zh: '/labs/pipeline-nccl-computation/', en: '/en/labs/pipeline-nccl-computation/' },
@@ -4314,8 +4317,8 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(367);
-    expect(sourceRoutes.size).toBe(734);
+    expect(publicationPairs).toHaveLength(370);
+    expect(sourceRoutes.size).toBe(740);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {

@@ -1,5 +1,36 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Issue 55 source refresh — 2026-09-20
+
+Context7 `/pytorch/pytorch/v2.11.0` query: “DistributedDataParallel torchrun
+LOCAL_RANK init_process_group nccl device_id destroy_process_group gradient
+synchronization no_sync CUDA streams record_stream TORCH_NCCL_ASYNC_ERROR_HANDLING”.
+`/nvidia/nccl` query: “NCCL CUDA stream asynchronous completion communicator
+unique device rank NCCL_DEBUG INFO troubleshooting timeout abort”. Main/master
+snippets are discovery, not the pin. Exact PyTorch source is
+`70d99e998b4955e0049d13a98d77ae1b14db1f45`; selected torch is 2.11.0+cu128,
+runtime/CUPTI 12.8.90 and NCCL wheel 2.28.9, reusing the existing hash-locked
+29-distribution environment without upgrading it. Source/test/API coverage and
+the independent 2.28.9 archive are recorded in bilingual SRC-CUDA-100.
+
+The exact ProcessGroupNCCL source uses the current stream for synchronous
+collectives and stashes tensors for async allocator safety. Work.wait establishes
+the consuming current stream's dependency under the selected nonblocking policy.
+This differs from simplistic always-internal-stream/always-recordStream summaries.
+The historical DDP design note explicitly targets v1.4. Requested
+`docs/source/distributed.rst` returned 404; the selected owner file is
+`docs/source/distributed.md`. NCCL v2.28.9-1 has no newer-tree user-guide path;
+the `archives/nccl_2289` owner documentation resolves and identifies 2.28.9.
+The exact communicator/environment archives and CUDA 12.8 driver release notes
+were checked as well as owner timeout, current-stream and destroy tests.
+
+The new rights ledger records all inspected file hashes and the range-retrieved
+NCCL wheel license member (1895 bytes), matching the old release's BSD terms,
+not EX24's newer license. No copied upstream code/log/diagram or GPU run.
+The original solution's CPU-only oracle and synthetic diagnostic fixture are
+checked locally/through the existing web test gates; neither grants CUDA evidence.
+G07 has empty evidence arrays; external scenarios remain Pending Hardware Verification.
+
 ## Issue 54 source refresh — 2026-09-20
 
 G06/LAB18: Context7 `/nvidia/nccl` query: “Grouping operations with multiple streams establishes stream dependencies ncclGroupEnd enqueue overlap computation communication CUDA streams”. `/websites/nvidia_nsight-systems` query: “CUDA NVTX GPU timeline correlation profiling --trace=cuda,nvtx --sample=none --cpuctxsw=none overhead event trace NCCL profiler permissions”. Results were discovery; selected authority is NCCL 2.31.2 commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`, `docs/userguide/source/usage/{streams,groups}.rst` and topology troubleshooting. The live owner Nsight Systems UserGuide reports 2026.5; attempted 2026.4 archive returned 404. SRC-CUDA-099 records exact coordinates and the independent installed-build gate. No version inference from the older bundled Toolkit profiler.

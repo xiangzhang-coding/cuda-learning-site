@@ -2,7 +2,7 @@
 
 ## Current increment — issue #54, 2026-09-20
 
-G06/LAB18 publish dependency-first communication/computation overlap, separate Exercises/solutions, PB-R6-006/007 and SRC-CUDA-099. Current scope is 101 Learning Units, 24 Runnable Examples, 367 Publication Pairs, 734 source routes, 100 Exercise sets, 100 separate solution sets and 469 catalog records (18 Labs, 109 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 114 source records). LAB18 adds one pending subject, for 41 subjects Pending Hardware Verification. Its original CUDA exercise solution has a GPU-free compile/link gate; its teaching fixture has only synthetic dimensionless intervals. There is no published overlap, throughput or bottleneck evidence. R5 remains frozen and R6 remains pending. Earlier dated inventories below are historical.
+G07 publishes PyTorch DDP as an NCCL client, with ownership/gradient/diagnostic Exercises, separate solutions, PB-R6-008/009 and SRC-CUDA-100. Current scope is 102 Learning Units, 24 Runnable Examples, 370 Publication Pairs, 740 source routes, 101 Exercise sets, 101 separate solution sets and 472 catalog records (18 Labs, 111 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 115 source records). Its original Python solution selects torch 2.11.0+cu128 and packaged NCCL 2.28.9 independently of EX24. The diagnostic fixture is synthetic; CPU algebra tests establish no distributed run. Existing 41 Example/Lab subjects and G07's external scenarios remain Pending Hardware Verification. R5 remains frozen and R6 remains pending. Earlier dated inventories below are historical.
 
 # CUDA Learning Site
 

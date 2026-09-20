@@ -17,9 +17,9 @@ describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R5', next: 'R6', status: 'pending' });
-    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06']);
-    expect(current.scope).toMatchObject({ publicationPairs: 367, sourceRoutes: 734,
-      exerciseSetPublicationPairs: 100, solutionSetPublicationPairs: 100, practiceBankEntries: 109, sourceRecords: 114 });
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07']);
+    expect(current.scope).toMatchObject({ publicationPairs: 370, sourceRoutes: 740,
+      exerciseSetPublicationPairs: 101, solutionSetPublicationPairs: 101, practiceBankEntries: 111, sourceRecords: 115 });
     const { nccl, ...priorComponents } = current.compatibility.componentBoundaries;
     expect({ ...current.compatibility, componentBoundaries: priorComponents }).toEqual(release.compatibility);
     expect(nccl.version).toBe('2.31.2');

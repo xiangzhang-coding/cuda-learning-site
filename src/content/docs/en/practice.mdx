@@ -4569,6 +4569,50 @@ Retry latency needs a separately declared end-to-end host interval that covers t
 
 ## Review record
 
+<span id="pb-r6-008" class="resource-target"></span>
+
+## PB-R6-008: A rank mean is not a sample mean
+
+**ID:** PB-R6-008 · original Publication Pair.
+- **Direct prerequisite:** [G07](/en/multi-gpu/pytorch-ddp-nccl/), exactly `[G07]`.
+- **Related Learning Units and resources:** [G07](/en/multi-gpu/pytorch-ddp-nccl/).
+- **Hardware gate:** none; static arithmetic.
+- **Last reviewed:** 2026-09-20.
+
+**Difficulty:** advanced. **Version:** PyTorch 2.11.0+cu128; NCCL 2.28.9.
+
+**Prompt:** In one matching DDP step, rank 0 has one sample with local mean gradient 2; rank 1 has three samples with local mean gradient 6. Predict the ordinary DDP result and the intended global sample mean. Derive local loss weights that recover the latter.
+
+**Constraints:** equal step counts; ordinary rank-mean reduction, no custom hook or join. **Expected evidence:** two numerical results and a weighting proof. **Acceptance criteria:** distinguish rank and sample means and explain why loss weighting does not solve missing collective participation.
+
+<details><summary>Hint 1</summary><p>DDP sees two local gradients, not the four individual samples.</p></details>
+<details><summary>Hint 2</summary><p>Multiply each local mean loss by R times its sample count divided by the total count.</p></details>
+
+**Reviewed solution:** Ordinary DDP gives (2+6)/2=4; the sample mean is (1×2+3×6)/4=5. Local weights 1/2 and 3/2 give (1+9)/2=5. All ranks must still execute matching steps. See [G07 solutions](/en/multi-gpu/pytorch-ddp-nccl/solutions/). **Source basis:** original algebra and [SRC-CUDA-100](/en/sources-and-versions/#src-cuda-100). **Source date:** 2026-09-20. These are derived values, not training results.
+
+<span id="pb-r6-009" class="resource-target"></span>
+
+## PB-R6-009: The waiting stream and the timing-out rank
+
+**ID:** PB-R6-009 · original Publication Pair.
+- **Direct prerequisite:** [G07](/en/multi-gpu/pytorch-ddp-nccl/), exactly `[G07]`.
+- **Related Learning Units and resources:** [G07](/en/multi-gpu/pytorch-ddp-nccl/).
+- **Hardware gate:** none; static diagnostic reasoning.
+- **Last reviewed:** 2026-09-20.
+
+**Difficulty:** advanced. **Version:** PyTorch 2.11.0+cu128; NCCL 2.28.9.
+
+**Prompt:** After an asynchronous all-reduce, an author calls work.wait() on C, reads the output on unrelated Q, and claims record_stream(Q) fixes readiness. Separately, a fictional rank-0 timeout follows an explicit rank-1 input exception. Identify both unsupported conclusions without running either failure.
+
+**Constraints:** nonblocking wait policy; native allocator; one node. **Expected evidence:** a corrected stream dependency and first-failure investigation. **Acceptance criteria:** protect Q, retain storage through its use, inspect the earlier rank-1 exception, and preserve a bounded supervisor without a recovery barrier.
+
+<details><summary>Hint 1</summary><p>Work.wait installs its dependency on the current stream, not every stream.</p></details>
+<details><summary>Hint 2</summary><p>Allocator tracking does not establish producer readiness; the rank reporting a timeout can be a waiting peer.</p></details>
+
+**Reviewed solution:** Wait under Q before consuming, or connect Q to C after C's wait; protect lifetimes and complete Q before host validation. The supplied rank-1 exception is the first investigation target, not a guessed rank-0 transport failure. See [G07 solutions](/en/multi-gpu/pytorch-ddp-nccl/solutions/). **Source basis:** original reasoning and [SRC-CUDA-100](/en/sources-and-versions/#src-cuda-100). **Source date:** 2026-09-20. No observed failure or synchronization result.
+
+Issue #55 adds PB-R6-008/009 with exact prerequisite G07: 111 complete original entries. Existing 41 Example/Lab subjects and G07's external scenarios remain Pending Hardware Verification. Earlier counts below are historical.
+
 Issue #54 adds PB-R6-006/007 on 2026-09-20, both with exact prerequisite G06. Current total: 109 complete original entries. LAB18 brings Pending Hardware Verification subjects to 41; no measured overlap, throughput or bottleneck is published. Earlier counts below are historical.
 
 Issue #53 adds PB-R6-004/005 on 2026-09-19 with exact prerequisites G04/G05. Current total: 107 complete original entries. R5 remains frozen, R6 review is pending. Earlier increment totals below are historical; EX24/LAB17 add two Pending Hardware Verification subjects, for 40 total, without recorded GPU results.
