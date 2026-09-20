@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Issue #54 publication increment — 2026-09-20
+
+Current `/publication.json`: 101 Learning Units, 24 Runnable Examples, 367 Publication Pairs, 734 source routes, 100 Exercise sets, 100 solution sets and 469 catalog records (18 Labs, 109 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 114 source records). G06/LAB18 reuse VIS16/VIS14. The NCCL workflow compiles/links the original exercise solution without GPU execution. All 41 pending subjects retain Pending Hardware Verification. No captured timeline, overlap, throughput or bottleneck conclusion is deployed. `/release.json` is frozen R5; R6 remains pending. Earlier dated inventories below are historical.
+
 # Cloudflare Deployment
 
 ## Current G04/G05 publication — 2026-09-19

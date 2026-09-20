@@ -17,15 +17,15 @@ describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R5', next: 'R6', status: 'pending' });
-    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05']);
-    expect(current.scope).toMatchObject({ publicationPairs: 363, sourceRoutes: 726,
-      exerciseSetPublicationPairs: 99, solutionSetPublicationPairs: 99, practiceBankEntries: 107, sourceRecords: 113 });
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06']);
+    expect(current.scope).toMatchObject({ publicationPairs: 367, sourceRoutes: 734,
+      exerciseSetPublicationPairs: 100, solutionSetPublicationPairs: 100, practiceBankEntries: 109, sourceRecords: 114 });
     const { nccl, ...priorComponents } = current.compatibility.componentBoundaries;
     expect({ ...current.compatibility, componentBoundaries: priorComponents }).toEqual(release.compatibility);
     expect(nccl.version).toBe('2.31.2');
     expect(current.evidence).toEqual({ ...release.evidence,
-      noCompileCheckedClaim: ['EX24', 'LAB17', ...release.evidence.noCompileCheckedClaim],
-      pendingHardwareVerification: ['EX24', 'LAB17', ...release.evidence.pendingHardwareVerification],
+      noCompileCheckedClaim: ['LAB18', 'EX24', 'LAB17', ...release.evidence.noCompileCheckedClaim],
+      pendingHardwareVerification: ['LAB18', 'EX24', 'LAB17', ...release.evidence.pendingHardwareVerification],
       evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS16'].sort(),
     });
     expect(release.scope.learningUnits).toEqual([...r4.scope.learningUnits, ...ids('P', 12), ...ids('T', 8)]);
@@ -35,7 +35,7 @@ describe('R5 aggregate release review', () => {
       expect(PUBLISHED_DESTINATIONS[id], id).toBeDefined();
       for (const prerequisite of PUBLISHED_DESTINATIONS[id].prerequisites) expect(PUBLISHED_DESTINATIONS[prerequisite], id).toBeDefined();
     }
-    for (const id of ['D01', 'EX25', 'LAB18', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
+    for (const id of ['D01', 'EX25', 'LAB19', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
     expect(r4.scope.learningUnits).toHaveLength(75);
   });
 

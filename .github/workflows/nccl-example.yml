@@ -14,3 +14,8 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Build pinned EX24 and run CPU oracle only
         run: docker build --platform linux/amd64 -t ex24-build examples/ex24-nccl-all-reduce
+      - name: Compile and link LAB18 exercise solution without GPU execution
+        run: >-
+          docker run --rm --platform linux/amd64 --network none
+          -v "$PWD/public/assets/exercise-solutions:/work:ro" ex24-build
+          bash -lc 'nvcc -std=c++17 -O2 -lineinfo -arch=sm_75 /work/g06-pipeline.cu -lnccl -o /tmp/lab18 && readelf -d /tmp/lab18'

@@ -435,6 +435,14 @@ const labs: readonly ResourceIndexRecord[] = [
     evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-14',
   },
   {
+    planningId: 'LAB18', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB18.title,
+    href: PUBLISHED_DESTINATIONS.LAB18.href, resourceType: 'guided-lab', difficulty: 'advanced',
+    prerequisites: ['G05', 'Q05', 'Q07'], relatedUnits: ['G06', 'EX24', 'VIS16', 'VIS14'],
+    hardwareGate: localized('原生 Linux；2–8 个完整 GPU，各 CC 7.5+、总内存 8 GB+、空闲 256 MiB+。', 'Native Linux; 2–8 full GPUs, each CC 7.5+, 8 GB+ total and 256 MiB+ free.'),
+    versionGate: same('CUDA 13.3.1; NCCL 2.31.2-1+cuda13.3; Nsight Systems 2026.5; driver >=610.43.02'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-20',
+  },
+  {
     planningId: 'LAB17', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB17.title,
     href: PUBLISHED_DESTINATIONS.LAB17.href, resourceType: 'guided-lab', difficulty: 'advanced',
     prerequisites: ['G04', 'G05'], relatedUnits: ['EX24'],
@@ -474,6 +482,18 @@ const multiGpuPractice: readonly ResourceIndexRecord[] = [
     href: localized('/practice/#pb-r6-005', '/en/practice/#pb-r6-005'),
     resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G05'], relatedUnits: ['G05', 'LAB17'],
     hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; CUDA 13.3.1'), reviewedOn: '2026-09-19',
+  },
+  {
+    planningId: 'PB-R6-006', group: 'practice', title: localized('跨设备相交不是局部重叠', 'Cross-device intersection is not local overlap'),
+    href: localized('/practice/#pb-r6-006', '/en/practice/#pb-r6-006'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['G06'], relatedUnits: ['G06', 'LAB18'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; Nsight Systems 2026.5'), reviewedOn: '2026-09-20',
+  },
+  {
+    planningId: 'PB-R6-007', group: 'practice', title: localized('复用槽前等待消费者', 'Wait for the consumer before reusing a slot'),
+    href: localized('/practice/#pb-r6-007', '/en/practice/#pb-r6-007'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G06'], relatedUnits: ['G06', 'LAB18'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; CUDA 13.3.1'), reviewedOn: '2026-09-20',
   },
 ];
 
@@ -2442,6 +2462,7 @@ const multiGpuSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-096', localized('拓扑工具与路径证据边界', 'Topology tools and path-evidence boundaries'), 'linux-tool-record', ['G03'], localized('NVIDIA 滚动手册，2026-09-19 复核；必须记录安装 CLI 版本。', 'NVIDIA rolling manual reviewed 2026-09-19; installed CLI version must be recorded.'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-097', localized('NCCL 通信器、集合通信与独立版本', 'NCCL communicators, collectives and independent versions'), 'cuda-version-record', ['G04', 'EX24', 'LAB17', 'VIS16'], same('NCCL 2.31.2; CUDA 13.3.1; source 7b83616df3ae082a1f32bb74c27458bfe8153a13'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-098', localized('NCCL 分组、流和错误进度', 'NCCL grouping, streams and error progress'), 'cuda-version-record', ['G05', 'EX24', 'LAB17'], same('NCCL 2.31.2; CUDA 13.3.1'), '2026-09-19', '2026-09-19'),
+  sourceRecord('SRC-CUDA-099', localized('通信计算流水线与时间线证据', 'Communication/compute pipelines and timeline evidence'), 'cuda-version-record', ['G06', 'LAB18'], same('NCCL 2.31.2; CUDA 13.3.1; Nsight Systems 2026.5'), '2026-09-20', '2026-09-20'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [

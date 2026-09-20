@@ -1,0 +1,61 @@
+{
+  "fixtureId": "LAB18-TEACHING-TIMELINE",
+  "license": "CC-BY-4.0",
+  "provenance": "original",
+  "fixtureType": "synthetic-teaching-timeline",
+  "unit": "dimensionless ticks",
+  "captureStatus": "not-captured",
+  "runtime": "Pending Hardware Verification",
+  "reviewDate": "2026-09-20",
+  "claimBoundary": "Invented intervals for arithmetic only. No measured execution, throughput, bottleneck or selected NCCL algorithm.",
+  "cases": [
+    {
+      "id": "overlap",
+      "classification": "synthetic-local-overlap",
+      "scope": "device-activity",
+      "intervals": [
+        { "rank": 0, "operation": "A0", "stream": "c", "start": 4, "end": 10 },
+        { "rank": 0, "operation": "P1", "stream": "p", "start": 5, "end": 8 },
+        { "rank": 1, "operation": "A0", "stream": "c", "start": 4, "end": 10 },
+        { "rank": 1, "operation": "P1", "stream": "p", "start": 5, "end": 8 }
+      ]
+    },
+    {
+      "id": "serialized",
+      "classification": "synthetic-serialized",
+      "scope": "device-activity",
+      "intervals": [
+        { "rank": 0, "operation": "A0", "stream": "c", "start": 4, "end": 10 },
+        { "rank": 0, "operation": "P1", "stream": "p", "start": 10, "end": 13 },
+        { "rank": 1, "operation": "A0", "stream": "c", "start": 4, "end": 10 },
+        { "rank": 1, "operation": "P1", "stream": "p", "start": 10, "end": 13 }
+      ]
+    },
+    { "id": "host-only", "classification": "inconclusive", "scope": "host-api-only", "intervals": [
+      { "rank": 0, "operation": "all-reduce API", "start": 0, "end": 2 },
+      { "rank": 1, "operation": "launch API", "start": 1, "end": 3 }
+    ] }
+  ],
+  "environmentManifest": {
+    "referenceEnvironment": null,
+    "gpuCount": null,
+    "rankDeviceMapping": null,
+    "topology": null,
+    "driver": null,
+    "toolkit": null,
+    "nccl": null,
+    "profilerBuild": null,
+    "permissions": null,
+    "sourceAndBinaryHashes": null,
+    "workload": null,
+    "warmupAndStatistics": null,
+    "synchronization": null,
+    "commandsAndExitStatuses": [],
+    "rawReports": [],
+    "correctness": [],
+    "observations": []
+  },
+  "sanitization": { "containsCapturedData": false, "reviewDate": "2026-09-20", "publicFields": "Synthetic rank ordinals, operation names and dimensionless intervals only; environment fields intentionally blank." },
+  "expectedObservations": ["A qualified run may exhibit overlap, serialization or insufficient evidence; correctness must pass first."],
+  "recordedObservations": []
+}

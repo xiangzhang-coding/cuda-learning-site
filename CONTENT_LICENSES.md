@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Issue #54 rights and current inventory — 2026-09-20
+
+G06/LAB18, Exercises/solutions, PB-R6-006/007 and the synthetic timeline fixture are original CC BY 4.0; the fixture carries an attribution sidecar. `public/assets/exercise-solutions/g06-pipeline.cu`, tests and CI are original Apache-2.0. No upstream code, diagram, screenshot or profiler report is copied. External NCCL 2.31.2 rights retain the exact LICENSE.txt hash and per-file notices recorded below; NVIDIA documentation/profiler terms remain separate. Current inventory: 101 Learning Units, 24 Runnable Examples, 367 Publication Pairs, 734 source routes, 100 Exercise sets, 100 solution sets and 469 catalog records (18 Labs, 109 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 114 source records). Earlier dated inventories below are historical. Forty-one subjects remain Pending Hardware Verification; source and compile gates do not establish measured overlap.
+
 ## NCCL publication — 2026-09-19
 
 G04/G05, EX24/LAB17/VIS16, PB-R6-004/005 and SRC-CUDA-097/098 add nine Publication Pairs. Current totals are 100 Learning Units, 24 Runnable Examples, 363 pairs, 726 routes, 99 Exercise and 99 solution pairs, and 465 catalog records (17 Labs, 107 practice entries, 21 visuals, 207 terms, 113 sources). Earlier increment inventories below are historical. Original software/model/UI/tests are Apache-2.0; original instruction and static diagrams are CC BY 4.0. NCCL 2.31.2 stays external, with exact LICENSE.txt SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`, Apache-2.0 plus retained BSD and per-file notices. No upstream sample, figure, fixture, header or library is redistributed. CUDA retains separate NVIDIA terms.

@@ -47,6 +47,10 @@ type PublicationPair = {
 };
 
 const publicationPairFixtures: readonly PublicationPair[] = [
+  { pairId: 'g06', unitId: 'G06', resourceKind: 'learning-unit', prerequisites: 'G05,Q05,Q07', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/communication-computation-overlap/', en: '/en/multi-gpu/communication-computation-overlap/' },
+  { pairId: 'g06-exercises', unitId: 'G06-EXERCISES', resourceKind: 'exercise-set', prerequisites: 'G06', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/communication-computation-overlap/exercises/', en: '/en/multi-gpu/communication-computation-overlap/exercises/' },
+  { pairId: 'g06-solutions', unitId: 'G06-SOLUTIONS', resourceKind: 'solution-set', prerequisites: 'G06-EXERCISES', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/communication-computation-overlap/solutions/', en: '/en/multi-gpu/communication-computation-overlap/solutions/' },
+  { pairId: 'lab18', unitId: 'LAB18', resourceKind: 'lab', prerequisites: 'G05,Q05,Q07', factCheckDate: '2026-09-20', evidenceRuntime: 'Pending Hardware Verification', zh: '/labs/pipeline-nccl-computation/', en: '/en/labs/pipeline-nccl-computation/' },
   { pairId: 'ex24', unitId: 'EX24', resourceKind: 'runnable-example', prerequisites: 'G04', factCheckDate: '2026-09-19', canonicalExample: 'EX24', canonicalRanges: 'oracle,collective,completion', evidenceRuntime: 'Pending Hardware Verification', zh: '/examples/nccl-all-reduce/', en: '/en/examples/nccl-all-reduce/' },
   { pairId: 'lab17', unitId: 'LAB17', resourceKind: 'lab', prerequisites: 'G04,G05', factCheckDate: '2026-09-19', evidenceRuntime: 'Pending Hardware Verification', zh: '/labs/nccl-all-reduce/', en: '/en/labs/nccl-all-reduce/' },
   { pairId: 'vis16', unitId: 'VIS16', resourceKind: 'visual-explainer', prerequisites: 'G04', factCheckDate: '2026-09-19', hardwareGate: 'none', zh: '/visuals/collective-paths/', en: '/en/visuals/collective-paths/' },
@@ -4310,14 +4314,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(363);
-    expect(sourceRoutes.size).toBe(726);
+    expect(publicationPairs).toHaveLength(367);
+    expect(sourceRoutes.size).toBe(734);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['EX25', 'LAB18']) {
+    for (const absentUnitId of ['EX25', 'LAB19']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

@@ -92,11 +92,11 @@ describe('R4 release review', () => {
         .toBe('2026-09-19');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
-        /363 (?:Publication Pairs|pairs|个双语发布对|个发布对)/, /726 (?:source routes|routes|条源路由|条路由)/,
-        /100 (?:Learning Units|units|个学习单元|个单元)/, /24 (?:Runnable Examples|个可运行示例)/,
-        /99 (?:Exercise sets|组练习)/, /99 (?:separate reviewed-solution sets|separate solution sets|solution sets|组独立参考解答|组独立解答|组解答)/,
-        /107 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
-        /113 (?:source records|条来源(?:记录)?)/, /465 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /40 (?:subjects|个主体)/,
+        /367 (?:Publication Pairs|pairs|个双语发布对|个发布对)/, /734 (?:source routes|routes|条源路由|条路由)/,
+        /101 (?:Learning Units|units|个学习单元|个单元)/, /24 (?:Runnable Examples|个可运行示例)/,
+        /100 (?:Exercise sets|组练习)/, /100 (?:separate reviewed-solution sets|separate solution sets|solution sets|组独立参考解答|组独立解答|组解答)/,
+        /109 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
+        /114 (?:source records|条来源(?:记录)?)/, /469 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /41 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
       expect(prose).toMatch(/R5[^\n]*2026-09-19|2026-09-19[^\n]*R5/);
       expect(prose).toMatch(/R6[^\n]*(?:pending|待复核)/);
@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '107'], ['glossary', '207'], ['sources-and-versions', '113']]) {
+        for (const [slug, count] of [['practice', '109'], ['glossary', '207'], ['sources-and-versions', '114']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -163,7 +163,7 @@ describe('R4 release review', () => {
     expect(current).toMatchObject({
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-19',
+      reviewDate: '2026-09-20',
       releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
@@ -474,7 +474,7 @@ describe('R4 release review', () => {
         expect(document).not.toMatch(/R4 aggregate review remains pending|R4 聚合复核仍待完成/i);
       }
       const practice = await readFile(path.join(projectRoot, 'src/content/docs', prefix, 'practice.mdx'), 'utf8');
-      expect(practice).toMatch(/107 (?:complete original entries|个完整原创条目)/i);
+      expect(practice).toMatch(/109 (?:complete original entries|个完整原创条目)/i);
       expect(practice).not.toMatch(/68 (?:complete|道完整)/i);
       for (const id of nsightReportAnalysisPracticeIds) expect(practice).toContain(id);
       for (const id of ['001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016']) {
@@ -518,7 +518,7 @@ describe('R4 release review', () => {
         .map(([, doc]) => metadata(doc, 'unit-id')!);
       expectExactMembers(idsOfKind('learning-unit'), current.scope.learningUnits);
       expectExactMembers(idsOfKind('runnable-example'), current.scope.runnableExamples);
-      expectExactMembers(idsOfKind('lab'), [...labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17']);
+      expectExactMembers(idsOfKind('lab'), [...labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18']);
       expect(idsOfKind('exercise-set')).toHaveLength(current.scope.exerciseSetPublicationPairs);
       expect(idsOfKind('solution-set')).toHaveLength(current.scope.solutionSetPublicationPairs);
       const units = new Map(localPages.filter(([, doc]) => metadata(doc, 'unit-id'))
@@ -558,7 +558,7 @@ describe('R4 release review', () => {
 
       const catalogIds: string[] = [];
       for (const [slug, group, count] of [
-        ['labs', 'labs', 17], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 21],
+        ['labs', 'labs', 18], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 21],
         ['glossary', 'glossary', current.scope.glossaryTerms], ['sources-and-versions', 'sources', current.scope.sourceRecords],
       ] as const) {
         const route = `${locale === 'en' ? '/en' : ''}/${slug}/`;
@@ -618,8 +618,8 @@ describe('R4 release review', () => {
       expect([...units.keys()].filter((id) => /^P\d{2}$/.test(id)).sort()).toEqual(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12']);
       expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018', 'PB-R5-019', 'PB-R5-020']);
       expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08']);
-      expect(catalogIds.filter((id) => /^PB-R6-/.test(id)).sort()).toEqual(['PB-R6-001', 'PB-R6-002', 'PB-R6-003', 'PB-R6-004', 'PB-R6-005']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[7-9]-|^(?:G06|EX25|LAB18)$/.test(id))).toBe(false);
+      expect(catalogIds.filter((id) => /^PB-R6-/.test(id)).sort()).toEqual(['PB-R6-001', 'PB-R6-002', 'PB-R6-003', 'PB-R6-004', 'PB-R6-005', 'PB-R6-006', 'PB-R6-007']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[7-9]-|^(?:G07|EX25|LAB19)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(
@@ -630,6 +630,6 @@ describe('R4 release review', () => {
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}frameworks/${slug}/${suffix}`))).sort(),
     );
     expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P|T|G)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
-    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB18');
+    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB19');
   }, 30_000);
 });

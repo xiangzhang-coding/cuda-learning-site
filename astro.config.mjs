@@ -214,6 +214,7 @@ export default defineConfig({
             { slug: 'multi-gpu/topology-paths' },
             { slug: 'multi-gpu/nccl-communicators-collectives' },
             { slug: 'multi-gpu/nccl-stream-dependencies' },
+            { slug: 'multi-gpu/communication-computation-overlap' },
           ],
         },
         {
