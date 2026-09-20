@@ -197,10 +197,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 18 },
-  { suffix: 'practice/', count: 111 },
+  { suffix: 'practice/', count: 113 },
   { suffix: 'visuals/', count: 21 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 115 },
+  { suffix: 'sources-and-versions/', count: 116 },
 ] as const;
 const exampleRouteSlugs = [
   'nccl-all-reduce',
@@ -679,7 +679,7 @@ test('serves the exact R5 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(252 + currentPublicationManifest.scope.glossaryTerms);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(268 + currentPublicationManifest.scope.glossaryTerms);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -690,7 +690,7 @@ test('serves the exact R5 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(16);
+    await expect(labCards).toHaveCount(18);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -708,6 +708,8 @@ test('serves the exact R5 release and current publication with production canoni
       'LAB14',
       'LAB15',
       'LAB16',
+      'LAB17',
+      'LAB18',
     ]);
   }
 
