@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-As of **2026-09-20**, the current publication includes G01–G07: 102 Learning Units, 24 Runnable Examples, 370 Publication Pairs, 740 source routes and 472 catalog records. Start with [device ownership](/en/multi-gpu/devices-contexts-ownership/), [peer access](/en/multi-gpu/peer-access-copies/) and [topology](/en/multi-gpu/topology-paths/), then [NCCL contracts](/en/multi-gpu/nccl-communicators-collectives/), [stream dependencies](/en/multi-gpu/nccl-stream-dependencies/) and [communication/computation overlap](/en/multi-gpu/communication-computation-overlap/). [G07: PyTorch DDP as an NCCL client](/en/multi-gpu/pytorch-ddp-nccl/) requires `[P04,P05,G04]`. Its external scenarios and [LAB18](/en/labs/pipeline-nccl-computation/) remain Pending Hardware Verification. [T08](/en/triton/attention-capstone/) retains the fused-attention capstone and VIS18. Using Python does not remove the Stable Curriculum's prerequisites.
+As of **2026-09-20**, the current publication includes G01–G08: 103 Learning Units, 24 Runnable Examples, 373 Publication Pairs, 746 source routes and 475 catalog records. Start with [device ownership](/en/multi-gpu/devices-contexts-ownership/), [peer access](/en/multi-gpu/peer-access-copies/) and [topology](/en/multi-gpu/topology-paths/), then [NCCL contracts](/en/multi-gpu/nccl-communicators-collectives/), [stream dependencies](/en/multi-gpu/nccl-stream-dependencies/) and [communication/computation overlap](/en/multi-gpu/communication-computation-overlap/). [G07: PyTorch DDP as an NCCL client](/en/multi-gpu/pytorch-ddp-nccl/) requires `[P04,P05,G04]`; [G08: NCCL graph capture and registration](/en/multi-gpu/nccl-graph-capture/) requires `[G05,M14]`. Their external scenarios and [LAB18](/en/labs/pipeline-nccl-computation/) remain Pending Hardware Verification. [T08](/en/triton/attention-capstone/) retains the fused-attention capstone and VIS18. Using Python does not remove the Stable Curriculum's prerequisites.
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
@@ -98,7 +98,7 @@ The site has 21 formal Visual Explainers: standalone VIS01-VIS14, [VIS16 Collect
 
 A10-A14, Q06-Q13, L01-L13, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The current catalog contains 18 Labs, 111 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 115 source records: 472 records total. Source files form 370 Publication Pairs / 740 routes, with 101 Exercise sets and 101 separate solution sets. This increment adds PB-R6-008/009 and SRC-CUDA-100. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/). There are 41 subjects Pending Hardware Verification. G07 has four empty evidence arrays and its external DDP scenarios remain unobserved.
+The current catalog contains 18 Labs, 113 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 116 source records: 475 records total. Source files form 373 Publication Pairs / 746 routes, with 102 Exercise sets and 102 separate solution sets. This increment adds PB-R6-010/011 and SRC-CUDA-101. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/). There are 41 subjects Pending Hardware Verification. G08 has four empty evidence arrays; capture, registration effects and performance remain unobserved.
 
 Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 23 examples and all 18 Labs remain Pending Hardware Verification, 41 subjects total. P01-P12, T01-T08 and G01-G06 keep four empty evidence arrays. EX21-EX24 and LAB13-LAB18 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; LAB18's additional timeline is synthetic. Source, interpreter and host checks do not grant GPU evidence.
 
@@ -738,7 +738,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, ownership, topology, NCCL, kernels, libraries, PyTorch and Triton through 111 original problems.</small>
+    <small>Practice evidence, ownership, topology, NCCL, kernels, libraries, PyTorch and Triton through 113 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 115 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 116 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

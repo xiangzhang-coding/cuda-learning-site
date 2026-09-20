@@ -1,5 +1,51 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Issue 56 source refresh — 2026-09-20
+
+Context7 `/websites/nvidia_deeplearning_nccl_user-guide` queried CUDA Graph
+capture, registration and mixing; `/websites/nvidia_cuda` queried invalidation,
+end capture and executable lifetime. Some discovery signatures were incomplete;
+exact NCCL 2.31.2 commit `7b83616df3ae082a1f32bb74c27458bfe8153a13` and the
+CUDA 13.3.1 stream/graph APIs govern the original G08 Publication Pair.
+The Toolkit archive distinguishes NVCC 13.3.73 from NVRTC 13.3.33 and records
+native driver 610.43.02. SRC-CUDA-101 retains immutable source hashes, the exact
+NCCL license and independently pinned nccl-tests BSD rights/source checks.
+
+The review covers all-rank capture/replay, lifetime, qualified allocators,
+NVLS offsets, legacy-registration hazards, PXN, disabled mixing's host-launch
+outstanding interval and the incompatible ordering bypass. NCCL 2.31.2's
+NVLS resource-allocation failure is not the 2.27/2.28 silent fallback.
+Release-specific CFT/device/RMA/NVLS changes and known issues remain outside
+the basic execution profile. Cluster provider versions are explicit admission
+requirements, not unobserved installations. Owner tests were read, not run.
+
+G08 adds three Publication Pairs, two Practice Bank entries and one source
+record: 373 pairs / 746 routes, 103 Learning Units, 102 Exercise/solution sets,
+113 Practice Bank entries, 116 source records and 475 catalog records.
+All page evidence arrays stay empty. No capture, registration, transport,
+timing, GPU correctness or performance observation was produced.
+
+Standards and Spec reviews both identified an ambiguous captured-producer
+description. The selected experiment now consistently produces input outside
+capture and captures only all-reduce plus the doubling consumer; a contract
+assertion guards that boundary and independently checks the 6/10/14 table.
+Both reviews rechecked their fixes with no unresolved findings.
+Context7 `/microsoft/playwright` confirmed explicit target-URL/document-readiness
+boundaries for the new index journeys; the installed 1.62.1 suite is the actual
+browser check. No dependency or timeout/retry policy was changed.
+
+Local release checks passed: 765 unit tests (5 designed skips), 1684 integration
+tests, 746 built routes, source/lockfile/file-license/canonical-import gates,
+deployment dry run and distributed-artifact scan. Initial E2E inventory assertions
+still expected 62 route batches and 111/115 practice/source records; corrected
+to 64 and 113/116. All 260 affected or blocked cases then passed, completing
+1351 non-accessibility passes with 245 designed skips across four browser projects.
+The combined shell command reached its execution limit after 152 successful
+accessibility cases, including both complete locale-route sweeps. The remaining
+52 cases passed separately: all 204 accessibility cases completed without a
+tagged violation. This is automated/emulated web evidence, not a WCAG conformance,
+real-device, assistive-technology or CUDA runtime claim.
+
 ## Issue 55 source refresh — 2026-09-20
 
 The first hosted cross-browser run exposed a test readiness gap in the new

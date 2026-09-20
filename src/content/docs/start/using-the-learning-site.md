@@ -98,7 +98,7 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 截至 **2026-09-12**，稳定课程（Stable Curriculum）的当前发布完整双语覆盖 82 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07。可复用库路线保留 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)及各自示例；Python 桥接从 [P01](/python/cuda-python-bridge/)进入，仍需满足已有 CUDA 生命周期与流的先修条件。P04-P07 将这些概念用于 eager PyTorch。下面列出当前完整发布的严格先修关系。
 
-最近完成的聚合静态复核是 2026-09-19 的 R5。冻结的 `/release.json` 记录 95 个学习单元、345 个双语发布对、690 条源路由、94 组练习、94 组独立解答与 453 条目录记录。当前 `/publication.json` 包含 G01–G07：102 个单元、370 个发布对、740 条路由、101 组练习、101 组解答和 472 条目录记录。R1-R5 保留历史快照。下一阶段 R6 待复核；发布不升级运行证据。
+最近完成的聚合静态复核是 2026-09-19 的 R5。冻结的 `/release.json` 记录 95 个学习单元、345 个双语发布对、690 条源路由、94 组练习、94 组独立解答与 453 条目录记录。当前 `/publication.json` 包含 G01–G08：103 个单元、373 个发布对、746 条路由、102 组练习、102 组解答和 475 条目录记录。R1-R5 保留历史快照。下一阶段 R6 待复核；发布不升级运行证据。
 
 **R5 静态复核与动态验收分开记录。** [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51)负责同一提交的 CI、Preview、生产与冒烟结果，[聚合来源复核](/sources-and-versions/#r5-aggregate-review)记录独立环境和回退边界。P01-P12 与 T01-T08 已完整发布，不包含多 GPU 支持。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41)与 R4 的 2026-09-10 复核保留历史日期，技术来源也保留逐项日期。
 
@@ -137,7 +137,7 @@ Q06-Q13 都有直接练习与独立参考解答，包括 [Q09 练习](/correctne
 
 可复用库路线可进入 [L01 练习](/libraries/library-primitive-dsl-custom-kernel/exercises/)与[解答](/libraries/library-primitive-dsl-custom-kernel/solutions/)、[L02 练习](/libraries/thrust-algorithm-vocabulary/exercises/)与[解答](/libraries/thrust-algorithm-vocabulary/solutions/)、[L03 练习](/libraries/cub-device-primitives/exercises/)与[解答](/libraries/cub-device-primitives/solutions/)、[L04 练习](/libraries/cub-warp-block-primitives/exercises/)与[解答](/libraries/cub-warp-block-primitives/solutions/)、[L05 练习](/libraries/libcu-plus-plus-synchronization/exercises/)与[解答](/libraries/libcu-plus-plus-synchronization/solutions/)、[L06 练习](/libraries/cublas-gemm/exercises/)与[解答](/libraries/cublas-gemm/solutions/)，以及 [L07 练习](/libraries/cublaslt-matmul/exercises/)与[解答](/libraries/cublaslt-matmul/solutions/)。本次新增 [L08 练习](/libraries/tensor-core-precision-contracts/exercises/)与[独立解答](/libraries/tensor-core-precision-contracts/solutions/)，以及 [L09 练习](/libraries/cutlass-cpp-gemm-structure/exercises/)与[独立解答](/libraries/cutlass-cpp-gemm-structure/solutions/)。
 
-当前 102 个学习单元包含先修 `[P04,P05,G04]` 的 [G07](/multi-gpu/pytorch-ddp-nccl/)。共有 24 个可运行示例。[实验索引](/labs/)列出 18 个实验，[可视化讲解索引](/visuals/)列出 21 项讲解。有 111 个[练习题库](/practice/)条目、207 个[术语表](/glossary/)词条、115 条[来源记录](/sources-and-versions/)，共 472 条资源目录记录。SRC-CUDA-100 记录精确 DDP／NCCL 契约；R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题不变。共 41 个主体待硬件验证。G07 四个证据数组为空，外部场景尚未观察。
+当前 103 个学习单元包含先修 `[P04,P05,G04]` 的 [G07](/multi-gpu/pytorch-ddp-nccl/)及先修 `[G05,M14]` 的 [G08](/multi-gpu/nccl-graph-capture/)。共有 24 个可运行示例。[实验索引](/labs/)列出 18 个实验，[可视化讲解索引](/visuals/)列出 21 项讲解。有 113 个[练习题库](/practice/)条目、207 个[术语表](/glossary/)词条、116 条[来源记录](/sources-and-versions/)，共 475 条资源目录记录。SRC-CUDA-101 记录精确捕获／注册契约；R3 十道 Nsight 报告分析题和 R4 八道库与算法选择题不变。共 41 个主体待硬件验证。G08 四个证据数组为空，外部场景尚未观察。
 
 P04-P07 的证据数组为空，[独立 eager 环境](/sources-and-versions/#src-cuda-080)保留 torch 2.11.0+cu128、CPython 3.12.14、随包 CUDA 12.8.1/runtime 12.8.90 与 native 分配器。Eager 工作不需要系统 Toolkit。[P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含练习和独立解答。扩展项目另行要求 Toolkit 12.8.1/NVCC 12.8.93/GCC 13.3.0。T01-T08、EX23 与 LAB15-LAB16 使用独立 Triton 3.7.1 环境。
 

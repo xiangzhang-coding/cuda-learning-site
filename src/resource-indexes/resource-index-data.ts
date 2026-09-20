@@ -507,6 +507,18 @@ const multiGpuPractice: readonly ResourceIndexRecord[] = [
     resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G07'], relatedUnits: ['G07'],
     hardwareGate: noHardware, versionGate: same('PyTorch 2.11.0+cu128; NCCL 2.28.9'), reviewedOn: '2026-09-20',
   },
+  {
+    planningId: 'PB-R6-010', group: 'practice', title: localized('关闭混用后，同流也不够', 'Same-stream order is insufficient with mixing disabled'),
+    href: localized('/practice/#pb-r6-010', '/en/practice/#pb-r6-010'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G08'], relatedUnits: ['G08'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; CUDA 13.3.1'), reviewedOn: '2026-09-20',
+  },
+  {
+    planningId: 'PB-R6-011', group: 'practice', title: localized('注册成功不证明传输生效', 'Registration success does not prove transport use'),
+    href: localized('/practice/#pb-r6-011', '/en/practice/#pb-r6-011'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['G08'], relatedUnits: ['G08'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; CUDA 13.3.1'), reviewedOn: '2026-09-20',
+  },
 ];
 
 const practice: readonly ResourceIndexRecord[] = [
@@ -2476,6 +2488,7 @@ const multiGpuSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-098', localized('NCCL 分组、流和错误进度', 'NCCL grouping, streams and error progress'), 'cuda-version-record', ['G05', 'EX24', 'LAB17'], same('NCCL 2.31.2; CUDA 13.3.1'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-099', localized('通信计算流水线与时间线证据', 'Communication/compute pipelines and timeline evidence'), 'cuda-version-record', ['G06', 'LAB18'], same('NCCL 2.31.2; CUDA 13.3.1; Nsight Systems 2026.5'), '2026-09-20', '2026-09-20'),
   sourceRecord('SRC-CUDA-100', localized('DDP、ProcessGroupNCCL 与有界诊断', 'DDP, ProcessGroupNCCL and bounded diagnosis'), 'cuda-version-record', ['G07'], same('PyTorch 2.11.0+cu128; packaged CUDA runtime 12.8.90; NCCL 2.28.9'), '2026-09-20', '2026-09-20'),
+  sourceRecord('SRC-CUDA-101', localized('NCCL 捕获、注册与图混用', 'NCCL capture, registration and graph mixing'), 'cuda-version-record', ['G08'], same('NCCL 2.31.2; CUDA 13.3.1; nccl-tests b4d5beeb'), '2026-09-20', '2026-09-20'),
 ];
 
 const sources: readonly ResourceIndexRecord[] = [

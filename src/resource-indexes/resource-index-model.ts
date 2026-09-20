@@ -73,6 +73,18 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  G08: {
+    href: { 'zh-CN': '/multi-gpu/nccl-graph-capture/', en: '/en/multi-gpu/nccl-graph-capture/' },
+    title: { 'zh-CN': 'G08：捕获 NCCL 工作，保留完整契约', en: 'G08: Capture NCCL Work Without Losing Its Contracts' }, prerequisites: ['G05', 'M14'],
+  },
+  'G08-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/nccl-graph-capture/exercises/', en: '/en/multi-gpu/nccl-graph-capture/exercises/' },
+    title: { 'zh-CN': 'G08 练习：捕获代次与缓冲区所有权', en: 'G08 Exercises: Capture Generations and Buffer Ownership' }, prerequisites: ['G08'],
+  },
+  'G08-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/nccl-graph-capture/solutions/', en: '/en/multi-gpu/nccl-graph-capture/solutions/' },
+    title: { 'zh-CN': 'G08 解答：对齐参与和最后一次使用', en: 'G08 Solutions: Match Participation and Last Use' }, prerequisites: ['G08-EXERCISES'],
+  },
   G07: {
     href: { 'zh-CN': '/multi-gpu/pytorch-ddp-nccl/', en: '/en/multi-gpu/pytorch-ddp-nccl/' },
     title: { 'zh-CN': 'G07：把 PyTorch DDP 看作 NCCL 客户端', en: 'G07: Read PyTorch DDP as an NCCL Client' }, prerequisites: ['P04', 'P05', 'G04'],

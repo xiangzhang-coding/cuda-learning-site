@@ -919,7 +919,7 @@ The diagnostic interpreter additionally pins **NumPy 2.5.3** in `scripts/triton-
 
 ## Multi-GPU source review
 
-Current `/publication.json` extends frozen R5 with G01–G07, EX24/LAB17/LAB18/VIS16: 370 Publication Pairs, 740 source routes and 472 catalog records. The R5 inventory and 95-unit rights census above describe that completed snapshot. Current instruction has 102 Learning Units and 111 Practice Bank entries; the same original-content licenses apply. This increment is not the R6 release review.
+Current `/publication.json` extends frozen R5 with G01–G08, EX24/LAB17/LAB18/VIS16: 373 Publication Pairs, 746 source routes and 475 catalog records. The R5 inventory and 95-unit rights census above describe that completed snapshot. Current instruction has 103 Learning Units and 113 Practice Bank entries; the same original-content licenses apply. This increment is not the R6 release review.
 
 <span id="src-cuda-094" class="resource-target"></span>
 
@@ -1004,6 +1004,30 @@ The **#55 current increment** has 102 Learning Units, 370 Publication Pairs, 740
 Historical #53 increment: G04/G05, EX24/LAB17/VIS16 and SRC-CUDA-097/098 brought the inventory to 100 Learning Units, 363 Publication Pairs, 726 source routes, 99 Exercise sets and 99 solution sets, 465 catalog records: 17 Labs, 107 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 113 source records. Its forty pending subjects are superseded by the #54 inventory above; R5 remains frozen and R6 review remains pending.
 
 The 2026-09-19 G01–G03 increment adds SRC-CUDA-094/095/096, bringing the source catalog to 111 records. R5's completed release snapshot remains historical; R6 is pending. No new CUDA evidence is claimed.
+
+<span id="src-cuda-101" class="resource-target"></span>
+
+### SRC-CUDA-101 — NCCL capture, registration and graph mixing
+
+Related IDs: [G08](/en/multi-gpu/nccl-graph-capture/), PB-R6-010/011. Reviewed/accessed **2026-09-20**. Current Context7 `/websites/nvidia_deeplearning_nccl_user-guide` covered graph registration/mixing; `/websites/nvidia_cuda` covered capture invalidation and graph lifetime. Discovery includes incomplete signatures and newer device APIs, so exact owner sources below govern. No discovery example is copied.
+
+NCCL is **2.31.2**, commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`, independently selected with Toolkit **13.3.1**. [CUDA release notes](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html) identify NVCC **13.3.73**, runtime **13.3.29**, and native driver floor **610.43.02**; NVRTC 13.3.33 is not the NVCC version. [Stream API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__STREAM.html) and [Graph API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__GRAPH.html) supply same-origin/thread end capture, error/null invalidation, instantiation, launch and reference-lifetime boundaries. EX24/SRC-CUDA-097 retain exact packages and GCC 13.3.0/C++17. Basic exercise: one node, two processes/two distinct CC≥7.5 GPUs, ≥8 GB total/≥1 GiB free each. Optional registration needs G08's separate allocator/fabric/permission ledger; cluster plugin/provider versions remain an admission requirement, not an invented tested profile.
+
+| Exact NCCL owner file | Inspected contract | Whole-file SHA-256 |
+| --- | --- | --- |
+| [usage/cudagraph.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/cudagraph.rst) | 2.9/11.3 minimum; collective capture/replay; one-GPU/process recommendation; mixing deadlocks | `7b758c4b90e8369d935eb4108a4c8ec629e50ec1160204da4c0fe108a3ed3c3c` |
+| [usage/bufferreg.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/bufferreg.rst) | all-rank/both-buffer rule, offsets, NVLS/general/IB SHARP, allocator granularity, legacy hazards, PXN exclusion | `d13b2ca058afcf7ba8903087b5f636745498c7813154e470ba6d9f8521bec709` |
+| [env.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/env.rst) | CollNet GRAPH_REGISTER; disabled mixing's outstanding interval; ordering bypass/mode-2 incompatibility; NVLS allocation failure | `e0ae57e7c592ea41546a5cb04b2ed1ee3be08b8d9e0f26f07727e72c41581980` |
+| [src/misc/strongstream.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/misc/strongstream.cc) | capture graph lookup, graphUsageMode and CUDA user-object destructor retention | `66b1607fb63421a8ffd4aadf2ca1ea237fa528025aa7ce30a612750fd2928f0d` |
+| [src/register/register.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/register/register.cc) | distinct local/graph registration and explicit deregistration entry points | `8ada19fb4dc3b1af13164cb3afadcc68fbca3ae85e823dde9c5e498f3ffa17d4` |
+
+Separate owner test source: nccl-tests commit **b4d5beebca8a76cf01335f724d154b9b9d394d96**, [src/common.cu](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/src/common.cu), SHA-256 `74cecb9591aeeadbabef6967af2ccb1ec4507f163cc7119c5e9299c470232626`, and [README.md](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/README.md), SHA-256 `7e1aef831b6bcd0befec250e82333d58dd71078730bafda03c7a99532f452895`. Inspected capture/performance versus data-check sections, `-G` replay count, `-R` local/symmetric distinction, compile/runtime gates and graph destruction. Its multi-GPU modes are not adopted as the basic process model. These owner tests were not built, run or copied; they confer no project evidence.
+
+[Selected release notes](https://github.com/NVIDIA/nccl/releases/tag/v2.31.2-1) retain PAT+NVLS/H100 performance regression, B40 symmetric-TMA illegal access and B100 PCIe MLoPart allocation issue; symmetric-window corruption and two-rank Copy Engine hangs are listed as fixes, not remaining basic-capture defects. CFT/Blackwell/Toolkit≥13.3, device APIs, one-sided RMA and new NVLS paths remain outside the basic Stable Curriculum path. No workaround is promoted into the ordinary exercise.
+
+**Rights:** NCCL's [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt), SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`, combines Apache-2.0 with retained BSD/per-file terms; the inspected implementation files carry their NVIDIA notices. The complete tree has no intervening license on these paths. nccl-tests has its own [BSD three-clause LICENSE.txt](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/LICENSE.txt), SHA-256 `88e8c1b85269ae234e8c56e1688fd3a1a10ea1d508b9228c38467b6877e10409`, not NCCL's newer Apache grant. NVIDIA documentation retains owner terms. Reference-only paraphrase; no copied code, diagram, test, binary or result. Original G08/Exercises/solutions/Practice Bank prose is CC BY 4.0, original site tests Apache-2.0. Capture, registration effects and performance remain Pending Hardware Verification.
+
+**#56 current increment:** 103 Learning Units, 373 Publication Pairs, 746 source routes, 102 Exercise sets and 102 solution sets; 475 catalog records: 18 Labs, 113 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 116 source records. Existing 41 Example/Lab subjects remain pending; G08's external scenarios have no observed results. R5 stays frozen, R6 review pending; earlier increment inventories are historical.
 
 <span id="r4-aggregate-review" class="resource-target" aria-hidden="true"></span>
 

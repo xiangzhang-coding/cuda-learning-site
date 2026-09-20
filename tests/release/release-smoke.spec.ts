@@ -141,7 +141,7 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -499,20 +499,20 @@ test('serves the exact R5 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 370,
-    sourceRoutes: 740,
-    exerciseSetPublicationPairs: 101,
-    solutionSetPublicationPairs: 101,
+    publicationPairs: 373,
+    sourceRoutes: 746,
+    exerciseSetPublicationPairs: 102,
+    solutionSetPublicationPairs: 102,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 111,
+    practiceBankEntries: 113,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 115,
+    sourceRecords: 116,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -644,8 +644,8 @@ test('serves the exact R5 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '370 Publication Pairs' : '370 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '740 source routes' : '740 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '373 Publication Pairs' : '373 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '746 source routes' : '746 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -1049,13 +1049,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(740);
-    expect(new Set(routes).size).toBe(740);
+    expect(routes).toHaveLength(746);
+    expect(new Set(routes).size).toBe(746);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(62);
+    expect(routeBatches).toHaveLength(64);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(370);
+      expect(localized).toHaveLength(373);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }
