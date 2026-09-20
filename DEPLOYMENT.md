@@ -2,7 +2,7 @@
 
 ## Issue #54 publication increment — 2026-09-20
 
-Current `/publication.json`: 102 Learning Units, 24 Runnable Examples, 370 Publication Pairs, 740 source routes, 101 Exercise sets, 101 solution sets and 472 catalog records (18 Labs, 111 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 115 source records). G07 adds a bilingual DDP unit, original Python exercise solution and synthetic diagnostic fixture. Host tests run no torch/CUDA collective. All 41 Example/Lab subjects and G07's external scenarios retain Pending Hardware Verification. No DDP/NCCL log, synchronization result, scaling or performance claim is deployed. `/release.json` is frozen R5; R6 remains pending. Earlier dated inventories below are historical.
+Current `/publication.json`: 103 Learning Units, 24 Runnable Examples, 373 Publication Pairs, 746 source routes, 102 Exercise sets, 102 solution sets and 475 catalog records (18 Labs, 113 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 116 source records). G08 adds bilingual NCCL capture/registration instruction, two Exercises and separate solutions. All 41 Example/Lab subjects and G08's external scenarios retain Pending Hardware Verification. No capture, registration, synchronization or performance result is deployed. `/release.json` is frozen R5; R6 remains pending. Earlier dated inventories below are historical.
 
 # Cloudflare Deployment
 

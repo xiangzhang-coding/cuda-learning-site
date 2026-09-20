@@ -918,7 +918,7 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 ## 多 GPU 来源复核
 
-当前 `/publication.json` 在冻结 R5 上增加 G01–G07、EX24/LAB17/LAB18/VIS16，共 370 个双语发布对、740 条源路由和 472 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 102 个学习单元和 111 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
+当前 `/publication.json` 在冻结 R5 上增加 G01–G08、EX24/LAB17/LAB18/VIS16，共 373 个双语发布对、746 条源路由和 475 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 103 个学习单元和 113 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
 
 <span id="src-cuda-094" class="resource-target"></span>
 
@@ -1003,6 +1003,30 @@ NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[
 历史 #53 增量发布 G04/G05、EX24/LAB17/VIS16 与 SRC-CUDA-097/098，当时为 100 个学习单元、363 个双语发布对、726 条源路由、99 组练习和 99 组解答、465 条目录记录：17 个实验、107 个练习题库条目、21 项可视化讲解、207 个术语表词条、113 条来源记录。当时 40 个待验证主体已由上方 #54 清单更新；R5 冻结，R6 待复核。
 
 2026-09-19 的 G01–G03 增量新增 SRC-CUDA-094/095/096，来源目录共 111 条。R5 已完成发布快照保留为历史，R6 待复核。不声称新的 CUDA 证据。
+
+<span id="src-cuda-101" class="resource-target"></span>
+
+### SRC-CUDA-101 — NCCL 捕获、注册与图混用
+
+相关 ID：[G08](/multi-gpu/nccl-graph-capture/)、PB-R6-010/011。复核／访问日期 **2026-09-20**。当前 Context7 `/websites/nvidia_deeplearning_nccl_user-guide` 检索图注册／混用；`/websites/nvidia_cuda` 检索捕获失效和图生命周期。检索含不完整签名及更新的设备 API，因此以以下精确版本的上游一手来源为准。未复制检索示例。
+
+NCCL 为 **2.31.2**，提交 `7b83616df3ae082a1f32bb74c27458bfe8153a13`，与 Toolkit **13.3.1** 独立选定。[CUDA 发行说明](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html)确认 NVCC **13.3.73**、runtime **13.3.29** 及原生驱动下限 **610.43.02**；NVRTC 13.3.33 不是 NVCC 版本。[流 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__STREAM.html)和[图 API](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__GRAPH.html)提供同源流／同线程结束捕获、错误／空图失效、实例化、启动及引用生命周期边界。EX24／SRC-CUDA-097 保留精确软件包及 GCC 13.3.0／C++17。基础练习为单节点、双进程／两个不同 CC≥7.5 GPU，每卡总显存 ≥8 GB／空闲 ≥1 GiB。可选注册需要 G08 独立分配器／互连／权限账本；集群插件／provider 版本仍是准入要求，不虚构已测试配置。
+
+| NCCL 精确上游文件 | 核对契约 | 全文件 SHA-256 |
+| --- | --- | --- |
+| [usage/cudagraph.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/cudagraph.rst) | 2.9／11.3 最低版本；集合捕获／重放；每进程一 GPU 建议；混用死锁 | `7b758c4b90e8369d935eb4108a4c8ec629e50ec1160204da4c0fe108a3ed3c3c` |
+| [usage/bufferreg.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/bufferreg.rst) | 全 rank／两缓冲区规则、偏移、NVLS／通用／IB SHARP、分配粒度、旧式风险、PXN 排斥 | `d13b2ca058afcf7ba8903087b5f636745498c7813154e470ba6d9f8521bec709` |
+| [env.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/env.rst) | CollNet GRAPH_REGISTER；关闭混用时的未完成区间；排序绕过与 mode 2 不兼容；NVLS 分配失败 | `e0ae57e7c592ea41546a5cb04b2ed1ee3be08b8d9e0f26f07727e72c41581980` |
+| [src/misc/strongstream.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/misc/strongstream.cc) | 捕获图查询、graphUsageMode 与 CUDA 用户对象析构引用保留 | `66b1607fb63421a8ffd4aadf2ca1ea237fa528025aa7ce30a612750fd2928f0d` |
+| [src/register/register.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/register/register.cc) | 独立本地／图注册和显式注销入口 | `8ada19fb4dc3b1af13164cb3afadcc68fbca3ae85e823dde9c5e498f3ffa17d4` |
+
+独立上游测试源码：nccl-tests 提交 **b4d5beebca8a76cf01335f724d154b9b9d394d96**，[src/common.cu](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/src/common.cu)，SHA-256 `74cecb9591aeeadbabef6967af2ccb1ec4507f163cc7119c5e9299c470232626`；[README.md](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/README.md)，SHA-256 `7e1aef831b6bcd0befec250e82333d58dd71078730bafda03c7a99532f452895`。核对捕获／性能与数据检查分区、`-G` 重放次数、`-R` 本地／对称区别、编译／运行版本门禁和图销毁。不把其多 GPU 模式作为基础进程模型。这些上游测试未构建、执行或复制，不授予本站证据。
+
+[选定发行说明](https://github.com/NVIDIA/nccl/releases/tag/v2.31.2-1)保留 PAT+NVLS／H100 性能回退、B40 对称 TMA 非法访问和 B100 PCIe MLoPart 分配问题；对称窗口损坏及双 rank Copy Engine 挂起列为已修复，不是剩余基础捕获缺陷。CFT／Blackwell／Toolkit≥13.3、设备 API、单边 RMA 和新 NVLS 路径仍在基础稳定课程路径之外。不把临时绕行配置提升到普通练习。
+
+**权利：** NCCL 的 [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt)，SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`，结合 Apache-2.0 及保留的 BSD／逐文件条款；已读实现文件保留 NVIDIA 声明。完整树中这些路径没有中间层许可。nccl-tests 使用独立 [BSD 三条款 LICENSE.txt](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/LICENSE.txt)，SHA-256 `88e8c1b85269ae234e8c56e1688fd3a1a10ea1d508b9228c38467b6877e10409`，不是 NCCL 的新 Apache 授权。NVIDIA 文档保留权利方条款。仅参考转述，不复制代码、图、测试、二进制或结果。原创 G08／练习／解答／题库正文为 CC BY 4.0，原创本站测试为 Apache-2.0。捕获、注册效果与性能仍待硬件验证（Pending Hardware Verification）。
+
+**#56 当前增量：**103 个学习单元、373 个双语发布对、746 条源路由、102 组练习和 102 组解答；475 条目录记录：18 个实验、113 个练习题库条目、21 个可视化讲解、207 个术语表词条和 116 条来源记录。原有 41 个示例／实验主体仍待验证，G08 外部场景没有观察结果。R5 冻结，R6 复核待完成；先前增量计数为历史。
 
 <span id="r4-aggregate-review" class="resource-target" aria-hidden="true"></span>
 

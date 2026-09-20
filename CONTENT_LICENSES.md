@@ -1,5 +1,34 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## G08 capture and registration source rights
+
+Reviewed 2026-09-20 for issue #56. G08, two Exercises, separate solutions and
+PB-R6-010/011 are original CC BY 4.0. Site contract/browser tests are original
+Apache-2.0. No upstream implementation, test, diagram, log or binary is copied.
+Current inventory: 103 Learning Units, 24 Runnable Examples, 373 Publication Pairs,
+746 source routes, 102 Exercise sets, 102 solution sets and 475 catalog records
+(18 Labs, 113 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms,
+116 source records). Earlier inventories below are historical. Existing 41
+Example/Lab subjects and G08's external scenarios remain Pending Hardware Verification.
+
+The bilingual SRC-CUDA-101 ledger records whole-file hashes for NCCL commit
+`7b83616df3ae082a1f32bb74c27458bfe8153a13`:
+`docs/userguide/source/usage/cudagraph.rst`, `usage/bufferreg.rst`, `env.rst`,
+`src/misc/strongstream.cc` and `src/register/register.cc`.
+The exact [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt)
+SHA-256 is `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`:
+Apache-2.0 plus retained BSD/per-file terms. The complete tree contains no
+intervening license on these paths; source notices remain applicable.
+NVIDIA Toolkit documentation remains subject to owner documentation terms.
+
+Separately inspected nccl-tests commit `b4d5beebca8a76cf01335f724d154b9b9d394d96`
+`src/common.cu` and `README.md` retain NVIDIA copyrights and the owner's
+[BSD three-clause LICENSE.txt](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/LICENSE.txt),
+SHA-256 `88e8c1b85269ae234e8c56e1688fd3a1a10ea1d508b9228c38467b6877e10409`.
+This test project is not covered by NCCL's newer Apache license. Owner tests
+were read, not built or executed, and are neither bundled nor adapted.
+Original static arithmetic and file inspection establish no GPU Evidence Status.
+
 ## G07 DDP source rights
 
 Reviewed 2026-09-20 for issue #55. G07, its three Exercises/separate solutions,

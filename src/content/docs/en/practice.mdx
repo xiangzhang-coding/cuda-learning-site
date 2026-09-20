@@ -4611,6 +4611,50 @@ Retry latency needs a separately declared end-to-end host interval that covers t
 
 **Reviewed solution:** Wait under Q before consuming, or connect Q to C after C's wait; protect lifetimes and complete Q before host validation. The supplied rank-1 exception is the first investigation target, not a guessed rank-0 transport failure. See [G07 solutions](/en/multi-gpu/pytorch-ddp-nccl/solutions/). **Source basis:** original reasoning and [SRC-CUDA-100](/en/sources-and-versions/#src-cuda-100). **Source date:** 2026-09-20. No observed failure or synchronization result.
 
+<span id="pb-r6-010" class="resource-target"></span>
+
+## PB-R6-010: Same-stream order is insufficient with mixing disabled
+
+**ID:** PB-R6-010 · original Publication Pair.
+- **Direct prerequisite:** [G08](/en/multi-gpu/nccl-graph-capture/), exactly `[G08]`.
+- **Related Learning Units and resources:** [G08](/en/multi-gpu/nccl-graph-capture/).
+- **Hardware gate:** none; static schedule review.
+- **Last reviewed:** 2026-09-20.
+
+**Difficulty:** advanced. **Version:** NCCL 2.31.2; CUDA 13.3.1.
+
+**Prompt:** With NCCL_GRAPH_MIXING_SUPPORT=0, both ranks launch their matching graph and immediately enqueue an ordinary all-reduce on the same stream and communicator. The author claims stream order makes the proposal supported. A second proposal uses an independent stream and a split-shared communicator. Audit both without running them.
+
+**Constraints:** graph launch returned but device completion is unobserved. **Expected evidence:** a host/device interval ledger. **Acceptance criteria:** identify the outstanding interval, explain why same-stream order does not permit the ordinary host call, and cover split-shared communicators and parallel graphs.
+
+<details><summary>Hint 1</summary><p>Outstanding starts at host launch, not when a kernel first appears on a timeline.</p></details>
+<details><summary>Hint 2</summary><p>The disabled-mixing rule for ordinary calls applies regardless of stream ordering.</p></details>
+
+**Reviewed solution:** Finish the graph's device work on every rank before issuing matching ordinary calls. Independent-stream parallel graphs are also unsupported for the same or split-shared communicators when mixing is disabled. Alternatively retain supported default mixing/ordering and separately review the full schedule; do not enable an incompatible ordering bypass. See [G08 solutions](/en/multi-gpu/nccl-graph-capture/solutions/). **Source basis:** original interval analysis and [SRC-CUDA-101](/en/sources-and-versions/#src-cuda-101). **Source date:** 2026-09-20. No hang or completion was observed.
+
+<span id="pb-r6-011" class="resource-target"></span>
+
+## PB-R6-011: Registration success does not prove transport use
+
+**ID:** PB-R6-011 · original Publication Pair.
+- **Direct prerequisite:** [G08](/en/multi-gpu/nccl-graph-capture/), exactly `[G08]`.
+- **Related Learning Units and resources:** [G08](/en/multi-gpu/nccl-graph-capture/).
+- **Hardware gate:** none; paper evidence audit.
+- **Last reviewed:** 2026-09-20.
+
+**Difficulty:** advanced. **Version:** NCCL 2.31.2; CUDA 13.3.1.
+
+**Prompt:** A fictional report lists successful local registration on all ranks but active PXN for network communication, no effective-transport evidence and no completed timing. It declares zero-copy and faster execution. Another report assumes NVLS_ENABLE=2 hides an NVLS resource-allocation failure. Decide which conclusions survive.
+
+**Constraints:** no captured reports or GPU runs exist. **Expected evidence:** separate eligibility, registration request, effective path, correctness and measurement verdicts. **Acceptance criteria:** reject both claims, distinguish unsupported NVLS hardware from allocation failure, and state the missing provider/version/permission fields before proposing a new run.
+
+<details><summary>Hint 1</summary><p>Network registration and PXN are incompatible even when the registration API returns success.</p></details>
+<details><summary>Hint 2</summary><p>The selected NVLS default differs from 2.27/2.28's attempted allocation-failure fallback.</p></details>
+
+**Reviewed solution:** API success proves neither network zero-copy nor speed; PXN prevents that network registration path. Record exact plugin/driver/fabric and permissions, compare independently admitted configurations with correctness and completed timing, and stop on allocation failure. NCCL 2.31.2 may select other algorithms for unsupported NVLS hardware but does not silently accept failed NVLS resource allocation under default 2. See [G08 solutions](/en/multi-gpu/nccl-graph-capture/solutions/). **Source basis:** original evidence audit and [SRC-CUDA-101](/en/sources-and-versions/#src-cuda-101). **Source date:** 2026-09-20. Registration effects and performance remain Pending Hardware Verification.
+
+Issue #56 adds PB-R6-010/011 with exact prerequisite G08: 113 complete original entries. Existing 41 Example/Lab subjects and G08's external scenarios remain Pending Hardware Verification. Earlier counts below are historical.
+
 Issue #55 adds PB-R6-008/009 with exact prerequisite G07: 111 complete original entries. Existing 41 Example/Lab subjects and G07's external scenarios remain Pending Hardware Verification. Earlier counts below are historical.
 
 Issue #54 adds PB-R6-006/007 on 2026-09-20, both with exact prerequisite G06. Current total: 109 complete original entries. LAB18 brings Pending Hardware Verification subjects to 41; no measured overlap, throughput or bottleneck is published. Earlier counts below are historical.
