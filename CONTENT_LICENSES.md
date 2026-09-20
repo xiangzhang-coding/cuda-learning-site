@@ -1,5 +1,56 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## G07 DDP source rights
+
+Reviewed 2026-09-20 for issue #55. G07, its three Exercises/separate solutions,
+PB-R6-008/009 and the synthetic diagnostic fixture are original CC BY 4.0.
+`public/assets/exercise-solutions/g07-ddp.py` and tests are original Apache-2.0.
+The fixture has an attribution sidecar and contains no captured logs or identities.
+Owner code/tests/docs are inspected, linked and paraphrased only; none is copied.
+Current inventory: 102 Learning Units, 24 Runnable Examples, 370 Publication Pairs,
+740 source routes, 101 Exercise sets, 101 solution sets and 472 catalog records
+(18 Labs, 111 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms,
+115 source records). Earlier inventories below are historical. Existing 41
+Example/Lab subjects and G07's external scenarios remain Pending Hardware Verification.
+
+PyTorch files below are at `70d99e998b4955e0049d13a98d77ae1b14db1f45`.
+Its [root LICENSE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE)
+has BSD-style redistribution, attribution and disclaimer terms, with named
+contributors; SHA-256 `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43`.
+`torch/distributed/run.py` explicitly names Facebook and refers to the root
+BSD-style license. Files without an individual notice are not assigned a new
+per-file license by this review. These hashes identify the inspected files;
+they do not grant a blanket license over dependencies or documentation.
+
+| Exact PyTorch file | SHA-256 |
+| --- | --- |
+| `torch/nn/parallel/distributed.py` | `cb4a5fbb455e9915a35951ea160fa1bf1d9a2803ad9aaebf372c05f67bcf0b1c` |
+| `torch/distributed/distributed_c10d.py` | `796ffcd9664734a85c0045a1657cbecf282142744eed15ee8ca300cccdd06803` |
+| `torch/distributed/run.py` | `e1c41f86d5cb299410e2ae087e4e070ae634aa87daf2b308939ea7032e65c6e0` |
+| `torch/csrc/distributed/c10d/reducer.cpp` | `60715ce82281f060529bddbdfafcc778abd631be397167fc980fcb477c028ff6` |
+| `torch/csrc/distributed/c10d/default_comm_hooks.cpp` | `672c76d6da61ce05d581bd457591b7de9a1b8087980af4627a4726e6c8a7d54a` |
+| `torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp` | `1811985ad18a4b51bf2a27d763be56ebf627bf7cda81ebdbce86c32de846f1e3` |
+| `torch/csrc/distributed/c10d/ProcessGroupNCCL.hpp` | `765aad2bbcfd86512edc09953b6453e488047d2adecbc8252c7807d9babcde6f` |
+| `docs/source/distributed.md` | `1781a4af7e4ea3c8a719e0c1f9c94ec6110baaadbccd9f51aa58a004a55dfc51` |
+| `docs/source/torch_nccl_environment_variables.md` | `51df2d5a06583c26b088bb429338500fab6377f5e1cd842c501fdbe85595390f` |
+| `test/distributed/test_c10d_nccl.py` | `ac85e32a47da31c7e214502318f0f592fadfd141d2cd9d34fcba3678aa9a42cc` |
+| `test/distributed/test_c10d_common.py` | `88b5fdfdff612754fe1c994d7f88886f3ced4e754319a5c8c4bd301fc32dacc8` |
+
+NCCL **2.28.9**, tag `v2.28.9-1`, commit `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`,
+has different terms from the newer EX24 source. Its [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/dbc86fd06e8b0c4517b95d8958a09ccacf9520c9/LICENSE.txt)
+is 1895 bytes, SHA-256 `0f0174a6b4e0b33ac26375bf729533075b32f4c51a5b6802a3d742d7dcdc9a76`:
+BSD three-clause terms naming NVIDIA/LBNL/DOE, with DOE funding and NVTX notice.
+HTTP range inspection of the locked wheel's exact
+`nvidia_nccl_cu12-2.28.9.dist-info/licenses/License.txt` returned identical bytes.
+It does not establish a complete wheel download, installation or runtime load.
+The `src/nccl.h.in` (NVIDIA 2015-2021) and `src/init.cc` (NVIDIA 2015-2022)
+headers direct readers to LICENSE.txt; their SHA-256 values are
+`e211613d53284fe26a19292f171aaed8c4cb043d9dabfbd09075e63576e49fdc` and
+`7f3536b4477e124acfd63a71bfdd240c971c8d73950dde7673905608e6797882`.
+NVIDIA archived documentation retains its separate owner terms, not the code's
+BSD license or the project's CC BY 4.0. Wheels/libraries remain external.
+No upstream tests were executed; no runtime evidence is added.
+
 ## Issue #54 rights and current inventory — 2026-09-20
 
 G06/LAB18, Exercises/solutions, PB-R6-006/007 and the synthetic timeline fixture are original CC BY 4.0; the fixture carries an attribution sidecar. `public/assets/exercise-solutions/g06-pipeline.cu`, tests and CI are original Apache-2.0. No upstream code, diagram, screenshot or profiler report is copied. External NCCL 2.31.2 rights retain the exact LICENSE.txt hash and per-file notices recorded below; NVIDIA documentation/profiler terms remain separate. Current inventory: 101 Learning Units, 24 Runnable Examples, 367 Publication Pairs, 734 source routes, 100 Exercise sets, 100 solution sets and 469 catalog records (18 Labs, 109 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 114 source records). Earlier dated inventories below are historical. Forty-one subjects remain Pending Hardware Verification; source and compile gates do not establish measured overlap.

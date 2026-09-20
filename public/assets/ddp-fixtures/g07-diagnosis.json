@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "provenance": "original-synthetic",
+  "captured": false,
+  "unit": "G07",
+  "scope": "single-node; two ranks; not NCCL logs or a measured timeline",
+  "cases": [
+    { "id": "D0", "owners": ["device-A", "device-A"], "sequences": [["broadcast", "all-reduce"], ["broadcast", "all-reduce"]], "firstFailure": null, "missingRanks": [] },
+    { "id": "D1", "owners": ["device-A", "device-B"], "sequences": [["broadcast", "all-reduce"], ["broadcast"]], "firstFailure": "rank-1-input-exception", "missingRanks": [] },
+    { "id": "D2", "owners": ["device-A", "device-B"], "sequences": [["broadcast", "all-reduce", "all-reduce"], ["broadcast", "all-reduce"]], "firstFailure": null, "missingRanks": [] },
+    { "id": "D3", "owners": ["device-A", null], "sequences": [["broadcast", "all-reduce"], null], "firstFailure": null, "missingRanks": [1] }
+  ],
+  "runtimeEvidence": "Pending Hardware Verification",
+  "recordedObservations": []
+}

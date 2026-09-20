@@ -918,7 +918,7 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 ## 多 GPU 来源复核
 
-当前 `/publication.json` 在冻结 R5 上增加 G01–G06、EX24/LAB17/LAB18/VIS16，共 367 个双语发布对、734 条源路由和 469 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 101 个学习单元和 109 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
+当前 `/publication.json` 在冻结 R5 上增加 G01–G07、EX24/LAB17/LAB18/VIS16，共 370 个双语发布对、740 条源路由和 472 条目录记录。上方 R5 清单及 95 单元权利统计描述的是已完成快照。当前讲解包含 102 个学习单元和 111 道练习题库题，适用相同原创内容许可。本增量不是 R6 发布复核。
 
 <span id="src-cuda-094" class="resource-target"></span>
 
@@ -976,7 +976,29 @@ Context7 使用 `/pytorch/pytorch/v2.11.0` 发现资料，但返回过部分 mai
 
 **权利：** NCCL 精确 [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt) SHA-256 为 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`，保留 Apache-2.0 与 BSD／逐文件条款。NVIDIA 文档及 profiler 二进制保留官方条款，仅链接与转述，不按项目许可重新授权。未再分发上游代码、图示或报告。原创教学 fixture 为 CC BY 4.0 并附署名 sidecar；原创可下载解答为 Apache-2.0。无量纲合成区间及无 GPU 构建检查不产生实测执行或证据状态。LAB18 保持待硬件验证。
 
-**#54 当前增量**包含 101 个学习单元、367 个双语发布对、734 条源路由、100 组练习与 100 组解答，469 条目录记录：18 个实验、109 个练习题库条目、21 个可视化讲解、207 个术语表词条、114 条来源记录。待验证主体共 41 个。以下增量计数为历史，R5 冻结、R6 复核待完成。
+<span id="src-cuda-100" class="resource-target"></span>
+
+### SRC-CUDA-100 — DDP、ProcessGroupNCCL 与有界诊断
+
+相关 ID：G07、PB-R6-008/009。复核／访问日期 **2026-09-20**。当前 Context7 `/pytorch/pytorch/v2.11.0` 检索 DDP、torchrun／本地 rank、进程组、no_sync、CUDA 等待／生命周期与异步错误；`/nvidia/nccl` 检索通信器所有权、流完成、INFO 日志和失败。部分结果指向 main／master，旧 DDP 设计说明针对 v1.4，均不能覆盖精确选定源码。PyTorch **2.11.0+cu128**、提交 `70d99e998b4955e0049d13a98d77ae1b14db1f45`，复用 SRC-CUDA-080 的 CPython 3.12.14／runtime 12.8.90 产物闭包。NCCL 是 **2.28.9**，不是 EX24 的 2.31.2。
+
+| 精确上游文件 | 已检查契约 |
+| --- | --- |
+| [DDP API／实现](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/nn/parallel/distributed.py) | 独占设备、init_sync、参数顺序、局部损失／梯度均值、前向须在 no_sync 内 |
+| [distributed_c10d](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/distributed/distributed_c10d.py) | env 会合、device_id 立即初始化、操作超时、销毁 |
+| [torchrun](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/distributed/run.py) | standalone 单节点启动、rank 环境、重定向、重启策略 |
+| [归约器](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/csrc/distributed/c10d/reducer.cpp) 及[默认钩子](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/csrc/distributed/c10d/default_comm_hooks.cpp) | 桶顺序、普通求和与梯度除数、future 完成 |
+| [ProcessGroupNCCL.cpp](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp) 及[头文件](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/csrc/distributed/c10d/ProcessGroupNCCL.hpp) | 异步 current→NCCL 依赖、Work.wait 消费者依赖、同步当前流路径、暂存分配器引用、看门狗／监控／错误模式 |
+| [分布式指南](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/distributed.md) 及 [NCCL 环境指南](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/docs/source/torch_nccl_environment_variables.md) | 关闭、调试检查、异步错误模式 3、监控及转储前提 |
+| [NCCL 后端上游测试](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/test/distributed/test_c10d_nccl.py) | test_init_process_group_nccl_timeout、test_block_current_stream、test_abort_in_destroy_pg 及 DDP 累积路径；仅检查、未执行 |
+
+NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[公共头文件](https://github.com/NVIDIA/nccl/blob/dbc86fd06e8b0c4517b95d8958a09ccacf9520c9/src/nccl.h.in)、[初始化源码](https://github.com/NVIDIA/nccl/blob/dbc86fd06e8b0c4517b95d8958a09ccacf9520c9/src/init.cc)。此标签没有较新目录位置的用户指南源码，因此使用精确 **2.28.9** 归档[流语义](https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2289/user-guide/docs/usage/streams.html)、[通信器](https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2289/user-guide/docs/usage/communicators.html)、[环境变量](https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2289/user-guide/docs/env.html)和[排障指南](https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2289/user-guide/docs/troubleshooting.html)。CUDA 12.8 [发布说明](https://docs.nvidia.com/cuda/archive/12.8.0/cuda-toolkit-release-notes/index.html) 提供 570.26 Linux 驱动坐标，作为保守场景下限，GPU 兼容性另查。
+
+[选定 NCCL wheel](https://files.pythonhosted.org/packages/4a/4e/44dbb46b3d1b0ec61afda8e84837870f2f9ace33c564317d59b70bc19d3e/nvidia_nccl_cu12-2.28.9-py3-none-manylinux_2_18_x86_64.whl) 哈希锁为 `485776daa8447da5da39681af455aa3b2c2586ddcf4af8772495e7c532c7e5ab`。范围读取精确成员 `nvidia_nccl_cu12-2.28.9.dist-info/licenses/License.txt`，得到 1895 字节，SHA-256 `0f0174a6b4e0b33ac26375bf729533075b32f4c51a5b6802a3d742d7dcdc9a76`，与该版本 [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/dbc86fd06e8b0c4517b95d8958a09ccacf9520c9/LICENSE.txt) 相同：含 NVIDIA／LBNL／DOE 名称的 BSD 三条款及 NVTX 声明，不是较新 NCCL 的 Apache 许可。[PyTorch 精确根 LICENSE](https://github.com/pytorch/pytorch/blob/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE)，SHA-256 `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43`，提供其 BSD 风格条款和具名贡献者。[逐文件权利表](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/CONTENT_LICENSES.md#g07-ddp-source-rights) 保留精确源码哈希和文件适用范围。NVIDIA 文档保持独立所有者条款。仅链接／转述文件，不复制；wheel 留在外部。范围读取不是整包安装，也不是实际加载库验证。
+
+原创 G07 正文／诊断 fixture 为 CC BY 4.0，解答／测试为 Apache-2.0。没有采集日志、时间戳、DDP／NCCL 执行、拓扑观察、扩展性或加速结果。GPU 场景仍待硬件验证；CPU 参考公式及合成诊断检查不改变证据状态（Evidence Status）。
+
+**#55 当前增量**包含 102 个学习单元、370 个双语发布对、740 条源路由、101 组练习与 101 组解答，472 条目录记录：18 个实验、111 个练习题库条目、21 个可视化讲解、207 个术语表词条、115 条来源记录。待验证示例／实验主体共 41 个，G07 外部场景也尚未观察。以下增量计数为历史，R5 冻结、R6 复核待完成。
 
 历史 #53 增量发布 G04/G05、EX24/LAB17/VIS16 与 SRC-CUDA-097/098，当时为 100 个学习单元、363 个双语发布对、726 条源路由、99 组练习和 99 组解答、465 条目录记录：17 个实验、107 个练习题库条目、21 项可视化讲解、207 个术语表词条、113 条来源记录。当时 40 个待验证主体已由上方 #54 清单更新；R5 冻结，R6 待复核。
 
