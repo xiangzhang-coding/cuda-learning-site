@@ -1,5 +1,11 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Issue 54 source refresh — 2026-09-20
+
+G06/LAB18: Context7 `/nvidia/nccl` query: “Grouping operations with multiple streams establishes stream dependencies ncclGroupEnd enqueue overlap computation communication CUDA streams”. `/websites/nvidia_nsight-systems` query: “CUDA NVTX GPU timeline correlation profiling --trace=cuda,nvtx --sample=none --cpuctxsw=none overhead event trace NCCL profiler permissions”. Results were discovery; selected authority is NCCL 2.31.2 commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`, `docs/userguide/source/usage/{streams,groups}.rst` and topology troubleshooting. The live owner Nsight Systems UserGuide reports 2026.5; attempted 2026.4 archive returned 404. SRC-CUDA-099 records exact coordinates and the independent installed-build gate. No version inference from the older bundled Toolkit profiler.
+
+Original LAB18 solution compiles/links in the existing CUDA 13.3.1/NCCL 2.31.2 EX24 image without GPU execution; CI repeats this gate. No published Compile-Checked status is added. The fixture is synthetic dimensionless data, not a profiler report; raw-report fields remain empty. Exact NCCL rights follow SRC-CUDA-097/098. No copied owner code or diagram.
+
 ## NCCL source and build disposition — 2026-09-19
 
 G04/G05, EX24/LAB17 and VIS16 use independently selected NCCL 2.31.2, commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`. Context7 `/nvidia/nccl` queried communicator initialization, all-reduce, group/stream synchronization and error/version APIs. Current master results were discovery; exact pinned docs/source and the Ubuntu 24.04 package index govern SRC-CUDA-097/098. The public bilingual records retain exact source/license/package hashes and rights boundaries. NCCL 2.32.3 was available on GitHub but absent from the selected binary repository at review time.

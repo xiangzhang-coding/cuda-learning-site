@@ -73,6 +73,22 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  G06: {
+    href: { 'zh-CN': '/multi-gpu/communication-computation-overlap/', en: '/en/multi-gpu/communication-computation-overlap/' },
+    title: { 'zh-CN': 'G06：先证明依赖，再判断通信与计算重叠', en: 'G06: Prove Dependencies Before Claiming Overlap' }, prerequisites: ['G05', 'Q05', 'Q07'],
+  },
+  'G06-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/communication-computation-overlap/exercises/', en: '/en/multi-gpu/communication-computation-overlap/exercises/' },
+    title: { 'zh-CN': 'G06 练习：流水线与时间线审查', en: 'G06 Exercises: Pipeline and Timeline Review' }, prerequisites: ['G06'],
+  },
+  'G06-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/communication-computation-overlap/solutions/', en: '/en/multi-gpu/communication-computation-overlap/solutions/' },
+    title: { 'zh-CN': 'G06 解答：依赖、区间与证据', en: 'G06 Solutions: Dependencies, Intervals, and Evidence' }, prerequisites: ['G06-EXERCISES'],
+  },
+  LAB18: {
+    href: { 'zh-CN': '/labs/pipeline-nccl-computation/', en: '/en/labs/pipeline-nccl-computation/' },
+    title: { 'zh-CN': 'LAB18：构建并审查 NCCL 通信计算流水线', en: 'LAB18: Build and Inspect an NCCL Compute Pipeline' }, prerequisites: ['G05', 'Q05', 'Q07'], indexGroup: 'labs',
+  },
   G04: {
     href: { 'zh-CN': '/multi-gpu/nccl-communicators-collectives/', en: '/en/multi-gpu/nccl-communicators-collectives/' },
     title: { 'zh-CN': 'G04：让所有 rank 遵守同一集合通信契约', en: 'G04: Give Every Rank the Same Collective Contract' }, prerequisites: ['G01', 'G03'],

@@ -357,13 +357,13 @@ The Practice Bank collects original problems that recur across the curriculum. E
 
 ## How to use it
 
-Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. This page publishes 107 complete original entries; a solution reviews your work rather than replacing it.
+Review the linked prerequisite, then produce your own artifact before reading the reviewed solution. Open hints in order. This page publishes 109 complete original entries; a solution reviews your work rather than replacing it.
 
 ## Published entry index
 
 <ResourceIndex group="practice" locale="en" />
 
-A planning ID is a stable discussion label, not a URL-stability promise. Filtering changes the visible cards only; all 107 complete prompts, prerequisite links and solutions remain in the static page.
+A planning ID is a stable discussion label, not a URL-stability promise. Filtering changes the visible cards only; all 109 complete prompts, prerequisite links and solutions remain in the static page.
 
 The R3 release contract explicitly classifies these 10 entries as the Nsight report-analysis subset: `PB-R3-002`, `PB-R3-003`, `PB-R3-004`, `PB-R3-005`, `PB-R3-007`, `PB-R3-008`, `PB-R3-009`, `PB-R3-010`, `PB-R3-011`, and `PB-R3-012`. They ask the learner to design or audit timelines, metrics and replay, report custody, Environment Manifests, and bounded conclusions. Static analysis is not a profiler run and grants no CUDA Evidence Status.
 
@@ -4525,7 +4525,51 @@ Retry latency needs a separately declared end-to-end host interval that covers t
 
 **Reviewed solution:** Record done in the communication stream after successful enqueue, wait in the consumer stream, retain input until communication completes and retain output until consumption completes. See [separate G05 solutions](/en/multi-gpu/nccl-stream-dependencies/solutions/). **Source basis:** original dependency audit; [SRC-CUDA-098](/en/sources-and-versions/#src-cuda-098). **Source date:** 2026-09-19. No observed overlap or runtime result.
 
+<span id="pb-r6-006" class="resource-target"></span>
+
+## PB-R6-006: Cross-device intersection is not local overlap
+
+**ID:** PB-R6-006 · original Publication Pair.
+- **Direct prerequisite:** [G06](/en/multi-gpu/communication-computation-overlap/), exactly `[G06]`.
+- **Related Learning Units and resources:** [G06](/en/multi-gpu/communication-computation-overlap/), [LAB18](/en/labs/pipeline-nccl-computation/).
+- **Hardware gate:** none; paper timeline analysis.
+- **Last reviewed:** 2026-09-20.
+
+**Difficulty:** advanced. **Version:** NCCL 2.31.2; Nsight Systems 2026.5.
+
+**Prompt:** A fictional report contains GPU 0 compute [4,10) and GPU 1 communication [5,8). Its author reports “3 microseconds of local NCCL overlap on both GPUs” and a bandwidth bottleneck. Correct the scope of the conclusion.
+
+**Constraints:** these are invented dimensionless intervals, not measured microseconds. **Expected evidence:** an interval/scope audit and a missing-evidence list. **Acceptance criteria:** cross-device simultaneity cannot establish same-GPU overlap; missing same-device rows are inconclusive; no throughput or bottleneck claim follows. A real claim needs complete two-GPU correctness, manifest, topology, profiler version/permissions, correlation and retained diagnostics/report.
+
+<details><summary>Hint 1</summary><p>Which device owns each interval?</p></details>
+<details><summary>Hint 2</summary><p>A positive intersection answers only the question defined by its scope and units.</p></details>
+
+**Reviewed solution:** The intersection is 3 synthetic ticks across devices, not local overlap and not measured time. Require independent compute and NCCL activity on the same GPU, inspect every rank and qualify capture completeness. See [G06 solutions](/en/multi-gpu/communication-computation-overlap/solutions/). **Source basis:** original evidence-review scenario and [SRC-CUDA-099](/en/sources-and-versions/#src-cuda-099). **Source date:** 2026-09-20.
+
+<span id="pb-r6-007" class="resource-target"></span>
+
+## PB-R6-007: Wait for the consumer before reusing a slot
+
+**ID:** PB-R6-007 · original Publication Pair.
+- **Direct prerequisite:** [G06](/en/multi-gpu/communication-computation-overlap/), exactly `[G06]`.
+- **Related Learning Units and resources:** [G06](/en/multi-gpu/communication-computation-overlap/), [LAB18](/en/labs/pipeline-nccl-computation/).
+- **Hardware gate:** none; static lifetime review.
+- **Last reviewed:** 2026-09-20.
+
+**Difficulty:** advanced. **Version:** NCCL 2.31.2; CUDA 13.3.1.
+
+**Prompt:** A two-slot in-place pipeline starts producing chunk k+2 into slot k mod 2 as soon as all-reduce k completes. The consumer on a third stream is still reading that slot. Repair the schedule while preserving independent work.
+
+**Constraints:** do not insert a device-wide barrier or intentionally run the race. **Expected evidence:** a per-generation ownership graph. **Acceptance criteria:** final consumer read precedes slot overwrite, events belong to the recording device, records precede waits, and event generations cannot be overwritten prematurely. Correctness must pass before performance analysis.
+
+<details><summary>Hint 1</summary><p>Collective completion is not the last use of this in-place slot.</p></details>
+<details><summary>Hint 2</summary><p>Record a completion event after consumption and connect it to the next producer of the same slot.</p></details>
+
+**Reviewed solution:** Add Q(k)→consumed(k)→P(k+2), with safe per-generation event handling. G06's reference avoids this hazard using disjoint slices, then drains before iteration reuse. See [G06 solutions](/en/multi-gpu/communication-computation-overlap/solutions/). **Source basis:** original buffer-lifetime audit and [SRC-CUDA-099](/en/sources-and-versions/#src-cuda-099). **Source date:** 2026-09-20. No observed race, overlap or performance is asserted.
+
 ## Review record
+
+Issue #54 adds PB-R6-006/007 on 2026-09-20, both with exact prerequisite G06. Current total: 109 complete original entries. LAB18 brings Pending Hardware Verification subjects to 41; no measured overlap, throughput or bottleneck is published. Earlier counts below are historical.
 
 Issue #53 adds PB-R6-004/005 on 2026-09-19 with exact prerequisites G04/G05. Current total: 107 complete original entries. R5 remains frozen, R6 review is pending. Earlier increment totals below are historical; EX24/LAB17 add two Pending Hardware Verification subjects, for 40 total, without recorded GPU results.
 

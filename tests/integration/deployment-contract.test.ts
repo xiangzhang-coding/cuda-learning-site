@@ -165,16 +165,16 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication).toMatchObject({
       publicationId: 'current',
       schemaVersion: 1,
-      reviewDate: '2026-09-19',
+      reviewDate: '2026-09-20',
       releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
       scope: {
-        publicationPairs: 363,
-        sourceRoutes: 726,
-        exerciseSetPublicationPairs: 99,
-        solutionSetPublicationPairs: 99,
-        practiceBankEntries: 107,
+        publicationPairs: 367,
+        sourceRoutes: 734,
+        exerciseSetPublicationPairs: 100,
+        solutionSetPublicationPairs: 100,
+        practiceBankEntries: 109,
         glossaryTerms: 207,
-        sourceRecords: 113,
+        sourceRecords: 114,
       },
       compatibility: {
         componentBoundaries: {
@@ -249,18 +249,18 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L12');
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('L13');
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L13');
-    expect(publication.scope.learningUnits).toHaveLength(100);
+    expect(publication.scope.learningUnits).toHaveLength(101);
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']));
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13']));
     expect(publication.scope.runnableExamples).toHaveLength(24);
     expect(publication.scope.runnableExamples).toEqual(expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21']));
-    expect(publication.scope.labs).toHaveLength(17);
+    expect(publication.scope.labs).toHaveLength(18);
     expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']));
     expect(publication.scope.visualExplainers).toHaveLength(21);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
     expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
-      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(465);
-    expect(publication.evidence.pendingHardwareVerification).toHaveLength(40);
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(469);
+    expect(publication.evidence.pendingHardwareVerification).toHaveLength(41);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',

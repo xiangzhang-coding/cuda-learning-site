@@ -141,7 +141,7 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -150,7 +150,7 @@ const r4RunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX
 const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23', 'EX24'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r4Labs = [...r3Labs, 'LAB11', 'LAB12'] as const;
-const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17'] as const;
+const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18'] as const;
 const historicalVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -184,23 +184,23 @@ const currentProfilerReportPlans = [
   '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
 ] as const;
 const currentNoCompileCheckedClaim = [
-  'EX24', 'LAB17',
+  'LAB18', 'EX24', 'LAB17',
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14', 'LAB15', 'LAB16',
 ] as const;
 const currentPendingHardwareVerification = [
-  'EX24', 'LAB17',
+  'LAB18', 'EX24', 'LAB17',
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
-  ...currentLabs.filter(id => id !== 'LAB17'),
+  ...currentLabs.filter(id => id !== 'LAB17' && id !== 'LAB18'),
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 17 },
-  { suffix: 'practice/', count: 107 },
+  { suffix: 'labs/', count: 18 },
+  { suffix: 'practice/', count: 109 },
   { suffix: 'visuals/', count: 21 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 113 },
+  { suffix: 'sources-and-versions/', count: 114 },
 ] as const;
 const exampleRouteSlugs = [
   'nccl-all-reduce',
@@ -365,7 +365,7 @@ test('serves the exact R5 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-19',
+    reviewDate: '2026-09-20',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -499,20 +499,20 @@ test('serves the exact R5 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 363,
-    sourceRoutes: 726,
-    exerciseSetPublicationPairs: 99,
-    solutionSetPublicationPairs: 99,
+    publicationPairs: 367,
+    sourceRoutes: 734,
+    exerciseSetPublicationPairs: 100,
+    solutionSetPublicationPairs: 100,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 107,
+    practiceBankEntries: 109,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 113,
+    sourceRecords: 114,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -644,8 +644,8 @@ test('serves the exact R5 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '363 Publication Pairs' : '363 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '726 source routes' : '726 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '367 Publication Pairs' : '367 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '734 source routes' : '734 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -1049,13 +1049,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(726);
-    expect(new Set(routes).size).toBe(726);
+    expect(routes).toHaveLength(734);
+    expect(new Set(routes).size).toBe(734);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
     expect(routeBatches).toHaveLength(62);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(363);
+      expect(localized).toHaveLength(367);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

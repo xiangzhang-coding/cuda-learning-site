@@ -2,7 +2,7 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "publicationId": "current",
-  "reviewDate": "2026-09-19",
+  "reviewDate": "2026-09-20",
   "artifactType": "static-assets",
   "canonicalOrigin": "https://cuda-learning-site.hmzhangxiang.workers.dev",
   "releaseReview": {
@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 363,
-    "sourceRoutes": 726,
-    "exerciseSetPublicationPairs": 99,
-    "solutionSetPublicationPairs": 99,
+    "publicationPairs": 367,
+    "sourceRoutes": 734,
+    "exerciseSetPublicationPairs": 100,
+    "solutionSetPublicationPairs": 100,
     "learningUnits": [
       "O01",
       "O02",
@@ -115,10 +115,11 @@
       "G02",
       "G03",
       "G04",
-      "G05"
+      "G05",
+      "G06"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22", "EX23", "EX24"],
-    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16", "LAB17"],
+    "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16", "LAB17", "LAB18"],
     "visualExplainers": [
       "VIS01",
       "VIS02",
@@ -142,7 +143,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 107,
+    "practiceBankEntries": 109,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -167,7 +168,7 @@
     ],
     "pytorchAndTritonPracticeEntries": ["PB-R5-004", "PB-R5-005", "PB-R5-006", "PB-R5-007", "PB-R5-008", "PB-R5-009", "PB-R5-010", "PB-R5-011", "PB-R5-012", "PB-R5-013", "PB-R5-014", "PB-R5-015", "PB-R5-016", "PB-R5-017", "PB-R5-018", "PB-R5-019", "PB-R5-020"],
     "glossaryTerms": 207,
-    "sourceRecords": 113
+    "sourceRecords": 114
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -482,6 +483,7 @@
   "evidence": {
     "compileChecked": ["EX02", "EX10", "LAB02"],
     "noCompileCheckedClaim": [
+      "LAB18",
       "EX24",
       "LAB17",
       "EX01",
@@ -522,6 +524,7 @@
       "LAB16"
     ],
     "pendingHardwareVerification": [
+      "LAB18",
       "EX24",
       "LAB17",
       "EX01",
@@ -584,6 +587,7 @@
     "retainedCompileRuns": [32720214527, 33275734951]
   },
   "knownLimitations": [
+    "Issue #54 adds G06/LAB18, two original Practice Bank entries and an original exercise solution. Nsight Systems 2026.5 was reviewed independently. LAB18 remains Pending Hardware Verification with empty compilation and recorded observations; its synthetic dimensionless fixture is not a captured report. No qualifying two-GPU overlap, throughput or bottleneck conclusion is published.",
     "The current increment adds G04/G05, EX24, LAB17 and VIS16. NCCL 2.31.2 is independently pinned; EX24/LAB17 retain empty compilation and recorded observations with Pending Hardware Verification. No qualifying two-GPU rank log, algorithm, bandwidth, latency or collective result is published. R6 aggregate review is pending.",
     "R5 completes static dependency closure through P01-P12 and T01-T08. Issue #51 separately records source-bound CI, Preview and production acceptance. R6 and later material and multi-GPU support are outside this release.",
     "T08 publishes bounded FP16 forward attention, separate Exercises/solution and VIS18 reuse. Runtime remains Pending Hardware Verification; gradients, arbitrary masks and production integration are outside the contract.",

@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Current increment — issue #54, 2026-09-20
+
+G06/LAB18 publish dependency-first communication/computation overlap, separate Exercises/solutions, PB-R6-006/007 and SRC-CUDA-099. Current scope is 101 Learning Units, 24 Runnable Examples, 367 Publication Pairs, 734 source routes, 100 Exercise sets, 100 separate solution sets and 469 catalog records (18 Labs, 109 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 114 source records). LAB18 adds one pending subject, for 41 subjects Pending Hardware Verification. Its original CUDA exercise solution has a GPU-free compile/link gate; its teaching fixture has only synthetic dimensionless intervals. There is no published overlap, throughput or bottleneck evidence. R5 remains frozen and R6 remains pending. Earlier dated inventories below are historical.
+
 # CUDA Learning Site
 
 The 2026-09-19 current publication extends G01–G03 with [G04 NCCL contracts](https://cuda-learning-site.hmzhangxiang.workers.dev/en/multi-gpu/nccl-communicators-collectives/), [G05 stream dependencies](https://cuda-learning-site.hmzhangxiang.workers.dev/en/multi-gpu/nccl-stream-dependencies/), EX24, LAB17 and VIS16. Current `/publication.json` has 100 Learning Units, 24 Runnable Examples, 363 Publication Pairs, 726 source routes, 99 Exercise sets and 99 separate solution sets. There are 465 catalog records: 17 Labs, 107 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 113 source records. R5's `/release.json` remains frozen; R6 review is pending. EX24 independently pins NCCL 2.31.2-1+cuda13.3 with Toolkit 13.3.1. Forty Example/Lab subjects remain Pending Hardware Verification; no new published compilation or runtime evidence is granted by host/container/browser checks.

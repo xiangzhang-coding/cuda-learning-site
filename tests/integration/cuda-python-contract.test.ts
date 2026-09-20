@@ -29,14 +29,14 @@ describe('issue #42 CUDA Python publication contract', () => {
     const [current, r4] = await Promise.all(['current-publication', 'r4-release'].map(async (name) =>
       JSON.parse(await readFile(path.join(root, `src/${name}-manifest.json`), 'utf8'))));
     expect(current).toMatchObject({
-      reviewDate: '2026-09-19',
+      reviewDate: '2026-09-20',
       releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
-      scope: { publicationPairs: 363, sourceRoutes: 726, exerciseSetPublicationPairs: 99,
-        solutionSetPublicationPairs: 99, practiceBankEntries: 107, sourceRecords: 113 },
+      scope: { publicationPairs: 367, sourceRoutes: 734, exerciseSetPublicationPairs: 100,
+        solutionSetPublicationPairs: 100, practiceBankEntries: 109, sourceRecords: 114 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23', 'EX24']);
-    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17']);
+    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18']);
     expect(current.scope.visualExplainers).toEqual([...r4.scope.visualExplainers, 'VIS16', 'VIS17'].sort());
     for (const field of ['nsightReportAnalysisPracticeEntries', 'libraryAlgorithmChoicePracticeEntries']) {
       expect(current.scope[field], field).toEqual(r4.scope[field]);
@@ -54,9 +54,9 @@ describe('issue #42 CUDA Python publication contract', () => {
     });
     expect(current.evidence).toEqual({
       ...r4.evidence,
-      noCompileCheckedClaim: ['EX24', 'LAB17', ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
+      noCompileCheckedClaim: ['LAB18', 'EX24', 'LAB17', ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
         ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
-      pendingHardwareVerification: ['EX24', 'LAB17', ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
+      pendingHardwareVerification: ['LAB18', 'EX24', 'LAB17', ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
         ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
       r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'],
       evidenceNeutralVisualExplainers: [...r4.evidence.evidenceNeutralVisualExplainers, 'VIS16', 'VIS17'].sort(),
@@ -174,7 +174,7 @@ describe('issue #42 CUDA Python publication contract', () => {
   });
 
   it('static: gives each Python Practice Bank entry and source record a published prerequisite destination', async () => {
-    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-19T12:00:00Z') })).not.toThrow();
+    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-20T12:00:00Z') })).not.toThrow();
     const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R5-00[1-3]$/.test(planningId));
     expect(practice.map(({ planningId }) => planningId)).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
     for (const [index, record] of practice.entries()) {

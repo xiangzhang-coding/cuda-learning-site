@@ -46,7 +46,7 @@ head:
 
 ## The route published today
 
-As of **2026-09-19**, the current publication includes G01–G05: 100 Learning Units, 24 Runnable Examples, 363 Publication Pairs, 726 source routes and 465 catalog records. Start with [device ownership](/en/multi-gpu/devices-contexts-ownership/), [peer access](/en/multi-gpu/peer-access-copies/) and [topology](/en/multi-gpu/topology-paths/), then [NCCL contracts](/en/multi-gpu/nccl-communicators-collectives/) and [stream dependencies](/en/multi-gpu/nccl-stream-dependencies/). [EX24](/en/examples/nccl-all-reduce/) and [LAB17](/en/labs/nccl-all-reduce/) remain Pending Hardware Verification. [T08](/en/triton/attention-capstone/) retains the fused-attention capstone and VIS18. Using Python does not remove the Stable Curriculum's prerequisites.
+As of **2026-09-20**, the current publication includes G01–G06: 101 Learning Units, 24 Runnable Examples, 367 Publication Pairs, 734 source routes and 469 catalog records. Start with [device ownership](/en/multi-gpu/devices-contexts-ownership/), [peer access](/en/multi-gpu/peer-access-copies/) and [topology](/en/multi-gpu/topology-paths/), then [NCCL contracts](/en/multi-gpu/nccl-communicators-collectives/), [stream dependencies](/en/multi-gpu/nccl-stream-dependencies/) and [communication/computation overlap](/en/multi-gpu/communication-computation-overlap/). [LAB18](/en/labs/pipeline-nccl-computation/) remains Pending Hardware Verification. [T08](/en/triton/attention-capstone/) retains the fused-attention capstone and VIS18. Using Python does not remove the Stable Curriculum's prerequisites.
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
@@ -92,15 +92,15 @@ Like EX11-EX14, EX15 uses one original C++17 implementation across Toolkit Lanes
 
 EX17's five bundled CUB 1.15.1/2.8.2/3.3.4 and selected CCCL 3.4.2 component rows are only a declared non-evidentiary build gate; the site does not claim CI ran. EX17 has empty compilation evidence and recorded observations, no observed runtime evidence, and Pending Hardware Verification runtime.
 
-The current 17 Labs are LAB01-LAB17. [LAB17](/en/labs/nccl-all-reduce/) requires G04/G05 and uses EX24. [LAB10](/en/labs/optimize-canonical-transpose/) requires Q11; [LAB11](/en/labs/compare-custom-reduction-with-cub/) requires Q12/L03 and compares EX11 with EX17; [LAB12](/en/labs/compare-gemm-with-cublas/) requires Q13/L06 and compares EX15 with EX18. LAB13 builds and validates EX22; [LAB14](/en/labs/profile-custom-operator/) requires P11; [LAB15](/en/labs/verify-fused-softmax/) requires T02/A10/Q05; [LAB16](/en/labs/autotune-triton-gemm/) requires T04/T05. All eight have empty recorded observations and Pending Hardware Verification runtime.
+The current 18 Labs are LAB01-LAB18. [LAB18](/en/labs/pipeline-nccl-computation/) requires G05/Q05/Q07 and adds a communication/compute pipeline. [LAB17](/en/labs/nccl-all-reduce/) requires G04/G05 and uses EX24. [LAB10](/en/labs/optimize-canonical-transpose/) requires Q11; [LAB11](/en/labs/compare-custom-reduction-with-cub/) requires Q12/L03 and compares EX11 with EX17; [LAB12](/en/labs/compare-gemm-with-cublas/) requires Q13/L06 and compares EX15 with EX18. LAB13 builds and validates EX22; [LAB14](/en/labs/profile-custom-operator/) requires P11; [LAB15](/en/labs/verify-fused-softmax/) requires T02/A10/Q05; [LAB16](/en/labs/autotune-triton-gemm/) requires T04/T05. All nine have empty recorded observations and Pending Hardware Verification runtime.
 
 The site has 21 formal Visual Explainers: standalone VIS01-VIS14, [VIS16 Collective Paths](/en/visuals/collective-paths/), [VIS17 SIMT/Triton Mapping](/en/visuals/simt-triton-mapping/) and [VIS18 Attention Memory Traffic](/en/visuals/attention-memory-traffic/), plus embedded VIS19-VIS22. VIS16 requires G04; VIS17 requires T01 and compares logical ownership without guessing Triton physical lanes. VIS18 requires A11. These browser models provide no GPU or performance evidence.
 
 A10-A14, Q06-Q13, L01-L13, VIS13, and VIS18 have all four evidence arrays empty. API presence, owner tests, and static teaching material grant no site Evidence Status. EX17/LAB11, EX18/LAB12, EX19, and EX20 have empty compilation evidence and recorded observations and Pending Hardware Verification runtime. The current publication records no CUDA, CCCL, CUB, Thrust, libcu++, cuBLAS, cuBLASLt, CUTLASS, cuDNN, cuFFT, or cuSPARSE execution, captured profiler report, library output, synchronization observation, actual traffic, fusion, timing, speedup, bottleneck, winner, Reference Environment, or `performanceObservations`. Publishing L07 does not mean EX18/LAB12 implement or validate Lt selection.
 
-The current catalog contains 17 Labs, 107 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 113 source records: 465 records total. Source files form 363 Publication Pairs / 726 routes, with 99 Exercise sets and 99 separate solution sets. This increment adds PB-R6-004/005 and SRC-CUDA-097/098. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/).
+The current catalog contains 18 Labs, 109 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 114 source records: 469 records total. Source files form 367 Publication Pairs / 734 routes, with 100 Exercise sets and 100 separate solution sets. This increment adds PB-R6-006/007 and SRC-CUDA-099. R4's historical 82 entries, 196 terms, 92 sources and 401 records remain unchanged, including its eight library-and-algorithm-choice entries and the R3 ten-entry Nsight report-analysis subset in the [Practice Bank](/en/practice/). There are 41 subjects Pending Hardware Verification.
 
-Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 23 examples and all 17 Labs remain Pending Hardware Verification, 40 subjects total. P01-P12, T01-T08 and G01-G05 keep four empty evidence arrays. EX21-EX24 and LAB13-LAB17 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; source, interpreter and host checks do not grant GPU evidence.
+Only EX02, EX10 and LAB02 are Compile-Checked. EX10 is Runtime-Not-Applicable; the other 23 examples and all 18 Labs remain Pending Hardware Verification, 41 subjects total. P01-P12, T01-T08 and G01-G06 keep four empty evidence arrays. EX21-EX24 and LAB13-LAB18 have empty compilation and recorded observations. Runtime-Verified, Community-Observed, Reference Environment and performance-observation counts remain zero. All six profiler plans are expected-only; LAB18's additional timeline is synthetic. Source, interpreter and host checks do not grant GPU evidence.
 
 [L12](/en/libraries/cufft-plans-layouts-startup/) has exactly `[Q05,M07]` as ordered prerequisites. [L12 Exercises](/en/libraries/cufft-plans-layouts-startup/exercises/) require `[L12]`; [separate solutions](/en/libraries/cufft-plans-layouts-startup/solutions/) require `[L12-EXERCISES]`. L12's four evidence arrays remain empty. The archived 12.9.2 cuFFT guide is the teaching baseline; the live 13.3 reference was accessed 2026-09-08 because exact 13.3.1 API and release-note archives were unavailable.
 
@@ -738,7 +738,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, ownership, topology, NCCL, kernels, libraries, PyTorch and Triton through 107 original problems.</small>
+    <small>Practice evidence, ownership, topology, NCCL, kernels, libraries, PyTorch and Triton through 109 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +748,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 113 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 114 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>
