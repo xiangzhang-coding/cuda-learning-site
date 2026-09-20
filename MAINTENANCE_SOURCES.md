@@ -2,6 +2,21 @@
 
 ## Issue 55 source refresh — 2026-09-20
 
+The first hosted cross-browser run exposed a test readiness gap in the new
+G07-to-Practice-Bank journey: the navigation had committed, but a late anchor
+was asserted before document parsing completed. The Mobile Safari job
+[106042723134](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/35497185960/job/106042723134)
+retains the failed five-second anchor assertion and trace. A parser-blocking
+resource inserted before that anchor reproduced the same failure locally.
+The test now awaits the exact target URL with `waitUntil: 'domcontentloaded'`
+before checking the anchor, and gives practice/source journeys separate existing
+30-second test budgets. The delayed-parser regression and all 16 four-browser
+navigation cases pass without increased assertion timeouts or retries.
+Context7 `/microsoft/playwright` and the owner navigation guide confirm the
+explicit URL/readiness boundary; site dependencies remain pinned to 1.62.1.
+The temporary resource is confined to test interception; no production resource,
+delay, readiness workaround or CUDA evidence was added.
+
 Context7 `/pytorch/pytorch/v2.11.0` query: “DistributedDataParallel torchrun
 LOCAL_RANK init_process_group nccl device_id destroy_process_group gradient
 synchronization no_sync CUDA streams record_stream TORCH_NCCL_ASYNC_ERROR_HANDLING”.

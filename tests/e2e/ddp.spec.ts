@@ -31,12 +31,33 @@ for (const prefix of ['', 'en/']) {
       expect(failures).toEqual([]);
     });
   }
-  test(`${prefix}G07 reaches practice and source anchors`, async ({ page }) => {
+  test(`${prefix}G07 reaches the practice anchor after document readiness`, async ({ page, baseURL }, info) => {
+    if (prefix && info.project.name === 'chromium') {
+      // Reproduce the hosted WebKit gap: navigation committed, but the late
+      // Practice Bank anchor is still behind a parser-blocking resource.
+      await page.route('**/g07-parser-gate.js', async route => {
+        await new Promise(resolve => setTimeout(resolve, 6500));
+        await route.fulfill({ contentType: 'text/javascript', body: '/* parser gate */' });
+      });
+      await page.route(`**/${prefix}practice/`, async route => {
+        const response = await route.fetch();
+        const html = await response.text();
+        const anchor = '<span id="pb-r6-008"';
+        expect(html).toContain(anchor);
+        await route.fulfill({ response, body: html.replace(anchor, `<script src="/g07-parser-gate.js"></script>${anchor}`) });
+      });
+    }
     await page.goto(`/${prefix}${slug}/`, { waitUntil: 'networkidle' });
     await page.locator(`main a[href="/${prefix}practice/#pb-r6-008"]`).click();
+    await page.waitForURL(`${baseURL}/${prefix}practice/#pb-r6-008`, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#pb-r6-008')).toHaveCount(1);
     await settlePublicationPage(page);
+  });
+  test(`${prefix}G07 reaches the source anchor after document readiness`, async ({ page, baseURL }) => {
+    // Keep each large-index journey inside its own existing 30-second budget.
+    await page.goto(`/${prefix}${slug}/`, { waitUntil: 'networkidle' });
     await page.locator(`main a[href="/${prefix}sources-and-versions/#src-cuda-100"]`).first().click();
+    await page.waitForURL(`${baseURL}/${prefix}sources-and-versions/#src-cuda-100`, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#src-cuda-100')).toHaveCount(1);
     await settlePublicationPage(page);
   });
