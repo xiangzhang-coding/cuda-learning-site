@@ -1,5 +1,42 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R6 release acceptance
+
+Aggregate static review: **2026-09-22**. Schema 7 `src/r6-release-manifest.json`
+supplies `/release.json`; `/publication.json` records `releaseReview.latestCompleted: R6`,
+`releaseReview.next: R7`, `releaseReview.status: pending`. Both bind the exact
+source commit. Current scope: 104 Learning Units, 24 Runnable Examples,
+18 Labs, 21 Visual Explainers, 103 Exercise and 103 separate solution sets,
+376 Publication Pairs / 752 routes, 478 catalog records including 115 original
+Practice Bank entries (13 multi-GPU/NCCL), 207 terms and 117 sources.
+All following dated R1-R5 and increment instructions are historical; this section
+supersedes their active release selection and inventory.
+
+Retain same-commit Web Quality, CUDA Compile Evidence, PyTorch Operator,
+Triton Example and NCCL Example runs and scanned artifacts in
+[issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58).
+The complete strict remote harness must pass on Preview before production
+promotion, then on production: every one of the 752 routes, direct locale pairs,
+search, keyboard, mobile, reduced motion, theme/print, canonical downloads,
+Labs, G01-G09, VIS16 and independent evidence boundaries. Keep exact Preview
+and production URLs, versions, deployment, source SHA and smoke run results.
+Static records do not pre-certify these dynamic results. Use the existing pinned
+deploy commands and clean-main guard, comparing built R6/current manifests.
+
+EX24/LAB17/LAB18 select native Linux, at least two CC 7.5+ GPUs, Toolkit 13.3.1,
+NVCC 13.3.73, driver 610.43.02 and NCCL 2.31.2-1+cuda13.3. LAB18 separately
+requires Nsight Systems 2026.5. DDP uses CPython 3.12.14, torch 2.11.0+cu128,
+packaged NCCL 2.28.9 and that wheel's torchrun, one visible GPU per process.
+Multi-node launcher/provider/network/hardware remain unselected admission gates.
+Record GPU count, visibility, topology, process/rank/stream ownership, complete
+Environment Manifest, loaded versions, commands, correctness and measurement
+method for every observation. Registration, bootstrap and local topology do
+not prove a transport; fallback must be explicitly selected and verified.
+No qualifying graph, DDP, transport, recovery, overlap or performance observation
+is claimed. All 41 Example/Lab subjects requiring runtime remain Pending Hardware
+Verification; EX10 remains Runtime-Not-Applicable. Compile gates do not upgrade
+published evidence. No architecture-specific or multi-node execution is implied.
+
 ## Issue #54 publication increment — 2026-09-20
 
 Current `/publication.json`: 103 Learning Units, 24 Runnable Examples, 373 Publication Pairs, 746 source routes, 102 Exercise sets, 102 solution sets and 475 catalog records (18 Labs, 113 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 116 source records). G08 adds bilingual NCCL capture/registration instruction, two Exercises and separate solutions. All 41 Example/Lab subjects and G08's external scenarios retain Pending Hardware Verification. No capture, registration, synchronization or performance result is deployed. `/release.json` is frozen R5; R6 remains pending. Earlier dated inventories below are historical.

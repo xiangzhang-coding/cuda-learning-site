@@ -1,5 +1,23 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R6 aggregate rights review — 2026-09-22
+
+The schema-7 R6 snapshot includes 104 Learning Units, 24 Runnable Examples,
+18 Labs, 21 Visual Explainers, 103 Exercise/solution sets, 376 Publication Pairs,
+752 routes and 478 catalog records. All 115 Practice Bank entries, including
+PB-R6-001–013, are original complete bilingual instruction. Original content is
+CC BY 4.0; software, manifests and tests are Apache-2.0. R1-R5 and all following
+dated scope/rights records are historical.
+
+Fresh exact owner-license hashes and source disposition are recorded in
+[MAINTENANCE_SOURCES.md](MAINTENANCE_SOURCES.md#r6-aggregate-source-disposition).
+NCCL retains Apache-2.0 plus BSD/per-file notices; PyTorch retains BSD-3-Clause,
+NOTICE and transitive terms; nccl-tests retains independent BSD-3-Clause;
+NVIDIA tools, libraries and documentation retain separate proprietary terms.
+No external sample, figure, question, report, package or unreviewed adaptation
+is added. Existing NOTICE and THIRD_PARTY_NOTICES.md remain applicable.
+Rights review and build gates confer no GPU Evidence Status.
+
 ## G09 multi-node source rights
 
 Reviewed 2026-09-21 for issue #57. G09, its Exercises/separate solutions,

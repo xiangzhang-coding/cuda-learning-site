@@ -16,14 +16,15 @@ const metadata = (doc: Document, key: string) => doc.querySelector(`meta[name="c
 describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
-    expect(current.releaseReview).toEqual({ latestCompleted: 'R5', next: 'R6', status: 'pending' });
+    expect(current.releaseReview).toEqual({ latestCompleted: 'R6', next: 'R7', status: 'pending' });
     expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09']);
     expect(current.scope).toMatchObject({ publicationPairs: 376, sourceRoutes: 752,
       exerciseSetPublicationPairs: 103, solutionSetPublicationPairs: 103, practiceBankEntries: 115, sourceRecords: 117 });
-    const { nccl, ...priorComponents } = current.compatibility.componentBoundaries;
+    const { nccl, r6Distributed, ...priorComponents } = current.compatibility.componentBoundaries;
     expect({ ...current.compatibility, componentBoundaries: priorComponents }).toEqual(release.compatibility);
     expect(nccl.version).toBe('2.31.2');
     expect(current.evidence).toEqual({ ...release.evidence,
+      r6EvidenceNeutralLearningUnits: ids('G', 9),
       noCompileCheckedClaim: ['LAB18', 'EX24', 'LAB17', ...release.evidence.noCompileCheckedClaim],
       pendingHardwareVerification: ['LAB18', 'EX24', 'LAB17', ...release.evidence.pendingHardwareVerification],
       evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS16'].sort(),
@@ -62,7 +63,7 @@ describe('R5 aggregate release review', () => {
     const locale = prefix ? 'en' : 'zh-CN';
     for (const slug of ['', 'about/', 'start/using-the-learning-site/', 'labs/', 'sources-and-versions/']) {
       const { document } = parseHTML(await read(`dist/${prefix}${slug}index.html`));
-      expect(metadata(document, 'fact-check-date'), `${prefix}${slug}`).toBe('2026-09-19');
+      expect(metadata(document, 'fact-check-date'), `${prefix}${slug}`).toBe('2026-09-22');
       expect(document.body.textContent, `${prefix}${slug}`).not.toMatch(/(?:further Triton units remain unpublished|Triton destinations remain absent|更后续 Triton 单元尚未发布|Triton 目的地仍不存在|All 19 Visual Explainers|19 项可视化讲解仍)/i);
     }
     for (const id of [...ids('P', 12), ...ids('T', 8)]) {

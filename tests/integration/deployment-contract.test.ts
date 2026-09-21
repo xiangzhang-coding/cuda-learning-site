@@ -10,21 +10,21 @@ const execFileAsync = promisify(execFile);
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 
 describe('Cloudflare assets-only deployment contract', () => {
-  it('accepts frozen R5 plus current publication inputs and rejects stale metadata before upload', async () => {
+  it('accepts frozen R6 plus current publication inputs and rejects stale metadata before upload', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'r4-release-source-'));
     const sourceCommit = '0000000000000000000000000000000000000041';
     try {
       await Promise.all(['src', 'dist', 'bin'].map((directory) => mkdir(path.join(root, directory))));
       await cp(path.join(projectRoot, 'scripts'), path.join(root, 'scripts'), { recursive: true });
       const historical = JSON.parse(await readFile(path.join(projectRoot, 'src/r3-release-manifest.json'), 'utf8'));
-      const reviewed = JSON.parse(await readFile(path.join(projectRoot, 'src/r5-release-manifest.json'), 'utf8'));
+      const reviewed = JSON.parse(await readFile(path.join(projectRoot, 'src/r6-release-manifest.json'), 'utf8'));
       const current = {
         ...JSON.parse(await readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8')),
-        releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
+        releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
       };
       await Promise.all([
         writeFile(path.join(root, 'src/r3-release-manifest.json'), JSON.stringify(historical)),
-        writeFile(path.join(root, 'src/r5-release-manifest.json'), JSON.stringify(reviewed)),
+        writeFile(path.join(root, 'src/r6-release-manifest.json'), JSON.stringify(reviewed)),
         writeFile(path.join(root, 'src/current-publication-manifest.json'), JSON.stringify(current)),
         writeFile(path.join(root, 'dist/release.json'), JSON.stringify({ ...reviewed, sourceCommit })),
         writeFile(path.join(root, 'dist/publication.json'), JSON.stringify({ ...current, sourceCommit })),
@@ -81,7 +81,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(guard).toContain("['status', '--porcelain=v1', '--untracked-files=all']");
     expect(guard).toContain("['rev-parse', 'HEAD']");
     expect(guard).toContain("['branch', '--show-current']");
-    expect(guard).toContain("'src/r5-release-manifest.json'");
+    expect(guard).toContain("'src/r6-release-manifest.json'");
     expect(guard).toContain("'src/current-publication-manifest.json'");
     expect(guard).toContain("'dist/publication.json'");
     expect(guard).toContain("scanDirectory(path.join(projectRoot, 'dist'))");
@@ -107,7 +107,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     const [release, publication, sourceManifest, currentSourceManifest] = await Promise.all([
       readFile(path.join(projectRoot, 'dist/release.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'dist/publication.json'), 'utf8').then(JSON.parse),
-      readFile(path.join(projectRoot, 'src/r5-release-manifest.json'), 'utf8').then(JSON.parse),
+      readFile(path.join(projectRoot, 'src/r6-release-manifest.json'), 'utf8').then(JSON.parse),
       readFile(path.join(projectRoot, 'src/current-publication-manifest.json'), 'utf8').then(JSON.parse),
     ]);
     const builtFiles = (await readdir(path.join(projectRoot, 'dist'), { recursive: true })).map((file) =>
@@ -136,37 +136,37 @@ describe('Cloudflare assets-only deployment contract', () => {
     });
     expect(publication.sourceCommit).toBe(release.sourceCommit);
     expect(release).toMatchObject({
-      releaseId: 'R5',
-      schemaVersion: 6,
-      reviewDate: '2026-09-19',
+      releaseId: 'R6',
+      schemaVersion: 7,
+      reviewDate: '2026-09-22',
       scope: {
-        publicationPairs: 345,
-        sourceRoutes: 690,
-        exerciseSetPublicationPairs: 94,
-        solutionSetPublicationPairs: 94,
-        practiceBankEntries: 102,
+        publicationPairs: 376,
+        sourceRoutes: 752,
+        exerciseSetPublicationPairs: 103,
+        solutionSetPublicationPairs: 103,
+        practiceBankEntries: 115,
         nsightReportAnalysisPracticeEntries: expect.arrayContaining(['PB-R3-002', 'PB-R3-012']),
         libraryAlgorithmChoicePracticeEntries: ['PB-R4-001', 'PB-R4-002', 'PB-R4-003', 'PB-R4-004', 'PB-R4-008', 'PB-R4-011', 'PB-R4-012', 'PB-R4-016'],
         glossaryTerms: 207,
-        sourceRecords: 108,
+        sourceRecords: 117,
       },
     });
-    expect(release.scope.learningUnits).toHaveLength(95);
-    expect(release.scope.runnableExamples).toHaveLength(23);
-    expect(release.scope.labs).toHaveLength(16);
-    expect(release.scope.visualExplainers).toHaveLength(20);
+    expect(release.scope.learningUnits).toHaveLength(104);
+    expect(release.scope.runnableExamples).toHaveLength(24);
+    expect(release.scope.labs).toHaveLength(18);
+    expect(release.scope.visualExplainers).toHaveLength(21);
     expect(
       release.scope.labs.length +
       release.scope.practiceBankEntries +
       release.scope.visualExplainers.length +
       release.scope.glossaryTerms +
       release.scope.sourceRecords,
-    ).toBe(453);
+    ).toBe(478);
     expect(publication).toMatchObject({
       publicationId: 'current',
       schemaVersion: 1,
-      reviewDate: '2026-09-21',
-      releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
+      reviewDate: '2026-09-22',
+      releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
       scope: {
         publicationPairs: 376,
         sourceRoutes: 752,

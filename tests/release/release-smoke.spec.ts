@@ -28,7 +28,8 @@ import canonicalExamplePublications from '../../src/canonical-example-publicatio
 import currentPublicationManifest from '../../src/current-publication-manifest.json' with { type: 'json' };
 import r3ReleaseManifest from '../../src/r3-release-manifest.json' with { type: 'json' };
 import r4ReleaseManifest from '../../src/r4-release-manifest.json' with { type: 'json' };
-import r5ReleaseManifest from '../../src/r5-release-manifest.json' with { type: 'json' };
+import r6ReleaseManifest from '../../src/r6-release-manifest.json' with { type: 'json' };
+import { PUBLISHED_DESTINATIONS } from '../../src/resource-indexes/resource-index-model';
 import { hashCanonicalBuildContract, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
 import { scanArtifactBuffer, zipEntries } from '../../scripts/lib/quality-policy.mjs';
@@ -141,7 +142,7 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -197,10 +198,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 18 },
-  { suffix: 'practice/', count: 113 },
+  { suffix: 'practice/', count: 115 },
   { suffix: 'visuals/', count: 21 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 116 },
+  { suffix: 'sources-and-versions/', count: 117 },
 ] as const;
 const exampleRouteSlugs = [
   'nccl-all-reduce',
@@ -258,7 +259,49 @@ async function expectCanonicalRanges(page: Page, project: { id: string; sourceUr
   }
 }
 
-test('serves the exact R5 release and current publication with production canonicals', async ({ page, request }) => {
+for (const locale of ['zh-CN', 'en'] as const) {
+  for (const id of r6ReleaseManifest.evidence.r6EvidenceNeutralLearningUnits) {
+    test(`R6 ${locale} ${id} direct prerequisites, exercises and evidence boundary`, async ({ page }) => {
+      const failures = collectBrowserFailures(page, releaseOrigin);
+      const destination = PUBLISHED_DESTINATIONS[id];
+      const route = destination.href[locale];
+      await page.goto(route, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('meta[name="cuda:prerequisites"]')).toHaveAttribute('content', destination.prerequisites.join(','));
+      for (const key of ['evidence-compilation', 'evidence-runtime']) {
+        await expect(page.locator(`meta[name="cuda:${key}"]`)).toHaveAttribute('content', 'none');
+      }
+      await expect(page.locator(`main a[href="${route}exercises/"]`).first()).toBeVisible();
+      await expect(page.locator(`main a[href="${route}solutions/"]`).first()).toBeVisible();
+      await settlePublicationPage(page);
+      await page.locator('[data-locale-counterpart]').click();
+      await expect(page).toHaveURL(`${releaseOrigin}${destination.href[locale === 'en' ? 'zh-CN' : 'en']}`);
+      await settlePublicationPage(page);
+      expect(failures).toEqual([]);
+    });
+  }
+  test(`R6 ${locale} published review and distinct multi-GPU practice subset`, async ({ page }) => {
+    const failures = collectBrowserFailures(page, releaseOrigin);
+    const prefix = locale === 'en' ? '/en' : '';
+    await page.goto(`${prefix}/sources-and-versions/#r6-aggregate-review`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#r6-aggregate-review')).toHaveCount(1);
+    await expect(page.locator('meta[name="cuda:fact-check-date"]')).toHaveAttribute('content', '2026-09-22');
+    for (const term of ['2.31.2', '2.28.9', '2026.5', 'PB-R6-013']) await expect(page.locator('main')).toContainText(term);
+    await settlePublicationPage(page);
+    await page.goto(`${prefix}/practice/`, { waitUntil: 'domcontentloaded' });
+    const titles: string[] = [];
+    for (const id of r6ReleaseManifest.scope.multiGpuAndNcclPracticeEntries) {
+      const card = page.locator(`[data-resource-id="${id}"]`);
+      await expect(card).toHaveCount(1);
+      await expect(page.locator(`#${id.toLowerCase()}`)).toHaveCount(1);
+      titles.push((await card.locator('h3').innerText()).trim());
+    }
+    expect(new Set(titles).size).toBe(13);
+    await settlePublicationPage(page);
+    expect(failures).toEqual([]);
+  });
+}
+
+test('serves the exact R6 release and current publication with production canonicals', async ({ page, request }) => {
   test.setTimeout(600_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
@@ -268,7 +311,7 @@ test('serves the exact R5 release and current publication with production canoni
   const release = JSON.parse(releaseBody.toString('utf8'));
   const r4Bytes = await readFile(path.join(projectRoot, 'src/r4-release-manifest.json'));
   expect(createHash('sha256').update(r4Bytes).digest('hex')).toBe('26b0897efbfed9d697570f475e25fd88dbd3442b13357581f9ff96b87c098df7');
-  expect(release).toEqual({ ...r5ReleaseManifest, sourceCommit: expectedSourceCommit });
+  expect(release).toEqual({ ...r6ReleaseManifest, sourceCommit: expectedSourceCommit });
   expect(r4ReleaseManifest.scope).toEqual({
     publicationPairs: 277, sourceRoutes: 554, exerciseSetPublicationPairs: 74, solutionSetPublicationPairs: 74,
     learningUnits: r4LearningUnits, runnableExamples: r4RunnableExampleIds, labs: r4Labs,
@@ -277,9 +320,9 @@ test('serves the exact R5 release and current publication with production canoni
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds, glossaryTerms: 196, sourceRecords: 92,
   });
   expect(release).toMatchObject({
-    schemaVersion: 6,
-    releaseId: 'R5',
-    reviewDate: '2026-09-19',
+    schemaVersion: 7,
+    releaseId: 'R6',
+    reviewDate: '2026-09-22',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -319,7 +362,7 @@ test('serves the exact R5 release and current publication with production canoni
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
       'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
       'R4 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
-      'R5 completes static dependency closure through P01-P12 and T01-T08. Issue #51 separately records source-bound CI, Preview and production acceptance. R6 and later material and multi-GPU support are outside this release.',
+      'R6 completes static dependency closure through G01-G09 and all prior scope. Issue #58 separately records source-bound CI, Preview and production acceptance. R7 and deferred destinations are outside this release.',
     ]),
   });
   // R4 advances the active contract without rewriting the completed R3 snapshot.
@@ -365,11 +408,11 @@ test('serves the exact R5 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-20',
+    reviewDate: '2026-09-22',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
+    releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
     compatibility: {
       componentBoundaries: {
         cudnn: {
@@ -499,20 +542,21 @@ test('serves the exact R5 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 373,
-    sourceRoutes: 746,
-    exerciseSetPublicationPairs: 102,
-    solutionSetPublicationPairs: 102,
+    publicationPairs: 376,
+    sourceRoutes: 752,
+    exerciseSetPublicationPairs: 103,
+    solutionSetPublicationPairs: 103,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 113,
+    practiceBankEntries: 115,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
+    multiGpuAndNcclPracticeEntries: Array.from({ length: 13 }, (_, index) => `PB-R6-${String(index + 1).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 116,
+    sourceRecords: 117,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -531,6 +575,7 @@ test('serves the exact R5 release and current publication with production canoni
     r4EvidenceNeutralLearningUnits: ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'],
     r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'],
     evidenceNeutralVisualExplainers: currentVisualExplainers,
+    r6EvidenceNeutralLearningUnits: ['G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09'],
     expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
     capturedProfilerReports: [],
     retainedCompileRuns: [32720214527, 33275734951],
@@ -644,8 +689,8 @@ test('serves the exact R5 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '373 Publication Pairs' : '373 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '746 source routes' : '746 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '376 Publication Pairs' : '376 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '752 source routes' : '752 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -1051,13 +1096,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(746);
-    expect(new Set(routes).size).toBe(746);
+    expect(routes).toHaveLength(752);
+    expect(new Set(routes).size).toBe(752);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
     expect(routeBatches).toHaveLength(64);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(373);
+      expect(localized).toHaveLength(376);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

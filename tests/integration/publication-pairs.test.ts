@@ -4197,12 +4197,13 @@ const publicationPairFixtures: readonly PublicationPair[] = [
 // Explicit rolling additions keep long catalog fixtures readable without deriving
 // expected metadata from the implementation being tested.
 const publicationPairs = publicationPairFixtures.map((pair): PublicationPair => {
-  if (['home', 'o01', 'about', 'labs-index', 'visuals-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-19' };
+  if (['home', 'o01', 'about', 'labs-index'].includes(pair.pairId)) return { ...pair, factCheckDate: '2026-09-22' };
+  if (pair.pairId === 'visuals-index') return { ...pair, factCheckDate: '2026-09-19' };
   if (pair.pairId === 'practice-bank') return { ...pair, factCheckDate: '2026-09-19',
     structure: pair.structure!.replace('entry-pb-r5-007,review', 'entry-pb-r5-007,entry-pb-r5-008,entry-pb-r5-009,entry-pb-r5-010,entry-pb-r5-011,entry-pb-r5-012,entry-pb-r5-013,entry-pb-r5-014,entry-pb-r5-015,entry-pb-r5-016,entry-pb-r5-017,entry-pb-r5-018,entry-pb-r5-019,entry-pb-r5-020,entry-pb-r6-001,entry-pb-r6-002,entry-pb-r6-003,entry-pb-r6-004,entry-pb-r6-005,review'),
     prerequisites: `${pair.prerequisites},P08,P09,P10,P11,P12,T01,T02,T03`,
     relatedUnits: pair.relatedUnits!.replace('P07,EX21', 'P07,P08,P09,P10,P11,P12,T01,T02,T03,EX21') };
-  if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-19',
+  if (pair.pairId === 'sources-and-versions') return { ...pair, factCheckDate: '2026-09-22',
     structure: pair.structure!.replace('entry-src-cuda-083,content-sources', 'entry-src-cuda-083,entry-src-cuda-084,entry-src-cuda-085,entry-src-cuda-086,entry-src-cuda-087,entry-src-cuda-088,entry-src-cuda-089,entry-src-cuda-090,entry-src-cuda-091,content-sources,multi-gpu-sources') };
   if (pair.pairId === 'glossary') return { ...pair, factCheckDate: '2026-09-14',
     structure: pair.structure!.replace('entry-term-204,maintenance', 'entry-term-204,entry-term-205,entry-term-206,entry-term-207,maintenance') };

@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -42,7 +42,7 @@ The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable E
 
 The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. [A12](/en/algorithms/sparse-formats-spmv/) establishes COO and CSR, storage, and SpMV contracts. [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/) establishes SpMM, descriptor, workspace, and preprocessing decision boundaries.
 
-R5 is the latest completed aggregate static release review, dated 2026-09-19. Schema 6 `src/r5-release-manifest.json` supplies `/release.json`: 95 Learning Units, 345 Publication Pairs, 690 source routes and 453 catalog records, including 102 practice entries, 207 terms and 108 sources. `/publication.json` records R5 as latest completed and R6 as next/pending. P01-P12 and T01-T08 are complete; 17 existing questions form the PyTorch-and-Triton subset. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) separately records dynamic acceptance. R1-R4 remain exact historical snapshots. Independent environments, 38 Pending Hardware Verification subjects and the single-GPU boundary are summarized in the [release review](/en/sources-and-versions/#r5-aggregate-review).
+The latest completed aggregate static review is **R6, dated 2026-09-22**. Schema 7 `src/r6-release-manifest.json` supplies `/release.json`; current `/publication.json` records R6 completed and R7 next/pending. G01-G09 and all prior paths form a closure; 115 original questions include 13 multi-GPU and NCCL entries. [Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) separately records dynamic acceptance. R1-R5 remain historical snapshots. The [release review](/en/sources-and-versions/#r6-aggregate-review) summarizes 41 Pending Hardware Verification subjects, independent software environments and multi-node evidence boundaries.
 
 Issue #31 adds `A12<-[M01,M02]` and `A13<-[A12,A08]` to the strict graph. [Issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33) adds [L01](/en/libraries/library-primitive-dsl-custom-kernel/) and [L02](/en/libraries/thrust-algorithm-vocabulary/) to the rolling R4 publication. [Issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34) publishes [L03: CUB Device Primitives](/en/libraries/cub-device-primitives/), [L04: CUB Warp and Block Primitives](/en/libraries/cub-warp-block-primitives/), [EX17: CUB Device Reduction and Scan](/en/examples/cub-device-reduction-scan/), and [LAB11: Compare a Custom Reduction with CUB](/en/labs/compare-custom-reduction-with-cub/), followed by [L05: libcu++ Synchronization Abstractions](/en/libraries/libcu-plus-plus-synchronization/) with strict prerequisites M05, M13, and M19. [Issue #36](https://github.com/xiangzhang-coding/cuda-learning-site/issues/36) adds [L06: cuBLAS GEMM](/en/libraries/cublas-gemm/)`<-[A08,Q01]`, [L07: cuBLASLt Matmul](/en/libraries/cublaslt-matmul/)`<-[L06,Q05]`, [EX18](/en/examples/cublas-gemm/)`<-[L06]`, and [LAB12](/en/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`.
 
@@ -56,7 +56,7 @@ Issue #31 adds `A12<-[M01,M02]` and `A13<-[A12,A08]` to the strict graph. [Issue
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) adds [P01: The CUDA Python Bridge](/en/python/cuda-python-bridge/), [P02: Devices, Contexts, and Launches](/en/python/devices-contexts-launches/), and [P03: Runtime Compilation and Linking](/en/python/runtime-compilation-linking/) to the current publication, with ordered direct prerequisites `[F04,M07]`, `[P01,F07]`, and `[P02,M15,M16]` respectively. Each unit has Exercises and separate solutions. Their shared [EX21: CUDA Python Explicit Launch](/en/examples/cuda-python-launch/) requires only `[P02]`, records its Python, package, and native Toolkit profile independently, and remains Pending Hardware Verification. These ten pairs and twenty routes neither rewrite R4 history nor publish framework or Triton placeholders.
 
-As of **2026-09-21**, the current publication has 104 Learning Units, 24 Runnable Examples (EX01-EX24), 18 Labs (LAB01-LAB18), 21 Visual Explainers, 115 [Practice Bank](/en/practice/) entries, 207 [Glossary](/en/glossary/) terms and 117 [source records](/en/sources-and-versions/): 478 catalog records, 376 Publication Pairs and 752 source routes, including 103 Exercise sets and 103 separate reviewed-solution sets. [G09](/en/multi-gpu/multi-node-transport-failures/) adds multi-node transport, logging, failure diagnosis and recovery-evidence contracts. There are 41 subjects Pending Hardware Verification; G09's future multi-node execution is also unobserved. R5's frozen review is unchanged and R6 is pending.
+As of **2026-09-22**, R6 has 104 Learning Units, 24 Runnable Examples (EX01-EX24), 18 Labs (LAB01-LAB18), 21 Visual Explainers, 115 [Practice Bank](/en/practice/) entries, 207 [Glossary](/en/glossary/) terms and 117 [source records](/en/sources-and-versions/): 478 catalog records, 376 Publication Pairs and 752 source routes, including 103 Exercise sets and 103 separate reviewed-solution sets. [G09](/en/multi-gpu/multi-node-transport-failures/) covers multi-node transport, logging, failure diagnosis and recovery-evidence contracts. There are 41 subjects Pending Hardware Verification; G09's future multi-node execution is also unobserved.
 
 Issue #44 adds [P08](/en/frameworks/first-custom-operator/) with `[O04,F04,Q01,P04]`, [P09](/en/frameworks/operator-registration/) with `[P08,Q01]`, and [P10](/en/frameworks/operator-packaging/) with `[P08,M18]`. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) require `[P08,P09]`; the original adjacent-energy operator has CPU/CUDA paths and an independently pinned extension Toolkit. Both retain empty compilation/recorded observations and Pending Hardware Verification runtime.
 
@@ -82,4 +82,4 @@ L13 uses the archived 12.9.2 cuSPARSE teaching baseline with exact 11.8.0 and 13
 
 ## Feedback
 
-For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). The current publication summary was checked on **2026-09-19**; this does not change the historical R4 aggregate review or individual technical source dates.
+For factual, bilingual-alignment, link, accessibility, or source problems, open a reproducible report in [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues). The current publication summary was checked on **2026-09-22**; this does not change historical R1-R5 aggregate reviews or individual technical source dates.

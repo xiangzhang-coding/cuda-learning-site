@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -98,9 +98,9 @@ Every public page also belongs to a **Publication Pair**. Its Chinese and Englis
 
 As of **2026-09-12**, the current Stable Curriculum publication covers 82 Learning Units in both languages: O01-O08, F01-F08, M01-M19, A01-A14, Q01-Q13, L01-L13, and P01-P07. The reusable-library path retains [L12: cuFFT Plans, Layouts, and Startup](/en/libraries/cufft-plans-layouts-startup/), [L13: cuSPARSE Descriptors, SpMV, and SpMM](/en/libraries/cusparse-descriptors-spmv-spmm/), and their examples. The Python bridge starts at [P01](/en/python/cuda-python-bridge/) after the existing CUDA lifecycle and stream prerequisites. P04-P07 apply those concepts to eager PyTorch. The complete strict prerequisite graph currently published follows.
 
-R5 is the latest completed aggregate static review, dated 2026-09-19. Frozen `/release.json` records 95 Learning Units, 345 Publication Pairs, 690 source routes, 94 Exercise sets, 94 separate solution sets and 453 catalog records. Current `/publication.json` includes G01–G09: 104 units, 376 pairs, 752 routes, 103 Exercise sets, 103 solution sets and 478 catalog records. R1-R5 remain historical snapshots. R6 is next/pending; publication does not upgrade runtime evidence.
+The latest completed aggregate static review is **R6, dated 2026-09-22**. Frozen `/release.json` and current `/publication.json` include G01-G09 and all prior paths: 104 units, 376 Publication Pairs, 752 routes, 103 Exercise sets, 103 separate solution sets and 478 catalog records. The 115 original questions include 13 multi-GPU and NCCL entries. R1-R5 remain historical snapshots and R7 is next/pending; publication does not upgrade runtime evidence.
 
-**R5 static review and dynamic acceptance are separate records.** [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) owns same-commit CI, Preview, production and smoke results; the [aggregate source review](/en/sources-and-versions/#r5-aggregate-review) records independent environments and fallback boundaries. P01-P12 and T01-T08 are complete, without multi-GPU support. [Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) and R4's 2026-09-10 review retain their historical dates, as do individual technical sources.
+**R6 static review and dynamic acceptance are separate records.** [Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) owns same-commit CI, Preview, production and smoke results; the [aggregate source review](/en/sources-and-versions/#r6-aggregate-review) records GPU count, topology, process, stream, profiler, transport, launcher and fallback boundaries. Forty-one Example/Lab subjects remain Pending Hardware Verification; DDP, graph and multi-node scenarios have no observations. Historical releases and technical sources retain their individual dates.
 
 1. [Home](/en/)
 2. **O01: Using the Learning Site** (this page)
@@ -191,4 +191,4 @@ You are ready to move on when you can answer these five questions:
 4. How does the theme control fall back when scripts or persistence are unavailable?
 5. Why does publishing a page not grant CUDA evidence?
 
-**Current publication summary checked: 2026-09-19.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. The R4 aggregate review and individual source dates remain historical. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources.
+**Current publication summary checked: 2026-09-22.** This page is not tied to a CUDA Toolkit version and does not grant CUDA evidence. R1-R5 aggregate reviews and individual source dates remain historical. See the [Glossary](/en/glossary/) for vocabulary and [Sources and Version Record](/en/sources-and-versions/) for publishing and CUDA sources.

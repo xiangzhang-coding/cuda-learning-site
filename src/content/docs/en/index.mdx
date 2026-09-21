@@ -4,7 +4,7 @@ description: A public, bilingual CUDA self-study route organized by prerequisite
 template: splash
 pairId: home
 counterpart: /
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -50,7 +50,7 @@ As of **2026-09-21**, the current publication includes G01–G09: 104 Learning U
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
 
-**R5 is the latest completed aggregate static review, dated 2026-09-19.** Schema 6 `src/r5-release-manifest.json` supplies `/release.json`: 95 Learning Units, 345 Publication Pairs, 690 source routes and 453 catalog records. `/publication.json` records R5 as latest completed and R6 as next/pending. The complete P01-P12 and T01-T08 path includes 102 original Practice Bank entries, 17 specifically covering PyTorch and Triton. [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) records source-bound CI, Preview, production and smoke acceptance separately from this [static source review](/en/sources-and-versions/#r5-aggregate-review). R1-R4 and [issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) remain historical. Independent Python environments inherit no CUDA evidence; 38 subjects remain Pending Hardware Verification. R6 and multi-GPU support are outside this release.
+**R6 is the latest completed aggregate static review, dated 2026-09-22.** Schema 7 `src/r6-release-manifest.json` supplies `/release.json`: 104 Learning Units, 376 Publication Pairs, 752 source routes and 478 catalog records. `/publication.json` records R6 completed and R7 next/pending. G01-G09 and all prior paths form a prerequisite closure; 115 original questions include 13 multi-GPU and NCCL entries. [Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) separately records same-commit CI, Preview, production and smoke acceptance, distinct from the [static source review](/en/sources-and-versions/#r6-aggregate-review). R1-R5 remain historical snapshots. Forty-one Example/Lab subjects remain Pending Hardware Verification; topology, DDP, graph and multi-node scenarios have no runtime observations. R7 and deferred material have no placeholder destinations.
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) publishes [P01: The CUDA Python Bridge](/en/python/cuda-python-bridge/) with ordered direct prerequisites `[F04,M07]`; [P02: Devices, Contexts, and Launches](/en/python/devices-contexts-launches/) requires `[P01,F07]`; [P03: Runtime Compilation and Linking](/en/python/runtime-compilation-linking/) requires `[P02,M15,M16]`. Each has Exercises and separate solutions, all using [EX21: CUDA Python Explicit Launch](/en/examples/cuda-python-launch/), whose sole direct prerequisite is `[P02]`. EX21 independently pins its Python, package, and native Toolkit profile, inherits no C++ Toolkit Lane compilation evidence, and remains Pending Hardware Verification. This increment publishes no framework or Triton placeholder destinations.
 

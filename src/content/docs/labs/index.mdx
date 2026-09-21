@@ -3,7 +3,7 @@ title: 实验索引
 description: 按先修、硬件、版本和证据状态（Evidence Status）直接查找当前完整发布的实验。
 pairId: labs-index
 counterpart: /en/labs/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-19' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -28,7 +28,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 本索引只列出完整双语发布对（Publication Pair）、有可执行步骤和验收条件的实验（Lab）。截至 2026-09-20，当前发布共十八个实验 LAB01-LAB18，冻结 R5 保留十六个。[LAB18](/labs/pipeline-nccl-computation/) 依赖 G05/Q05/Q07，分析依赖安全的 NCCL 流水线。[LAB17](/labs/nccl-all-reduce/) 依赖 G04/G05，使用独立固定 NCCL 2.31.2 的 EX24。LAB16 依赖 T04/T05；[LAB15：验证并测量融合 Softmax](/labs/verify-fused-softmax/)依赖 T02/A10/Q05。[LAB14](/labs/profile-custom-operator/)保留 P11；[LAB13](/labs/build-custom-operator/)保留 P08/P09。页面完整不等于运行已验证（Runtime-Verified）。
 
-**发布清单与导航更新：2026-09-19。** 既有实验的技术来源与证据记录保留各自日期。
+**R6 发布清单与导航更新：2026-09-22。** 冻结 R6 包含十八个实验；下述 R5 数量为历史记录。既有实验的技术来源与证据记录保留各自日期。全部十八个实验仍待硬件验证；[聚合复核](/sources-and-versions/#r6-aggregate-review)记录多 GPU、分析器与传输边界。
 
 ## 已发布实验
 
