@@ -77,6 +77,15 @@ export async function settlePublicationPage(page: Page) {
   await page.waitForLoadState('networkidle');
 }
 
+export async function openResourceIndexPage(page: Page, route: string) {
+  await page.goto(route, { waitUntil: 'networkidle' });
+  // WebKit can report network idle while a large streamed document is still
+  // parsing. Its deferred component module has not run yet; start the existing
+  // bounded hydration assertion only after the document's parsing boundary.
+  await page.waitForLoadState('domcontentloaded');
+  return page.locator('cuda-resource-index');
+}
+
 export async function expectSearchReadyForNavigation(
   page: Page,
   { label, query, href }: { label: string; query: string; href: string },
