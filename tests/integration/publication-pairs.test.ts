@@ -47,6 +47,9 @@ type PublicationPair = {
 };
 
 const publicationPairFixtures: readonly PublicationPair[] = [
+  { pairId: 'g09', unitId: 'G09', resourceKind: 'learning-unit', prerequisites: 'G03,G04,Q07', factCheckDate: '2026-09-21', hardwareGate: 'none', zh: '/multi-gpu/multi-node-transport-failures/', en: '/en/multi-gpu/multi-node-transport-failures/' },
+  { pairId: 'g09-exercises', unitId: 'G09-EXERCISES', resourceKind: 'exercise-set', prerequisites: 'G09', factCheckDate: '2026-09-21', hardwareGate: 'none', zh: '/multi-gpu/multi-node-transport-failures/exercises/', en: '/en/multi-gpu/multi-node-transport-failures/exercises/' },
+  { pairId: 'g09-solutions', unitId: 'G09-SOLUTIONS', resourceKind: 'solution-set', prerequisites: 'G09-EXERCISES', factCheckDate: '2026-09-21', hardwareGate: 'none', zh: '/multi-gpu/multi-node-transport-failures/solutions/', en: '/en/multi-gpu/multi-node-transport-failures/solutions/' },
   { pairId: 'g08', unitId: 'G08', resourceKind: 'learning-unit', prerequisites: 'G05,M14', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/nccl-graph-capture/', en: '/en/multi-gpu/nccl-graph-capture/' },
   { pairId: 'g08-exercises', unitId: 'G08-EXERCISES', resourceKind: 'exercise-set', prerequisites: 'G08', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/nccl-graph-capture/exercises/', en: '/en/multi-gpu/nccl-graph-capture/exercises/' },
   { pairId: 'g08-solutions', unitId: 'G08-SOLUTIONS', resourceKind: 'solution-set', prerequisites: 'G08-EXERCISES', factCheckDate: '2026-09-20', hardwareGate: 'none', zh: '/multi-gpu/nccl-graph-capture/solutions/', en: '/en/multi-gpu/nccl-graph-capture/solutions/' },
@@ -4320,8 +4323,8 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(373);
-    expect(sourceRoutes.size).toBe(746);
+    expect(publicationPairs).toHaveLength(376);
+    expect(sourceRoutes.size).toBe(752);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {

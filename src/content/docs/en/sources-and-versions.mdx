@@ -919,7 +919,7 @@ The diagnostic interpreter additionally pins **NumPy 2.5.3** in `scripts/triton-
 
 ## Multi-GPU source review
 
-Current `/publication.json` extends frozen R5 with G01–G08, EX24/LAB17/LAB18/VIS16: 373 Publication Pairs, 746 source routes and 475 catalog records. The R5 inventory and 95-unit rights census above describe that completed snapshot. Current instruction has 103 Learning Units and 113 Practice Bank entries; the same original-content licenses apply. This increment is not the R6 release review.
+Current `/publication.json` extends frozen R5 with G01–G09, EX24/LAB17/LAB18/VIS16: 376 Publication Pairs, 752 source routes and 478 catalog records. The R5 inventory and 95-unit rights census above describe that completed snapshot. Current instruction has 104 Learning Units and 115 Practice Bank entries; the same original-content licenses apply. This increment is not the R6 release review.
 
 <span id="src-cuda-094" class="resource-target"></span>
 
@@ -1004,6 +1004,28 @@ The **#55 current increment** has 102 Learning Units, 370 Publication Pairs, 740
 Historical #53 increment: G04/G05, EX24/LAB17/VIS16 and SRC-CUDA-097/098 brought the inventory to 100 Learning Units, 363 Publication Pairs, 726 source routes, 99 Exercise sets and 99 solution sets, 465 catalog records: 17 Labs, 107 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 113 source records. Its forty pending subjects are superseded by the #54 inventory above; R5 remains frozen and R6 review remains pending.
 
 The 2026-09-19 G01–G03 increment adds SRC-CUDA-094/095/096, bringing the source catalog to 111 records. R5's completed release snapshot remains historical; R6 is pending. No new CUDA evidence is claimed.
+
+<span id="src-cuda-102" class="resource-target"></span>
+
+### SRC-CUDA-102 — NCCL multi-node transport, logging and failures
+
+Related IDs: [G09](/en/multi-gpu/multi-node-transport-failures/), PB-R6-012/013. Reviewed/accessed **2026-09-21**. Current Context7 `/nvidia/nccl` discovery covered IP/HCA filtering, NET/INIT/BOOTSTRAP logging, retries and hangs; master snippets were checked against **2.31.2**, commit `7b83616df3ae082a1f32bb74c27458bfe8153a13`. The future native Ubuntu 24.04/C++17/Toolkit 13.3.1/NCCL 2.31.2-1+cuda13.3 profile reuses SRC-CUDA-097's exact package coordinates. The multi-node launcher, hardware and fabric remain unselected: no runnable deployment or operated cluster is claimed.
+
+| Inspected owner file | Contract and whole-file SHA-256 |
+| --- | --- |
+| [env.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/env.rst) | Exact/prefix filters, named networks, DEBUG_FILE overwrite, timeout scopes; `e0ae57e7c592ea41546a5cb04b2ed1ee3be08b8d9e0f26f07727e72c41581980` |
+| [networking_troubleshooting.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/troubleshooting/networking_troubleshooting.rst) | UP but unreachable, TCP ports, verbs/memory limits, dynamic RoCE GID; `a2e3abf1f127b37b604466d854eac88d1657eb60b26335b02cb8f50669683905` |
+| [communicators.rst](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/communicators.rst) | CPU ID distribution, local InitAll, async errors, nonblocking safe abort; `9b513c465c2358929c1f3ccb3810210db8cdeb2db226d2be00702a79b24d5bb6` |
+| [socket.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/misc/socket.cc) | Retry defaults 34/100 and interface selection; `f59dd2fb905423492421a456d411b0e33f1695145f4633c1a8db213d1fd3e302` |
+| [net_ib/connect.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/transport/net_ib/connect.cc) | Verbs timeout/retry defaults 20/7 and QP attributes; `570071d7b7a260fb49a03b5dc543745316ef34a4a2d4354d7ae56316d5416c1a` |
+| [net_ib/init.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/transport/net_ib/init.cc) | HCA filters and link-type compatibility; `6e77b26e7563d3db5b0c6b7ea20fdd81479fe605762d54ca2d296947e4b6fd96` |
+| [debug.cc](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/src/debug.cc) | `%h`/`%p` filename expansion; `3a69f66e5852578dd6230cb8dd8491c58349d8c59fdf290ee347d3270fa5915b` |
+| [nccl-tests README.md](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/README.md) | MPI-enabled multi-process build, process/thread/GPU rank count; `7e1aef831b6bcd0befec250e82333d58dd71078730bafda03c7a99532f452895` |
+| [nccl-tests common.cu](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/src/common.cu) | MPI_Bcast, local-rank device placement, CheckData; `74cecb9591aeeadbabef6967af2ccb1ec4507f163cc7119c5e9299c470232626` |
+
+**Rights:** NCCL [LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt), SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`, contains Apache-2.0 plus retained BSD/per-file terms. No intervening license on inspected paths; NVIDIA source notices and documentation terms apply. nccl-tests has separate [BSD three-clause LICENSE.txt](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/LICENSE.txt), SHA-256 `88e8c1b85269ae234e8c56e1688fd3a1a10ea1d508b9228c38467b6877e10409`. Owner tests were read, not executed; source/logs/binaries are not copied or adapted. Original prose/fixtures are CC BY 4.0; site tests Apache-2.0. F1/F2 contain aliases only and are not execution evidence. Multi-node transport, failure/recovery, topology and performance remain Pending Hardware Verification.
+
+**#57 current increment:** 104 Learning Units, 376 Publication Pairs, 752 source routes, 103 Exercise sets and 103 solution sets; 478 catalog records: 18 Labs, 115 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 117 source records. Existing 41 pending Example/Lab subjects remain unchanged. R5 is frozen; R6 review pending. Other increment counts are historical.
 
 <span id="src-cuda-101" class="resource-target"></span>
 

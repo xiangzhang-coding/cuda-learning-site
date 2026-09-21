@@ -1,5 +1,34 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## G09 multi-node source rights
+
+Reviewed 2026-09-21 for issue #57. G09, its Exercises/separate solutions,
+PB-R6-012/013 and both synthetic identity-redacted fixtures are original CC BY 4.0.
+Site checks are original Apache-2.0. Current inventory: 104 Learning Units,
+24 Runnable Examples, 376 Publication Pairs, 752 source routes, 103 Exercise sets,
+103 solution sets and 478 catalog records (18 Labs, 115 Practice Bank entries,
+21 Visual Explainers, 207 Glossary terms, 117 sources). Earlier inventories are
+historical. All 41 existing pending subjects remain pending; G09 grants no evidence.
+
+SRC-CUDA-102 in both locales records inspected owner files and full hashes.
+NCCL 2.31.2 commit `7b83616df3ae082a1f32bb74c27458bfe8153a13` supplies
+`docs/userguide/source/env.rst`, `troubleshooting/networking_troubleshooting.rst`,
+`usage/communicators.rst`, `src/misc/socket.cc`, `src/transport/net_ib/connect.cc`,
+`src/transport/net_ib/init.cc` and `src/debug.cc` (documentation paths relative to
+the stated source directory). The root
+[LICENSE.txt](https://github.com/NVIDIA/nccl/blob/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt)
+SHA-256 `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be`
+contains Apache-2.0 and retained BSD/per-file terms. No intervening license
+exists on the inspected paths; source notices and owner documentation terms apply.
+
+nccl-tests commit `b4d5beebca8a76cf01335f724d154b9b9d394d96` README.md and
+src/common.cu were inspected for MPI build, rank placement, ID broadcast and
+validation behavior, not built or executed. Its separate
+[BSD three-clause LICENSE.txt](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/LICENSE.txt)
+has SHA-256 `88e8c1b85269ae234e8c56e1688fd3a1a10ea1d508b9228c38467b6877e10409`.
+NVIDIA copyrights remain with their owners. These are reference-only paraphrases;
+no owner source, test, log, figure or binary is copied, adapted or bundled.
+
 ## G08 capture and registration source rights
 
 Reviewed 2026-09-20 for issue #56. G08, two Exercises, separate solutions and

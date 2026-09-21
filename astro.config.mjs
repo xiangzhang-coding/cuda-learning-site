@@ -216,6 +216,7 @@ export default defineConfig({
             { slug: 'multi-gpu/nccl-stream-dependencies' },
             { slug: 'multi-gpu/communication-computation-overlap' },
             { slug: 'multi-gpu/pytorch-ddp-nccl' },
+            { slug: 'multi-gpu/multi-node-transport-failures' },
           ],
         },
         {

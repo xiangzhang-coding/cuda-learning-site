@@ -4653,6 +4653,50 @@ NVRTC create 返回 `(status, program)`，compile/destroy 返回 `(status,)`，�
 
 **参考解答：** API 成功既不证明网络零拷贝，也不证明速度；PXN 会阻止该网络注册路径。记录插件／驱动／互连精确版本及权限，只有独立获准的配置才能在正确性和完成计时后比较，分配失败则停止。NCCL 2.31.2 可在不支持 NVLS 的硬件上选其他算法，但默认值 2 不会静默接受 NVLS 资源分配失败。见 [G08 解答](/multi-gpu/nccl-graph-capture/solutions/)。**来源依据：** 原创证据审查与 [SRC-CUDA-101](/sources-and-versions/#src-cuda-101)。**来源日期：** 2026-09-20。注册效果与性能仍待硬件验证（Pending Hardware Verification）。
 
+<span id="pb-r6-012" class="resource-target"></span>
+
+## PB-R6-012：引导成功不证明数据路径
+
+**ID：** PB-R6-012 · 原创双语发布对（Publication Pair）。
+- **直接先修：** [G09](/multi-gpu/multi-node-transport-failures/)，精确为 `[G09]`。
+- **相关学习单元与资源：** [G09](/multi-gpu/multi-node-transport-failures/)。
+- **硬件门槛：** 无；静态证据审查。
+- **最近复核：** 2026-09-21。
+
+**难度：** 高级。**版本：** NCCL 2.31.2；原生 Linux。
+
+**题目：** 虚构双节点报告列出 TCP 引导消息和 HCA 清单，就声称 GPUDirect RDMA 生效且 all-reduce 更快。报告没有所选网络日志、GPU 内存路径证据、正确性结果或完成计时。分别判断这些主张。
+
+**约束：** 仅合成前提，不编造测量。**预期证据：** 主张／证据／缺失观察表。**验收条件：** 区分引导、verbs 可用、所选传输、GPU 直接路径、正确性与性能；外部运行前索取逐 rank 记录并落实 G09 环境准入。
+
+<details><summary>提示 1</summary><p>CPU 控制连接与 GPU 数据路径不一定使用同一传输。</p></details>
+<details><summary>提示 2</summary><p>HCA 名称既不提供活动端口，也不证明 GPU 内存注册。</p></details>
+
+**参考解答：** 只有虚构的引导前提与清单。索取实际逐 rank NET／INIT 日志、provider／端口／网络／GPU 内存证据、全元素检查、清理及有明确负载和边界的多次完成计时。RDMA、零拷贝与速度主张均未成立。见 [G09 解答](/multi-gpu/multi-node-transport-failures/solutions/)。**来源依据：** 原创证据审查与 [SRC-CUDA-102](/sources-and-versions/#src-cuda-102)。**来源日期：** 2026-09-21。执行仍待硬件验证（Pending Hardware Verification）。
+
+<span id="pb-r6-013" class="resource-target"></span>
+
+## PB-R6-013：启动器退出不证明远端终止
+
+**ID：** PB-R6-013 · 原创双语发布对（Publication Pair）。
+- **直接先修：** [G09](/multi-gpu/multi-node-transport-failures/)，精确为 `[G09]`。
+- **相关学习单元与资源：** [G09](/multi-gpu/multi-node-transport-failures/)。
+- **硬件门槛：** 无；静态恢复审查。
+- **最近复核：** 2026-09-21。
+
+**难度：** 高级。**版本：** NCCL 2.31.2；原生 Linux。
+
+**题目：** 假设达到期限后，运维人员杀死本地启动器，覆盖旧日志目录，立即用旧输出缓冲区作为 checkpoint 启动新作业。没有远端终止回执。设计可接受的重启账本。
+
+**约束：** 不执行、不注入故障；恢复未观察。**预期证据：** 失败保存、终止及新尝试验收阶段。**验收条件：** 否决三个捷径，在脱敏中保留 rank／阶段身份，要求每节点终止及已知输入／checkpoint 身份，再要求每 rank 正确性与清理。
+
+<details><summary>提示 1</summary><p>谁确认上次远端进程及其 GPU 工作已经停止？</p></details>
+<details><summary>提示 2</summary><p>使用独立尝试目录；未经验证的接收缓冲区不是 checkpoint。</p></details>
+
+**参考解答：** 保留原始私有材料，仅发布经过复核的别名。使用固定监督器的全节点终止契约，包含有界宽限和回执；未确认的进程阻止重启准入。创建新通信器／ID 和已验证输入／checkpoint，记录修复，所有 rank 检查及清理成功后才声称恢复。见 [G09 解答](/multi-gpu/multi-node-transport-failures/solutions/)。**来源依据：** 原创恢复审查与 [SRC-CUDA-102](/sources-and-versions/#src-cuda-102)。**来源日期：** 2026-09-21。恢复仍待硬件验证（Pending Hardware Verification）。
+
+Issue #57 增加精确先修 G09 的 PB-R6-012/013，共 115 个完整原创条目。原有 41 个示例／实验主体仍待验证；G09 不授予运行证据。以下计数为历史记录。
+
 Issue #56 增加精确先修 G08 的 PB-R6-010/011，共 113 个完整原创条目。原有 41 个示例／实验主体及 G08 外部场景保持待硬件验证。以下计数为历史记录。
 
 Issue #55 增加精确先修 G07 的 PB-R6-008/009，共 111 个完整原创条目。原有 41 个示例／实验主体及 G07 外部场景保持待硬件验证。以下计数为历史记录。
