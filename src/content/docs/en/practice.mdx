@@ -4653,6 +4653,50 @@ Retry latency needs a separately declared end-to-end host interval that covers t
 
 **Reviewed solution:** API success proves neither network zero-copy nor speed; PXN prevents that network registration path. Record exact plugin/driver/fabric and permissions, compare independently admitted configurations with correctness and completed timing, and stop on allocation failure. NCCL 2.31.2 may select other algorithms for unsupported NVLS hardware but does not silently accept failed NVLS resource allocation under default 2. See [G08 solutions](/en/multi-gpu/nccl-graph-capture/solutions/). **Source basis:** original evidence audit and [SRC-CUDA-101](/en/sources-and-versions/#src-cuda-101). **Source date:** 2026-09-20. Registration effects and performance remain Pending Hardware Verification.
 
+<span id="pb-r6-012" class="resource-target"></span>
+
+## PB-R6-012: Bootstrap success does not prove the data path
+
+**ID:** PB-R6-012 · original Publication Pair.
+- **Direct prerequisite:** [G09](/en/multi-gpu/multi-node-transport-failures/), exactly `[G09]`.
+- **Related Learning Units and resources:** [G09](/en/multi-gpu/multi-node-transport-failures/).
+- **Hardware gate:** none; static evidence review.
+- **Last reviewed:** 2026-09-21.
+
+**Difficulty:** advanced. **Version:** NCCL 2.31.2; native Linux.
+
+**Prompt:** A fictional two-node report lists a TCP bootstrap message and an HCA inventory, then claims GPUDirect RDMA and a faster all-reduce. It has no selected-network log, GPU-memory-path evidence, correctness result or completed timing. Assess each claim separately.
+
+**Constraints:** synthetic premises only; do not invent measurements. **Expected evidence:** a claim/evidence/missing-observation table. **Acceptance criteria:** distinguish bootstrap, verbs availability, selected transport, GPU-direct path, correctness and performance; request every-rank records and G09's admitted environment before an external run.
+
+<details><summary>Hint 1</summary><p>A CPU control connection and a GPU data path need not use the same transport.</p></details>
+<details><summary>Hint 2</summary><p>A named HCA supplies neither an active port nor evidence of GPU-memory registration.</p></details>
+
+**Reviewed solution:** Only the fictional bootstrap premise and inventory are supplied. Request actual per-rank NET/INIT logs, provider/port/fabric/GPU-memory evidence, all-element checks, cleanup and repeated completed timing with a stated workload and boundary. No RDMA, zero-copy or speed claim is established. See [G09 solutions](/en/multi-gpu/multi-node-transport-failures/solutions/). **Source basis:** original evidence review and [SRC-CUDA-102](/en/sources-and-versions/#src-cuda-102). **Source date:** 2026-09-21. Execution remains Pending Hardware Verification.
+
+<span id="pb-r6-013" class="resource-target"></span>
+
+## PB-R6-013: Launcher exit does not prove remote termination
+
+**ID:** PB-R6-013 · original Publication Pair.
+- **Direct prerequisite:** [G09](/en/multi-gpu/multi-node-transport-failures/), exactly `[G09]`.
+- **Related Learning Units and resources:** [G09](/en/multi-gpu/multi-node-transport-failures/).
+- **Hardware gate:** none; static recovery review.
+- **Last reviewed:** 2026-09-21.
+
+**Difficulty:** advanced. **Version:** NCCL 2.31.2; native Linux.
+
+**Prompt:** After a hypothetical deadline, an operator kills the local launcher, overwrites the old log directory and immediately starts a new job using the old output buffer as a checkpoint. There are no remote termination receipts. Design an acceptable restart ledger.
+
+**Constraints:** no execution or fault injection; recovery is unobserved. **Expected evidence:** failure-preservation, termination and fresh-attempt acceptance stages. **Acceptance criteria:** reject all three shortcuts, preserve rank/phase identities under redaction, require every-node termination and known input/checkpoint identity, then every-rank correctness and cleanup.
+
+<details><summary>Hint 1</summary><p>Who confirms that the previous remote process and its GPU work have stopped?</p></details>
+<details><summary>Hint 2</summary><p>Use separate attempt directories; an unvalidated receive buffer is not a checkpoint.</p></details>
+
+**Reviewed solution:** Retain the original private bundle and publish only reviewed aliases. Use the pinned supervisor's all-node termination contract with a bounded grace period and receipts; unresolved processes block restart admission. Create a fresh communicator/ID and validated input/checkpoint, record remediation, and require every-rank checks and successful cleanup before claiming recovery. See [G09 solutions](/en/multi-gpu/multi-node-transport-failures/solutions/). **Source basis:** original recovery review and [SRC-CUDA-102](/en/sources-and-versions/#src-cuda-102). **Source date:** 2026-09-21. Recovery remains Pending Hardware Verification.
+
+Issue #57 adds PB-R6-012/013 with exact prerequisite G09: 115 complete original entries. Existing 41 Example/Lab subjects remain pending; G09 grants no runtime evidence. Earlier counts below are historical.
+
 Issue #56 adds PB-R6-010/011 with exact prerequisite G08: 113 complete original entries. Existing 41 Example/Lab subjects and G08's external scenarios remain Pending Hardware Verification. Earlier counts below are historical.
 
 Issue #55 adds PB-R6-008/009 with exact prerequisite G07: 111 complete original entries. Existing 41 Example/Lab subjects and G07's external scenarios remain Pending Hardware Verification. Earlier counts below are historical.

@@ -165,16 +165,16 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication).toMatchObject({
       publicationId: 'current',
       schemaVersion: 1,
-      reviewDate: '2026-09-20',
+      reviewDate: '2026-09-21',
       releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
       scope: {
-        publicationPairs: 373,
-        sourceRoutes: 746,
-        exerciseSetPublicationPairs: 102,
-        solutionSetPublicationPairs: 102,
-        practiceBankEntries: 113,
+        publicationPairs: 376,
+        sourceRoutes: 752,
+        exerciseSetPublicationPairs: 103,
+        solutionSetPublicationPairs: 103,
+        practiceBankEntries: 115,
         glossaryTerms: 207,
-        sourceRecords: 116,
+        sourceRecords: 117,
       },
       compatibility: {
         componentBoundaries: {
@@ -249,7 +249,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L12');
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('L13');
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L13');
-    expect(publication.scope.learningUnits).toHaveLength(103);
+    expect(publication.scope.learningUnits).toHaveLength(104);
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']));
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13']));
     expect(publication.scope.runnableExamples).toHaveLength(24);
@@ -259,7 +259,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.scope.visualExplainers).toHaveLength(21);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
     expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
-      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(475);
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(478);
     expect(publication.evidence.pendingHardwareVerification).toHaveLength(41);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',

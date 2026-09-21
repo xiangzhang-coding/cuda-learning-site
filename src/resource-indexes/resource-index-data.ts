@@ -519,6 +519,18 @@ const multiGpuPractice: readonly ResourceIndexRecord[] = [
     resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['G08'], relatedUnits: ['G08'],
     hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; CUDA 13.3.1'), reviewedOn: '2026-09-20',
   },
+  {
+    planningId: 'PB-R6-012', group: 'practice', title: localized('引导成功不证明数据路径', 'Bootstrap success does not prove the data path'),
+    href: localized('/practice/#pb-r6-012', '/en/practice/#pb-r6-012'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['G09'], relatedUnits: ['G09'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; native Linux'), reviewedOn: '2026-09-21',
+  },
+  {
+    planningId: 'PB-R6-013', group: 'practice', title: localized('启动器退出不证明远端终止', 'Launcher exit does not prove remote termination'),
+    href: localized('/practice/#pb-r6-013', '/en/practice/#pb-r6-013'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['G09'], relatedUnits: ['G09'],
+    hardwareGate: noHardware, versionGate: same('NCCL 2.31.2; native Linux'), reviewedOn: '2026-09-21',
+  },
 ];
 
 const practice: readonly ResourceIndexRecord[] = [
@@ -2488,6 +2500,7 @@ const multiGpuSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-098', localized('NCCL 分组、流和错误进度', 'NCCL grouping, streams and error progress'), 'cuda-version-record', ['G05', 'EX24', 'LAB17'], same('NCCL 2.31.2; CUDA 13.3.1'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-099', localized('通信计算流水线与时间线证据', 'Communication/compute pipelines and timeline evidence'), 'cuda-version-record', ['G06', 'LAB18'], same('NCCL 2.31.2; CUDA 13.3.1; Nsight Systems 2026.5'), '2026-09-20', '2026-09-20'),
   sourceRecord('SRC-CUDA-100', localized('DDP、ProcessGroupNCCL 与有界诊断', 'DDP, ProcessGroupNCCL and bounded diagnosis'), 'cuda-version-record', ['G07'], same('PyTorch 2.11.0+cu128; packaged CUDA runtime 12.8.90; NCCL 2.28.9'), '2026-09-20', '2026-09-20'),
+  sourceRecord('SRC-CUDA-102', localized('NCCL 多节点传输、日志与故障', 'NCCL multi-node transport, logging and failures'), 'cuda-version-record', ['G09'], same('NCCL 2.31.2; nccl-tests b4d5beeb'), '2026-09-21', '2026-09-21'),
   sourceRecord('SRC-CUDA-101', localized('NCCL 捕获、注册与图混用', 'NCCL capture, registration and graph mixing'), 'cuda-version-record', ['G08'], same('NCCL 2.31.2; CUDA 13.3.1; nccl-tests b4d5beeb'), '2026-09-20', '2026-09-20'),
 ];
 

@@ -456,6 +456,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-004', 'PB-R6-005', 'PB-R6-006', 'PB-R6-007',
       'PB-R6-008', 'PB-R6-009',
       'PB-R6-010', 'PB-R6-011',
+      'PB-R6-012', 'PB-R6-013',
     ];
     const entrySections = [...source.matchAll(
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
@@ -561,6 +562,8 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-009': 'multi-gpu/pytorch-ddp-nccl',
       'PB-R6-010': 'multi-gpu/nccl-graph-capture',
       'PB-R6-011': 'multi-gpu/nccl-graph-capture',
+      'PB-R6-012': 'multi-gpu/multi-node-transport-failures',
+      'PB-R6-013': 'multi-gpu/multi-node-transport-failures',
     };
     const focusedRelatedPaths: Readonly<Record<string, readonly string[]>> = {
       'PB-R2-019': [
@@ -853,9 +856,11 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-009': ['multi-gpu/pytorch-ddp-nccl'],
       'PB-R6-010': ['multi-gpu/nccl-graph-capture'],
       'PB-R6-011': ['multi-gpu/nccl-graph-capture'],
+      'PB-R6-012': ['multi-gpu/multi-node-transport-failures'],
+      'PB-R6-013': ['multi-gpu/multi-node-transport-failures'],
     };
 
-    expect(entrySections).toHaveLength(113);
+    expect(entrySections).toHaveLength(115);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];

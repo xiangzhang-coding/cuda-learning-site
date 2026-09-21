@@ -73,6 +73,18 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  G09: {
+    href: { 'zh-CN': '/multi-gpu/multi-node-transport-failures/', en: '/en/multi-gpu/multi-node-transport-failures/' },
+    title: { 'zh-CN': 'G09：追踪多节点传输与故障证据', en: 'G09: Trace Multi-Node Transport and Failure Evidence' }, prerequisites: ['G03', 'G04', 'Q07'],
+  },
+  'G09-EXERCISES': {
+    href: { 'zh-CN': '/multi-gpu/multi-node-transport-failures/exercises/', en: '/en/multi-gpu/multi-node-transport-failures/exercises/' },
+    title: { 'zh-CN': 'G09 练习：选择传输，限定诊断结论', en: 'G09 Exercises: Select a Transport and Bound a Diagnosis' }, prerequisites: ['G09'],
+  },
+  'G09-SOLUTIONS': {
+    href: { 'zh-CN': '/multi-gpu/multi-node-transport-failures/solutions/', en: '/en/multi-gpu/multi-node-transport-failures/solutions/' },
+    title: { 'zh-CN': 'G09 解答：保留未知项与重启证据', en: 'G09 Solutions: Preserve Unknowns and Restart Evidence' }, prerequisites: ['G09-EXERCISES'],
+  },
   G08: {
     href: { 'zh-CN': '/multi-gpu/nccl-graph-capture/', en: '/en/multi-gpu/nccl-graph-capture/' },
     title: { 'zh-CN': 'G08：捕获 NCCL 工作，保留完整契约', en: 'G08: Capture NCCL Work Without Losing Its Contracts' }, prerequisites: ['G05', 'M14'],
