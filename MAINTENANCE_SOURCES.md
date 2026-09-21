@@ -1,5 +1,34 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Post-merge resource-index readiness — 2026-09-21
+
+Main Web Quality run [35523256819](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/35523256819)
+failed the unchanged fail-on-flaky gate: WebKit and Mobile Safari's Chinese and
+English cuFFT Practice Bank journeys each timed out waiting for `data-ready`.
+Their retries passed, but that does not establish a stable first attempt.
+First-failure traces were not retained, so the exact hosted parser timing is
+not asserted. This follows the same observable readiness symptom from PR #142.
+
+A local fixture serves the real built Practice Bank in two chunks on a fresh
+loopback origin, pausing one second before the index markup. It injects no
+component, readiness flag, extra cards or replacement script. With the original
+navigation boundary, both locale tests fail because WebKit returns from
+`goto(..., { waitUntil: 'networkidle' })` while `document.readyState` is still
+`loading`. The ordinary component module has not initialized yet. Explicitly
+waiting for `domcontentloaded` before returning the index locator fixes this
+reproduced gap and leaves the existing 15-second hydration assertion and
+60-second cuFFT journey budget intact. Context7 `/microsoft/playwright` and
+the owner's [navigation parameters](https://github.com/microsoft/playwright/blob/main/docs/src/api/params.md)
+distinguish network inactivity from DOM readiness; the pinned 1.62.1 browser
+test supplies the executable check. This is a test-navigation correction,
+not a change to production component initialization or CUDA evidence.
+
+WebKit/Mobile Safari's streamed regressions and original cuFFT journeys passed
+three repetitions each (24 cases) without retries. The fixture additionally
+checks complete card count, real L12 filtering and strict browser failures.
+It exercises the same navigation helper as the actual failing call sites.
+No assertion, failure filter, retry policy or test timeout is relaxed.
+
 ## Issue 56 source refresh — 2026-09-20
 
 Context7 `/websites/nvidia_deeplearning_nccl_user-guide` queried CUDA Graph

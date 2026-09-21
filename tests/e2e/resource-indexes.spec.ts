@@ -5,7 +5,7 @@ import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-inde
 import currentPublication from '../../src/current-publication-manifest.json' with { type: 'json' };
 import { INDEX_GROUPS, INDEX_LOCALES, INDEX_ROUTES } from '../../src/resource-indexes/resource-index-model';
 import { THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
-import { collectBrowserFailures } from '../helpers/browser-contract';
+import { collectBrowserFailures, openResourceIndexPage } from '../helpers/browser-contract';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
 const expectedCount = (group: (typeof INDEX_GROUPS)[number]) =>
@@ -600,8 +600,7 @@ for (const locale of INDEX_LOCALES) {
   test(`cuFFT practice filters and independent solutions (${locale})`, async ({ page }) => {
     // Each locale loads the complete growing Practice Bank and opens two entries.
     test.setTimeout(60_000);
-    await page.goto(INDEX_ROUTES.practice[locale], { waitUntil: 'networkidle' });
-    const index = page.locator('cuda-resource-index');
+    const index = await openResourceIndexPage(page, INDEX_ROUTES.practice[locale]);
     await expect(index).toHaveAttribute('data-ready', 'true', { timeout: 15_000 });
     await index.locator('[data-resource-filter="relation"]').selectOption('L12');
     await expect(index.locator('[data-resource-card]:visible')).toHaveCount(2);
