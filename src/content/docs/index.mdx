@@ -4,7 +4,7 @@ description: 一条公开、双语、按先修关系组织的 CUDA 自学路线�
 template: splash
 pairId: home
 counterpart: /en/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -20,7 +20,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -50,7 +50,7 @@ head:
 
 [P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含完整练习与独立解答。[EX22](/examples/adjacent-energy/)、[LAB13](/labs/build-custom-operator/)都依赖 `[P08,P09]`，扩展 Toolkit 独立固定为 12.8.1，匹配 torch 2.11.0+cu128。编译与运行证据保持独立。
 
-**最近完成的聚合静态复核是 2026-09-19 的 R5。** 模式版本 6 的 `src/r5-release-manifest.json` 生成 `/release.json`：95 个学习单元、345 个双语发布对、690 条源路由与 453 条目录记录。`/publication.json` 记录最近完成阶段 R5，下一阶段 R6 待复核。完整的 P01-P12 与 T01-T08 路径包含 102 道原创题，其中 17 道专门覆盖 PyTorch 和 Triton。[Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) 单独记录绑定源码提交的 CI、Preview、生产与冒烟验收，区别于本次[静态来源复核](/sources-and-versions/#r5-aggregate-review)。R1-R4 与 [issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41) 保留历史记录。独立 Python 环境不继承 CUDA 证据；38 个对象仍待硬件验证。R6 与多 GPU 支持不属于本次发布。
+**最近完成的聚合静态复核是 2026-09-22 的 R6。** 模式版本 7 的 `src/r6-release-manifest.json` 生成 `/release.json`：104 个学习单元、376 个双语发布对、752 条源路由与 478 条目录记录。`/publication.json` 记录 R6 已完成、R7 待复核。G01-G09 与全部既有路径形成先修闭包；115 道原创题中有 13 道多 GPU 与 NCCL 题。[Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) 单独记录同一提交的 CI、Preview、生产与冒烟验收，区别于[静态来源复核](/sources-and-versions/#r6-aggregate-review)。R1-R5 保留历史快照。41 个示例／实验仍待硬件验证；拓扑、DDP、图与多节点场景没有运行观察。R7 与延后内容没有占位目的地。
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42) 发布 [P01：CUDA Python 桥接](/python/cuda-python-bridge/)，有序直接先修为 `[F04,M07]`；[P02：设备、上下文与启动](/python/devices-contexts-launches/)为 `[P01,F07]`；[P03：运行时编译与链接](/python/runtime-compilation-linking/)为 `[P02,M15,M16]`。三者各有练习与独立解答，共用 [EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)，EX21 的唯一直接先修为 `[P02]`。EX21 独立固定 Python、包与原生 Toolkit 配置，不继承 C++ 工具包通道的编译证据，仍待硬件验证（Pending Hardware Verification）。本次不发布框架或 Triton 的占位入口。
 

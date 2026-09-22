@@ -87,9 +87,9 @@ describe('R4 release review', () => {
     for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md']) {
       const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
       const { frontmatter } = parseFrontmatter(raw);
-      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-19');
+      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-22');
       expect(frontmatter.head.find((entry: { attrs: { name: string } }) => entry.attrs.name === 'cuda:fact-check-date')?.attrs.content)
-        .toBe('2026-09-19');
+        .toBe('2026-09-22');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
         /376 (?:Publication Pairs|pairs|个双语发布对|个发布对)/, /752 (?:source routes|routes|条源路由|条路由)/,
@@ -98,8 +98,8 @@ describe('R4 release review', () => {
         /115 (?:Practice Bank entries|个练习题库条目)/, /207 (?:Glossary terms|个术语表词条)/,
         /117 (?:source records|条来源(?:记录)?)/, /478 (?:catalog records|records|条资源目录记录|条目录记录|条记录)/, /41 (?:subjects|个主体)/,
       ]) expect(prose, `${prefix}${file}: ${count}`).toMatch(count);
-      expect(prose).toMatch(/R5[^\n]*2026-09-19|2026-09-19[^\n]*R5/);
-      expect(prose).toMatch(/R6[^\n]*(?:pending|待复核)/);
+      expect(prose).toMatch(/R6[^\n]*2026-09-22|2026-09-22[^\n]*R6/);
+      expect(prose).toMatch(/R7[^\n]*(?:pending|待复核)/);
       expect(prose).not.toMatch(/R4 and (?:the )?current catalog|R4 与当前[^。\n]*均|currently has the same inventory|当前具有相同清单/);
       for (const slug of ['python/cuda-python-bridge', 'python/devices-contexts-launches', 'python/runtime-compilation-linking', 'examples/cuda-python-launch',
         'frameworks/queued-work-timing', 'frameworks/streams-and-storage-lifetime', 'frameworks/mixed-precision-contracts', 'frameworks/python-to-cuda-profiling']) {
@@ -158,13 +158,13 @@ describe('R4 release review', () => {
     }
   });
 
-  it('retains reviewed R4 metadata while emitting R5 without building the site', async () => {
+  it('retains reviewed R4 metadata while emitting R6 without building the site', async () => {
     const current = await readJson('src/current-publication-manifest.json');
     expect(current).toMatchObject({
       schemaVersion: 1,
       publicationId: 'current',
-      reviewDate: '2026-09-21',
-      releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
+      reviewDate: '2026-09-22',
+      releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
     const reviewed = await readJson('src/r4-release-manifest.json');
@@ -193,7 +193,7 @@ describe('R4 release review', () => {
       // Run the real metadata emitter in isolation, never touching the coordinated site build.
       for (const file of [
         'scripts/prepare-release-output.mjs',
-        'src/r3-release-manifest.json', 'src/r4-release-manifest.json', 'src/r5-release-manifest.json', 'src/current-publication-manifest.json',
+        'src/r3-release-manifest.json', 'src/r4-release-manifest.json', 'src/r6-release-manifest.json', 'src/current-publication-manifest.json',
         'LICENSE', 'LICENSE-CONTENT', 'NOTICE', 'CONTENT_LICENSES.md', 'THIRD_PARTY_NOTICES.md',
         'node_modules/astro/LICENSE', 'node_modules/@astrojs/starlight/LICENSE',
         'node_modules/pagefind/LICENSE/LICENSE', 'node_modules/pagefind/LICENSE/LICENSE-vscode-ripgrep',
@@ -205,7 +205,7 @@ describe('R4 release review', () => {
         cwd: root,
         env: { ...process.env, WORKERS_CI_COMMIT_SHA: sourceCommit },
       });
-      expect(JSON.parse(await readFile(path.join(root, 'dist/release.json'), 'utf8'))).toEqual({ ...await readJson('src/r5-release-manifest.json'), sourceCommit });
+      expect(JSON.parse(await readFile(path.join(root, 'dist/release.json'), 'utf8'))).toEqual({ ...await readJson('src/r6-release-manifest.json'), sourceCommit });
       expect(JSON.parse(await readFile(path.join(root, 'dist/publication.json'), 'utf8'))).toEqual({ ...current, sourceCommit });
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -362,7 +362,7 @@ describe('R4 release review', () => {
       readJson('src/r4-release-manifest.json'), readJson('src/current-publication-manifest.json'),
       readJson('dist/release.json'), readJson('dist/publication.json'),
     ]);
-    expect(release).toEqual({ ...await readJson('src/r5-release-manifest.json'), sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/) });
+    expect(release).toEqual({ ...await readJson('src/r6-release-manifest.json'), sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/) });
     expect(publication).toEqual({ ...current, sourceCommit: release.sourceCommit });
     expect(reviewed.scope).toEqual({
       publicationPairs: 277,
@@ -468,8 +468,8 @@ describe('R4 release review', () => {
     for (const prefix of ['', 'en/']) {
       for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md', 'sources-and-versions.mdx']) {
         const document = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
-        expect(document, `${prefix}${file}`).toMatch(/issue #41/i);
-        expect(document).toMatch(/R4/);
+        expect(document, `${prefix}${file}`).toMatch(/issue #58/i);
+        expect(document).toMatch(/R1-R5|R4/);
         expect(document).toMatch(/R5/);
         expect(document).not.toMatch(/R4 aggregate review remains pending|R4 聚合复核仍待完成/i);
       }

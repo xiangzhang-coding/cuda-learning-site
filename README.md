@@ -1,5 +1,24 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R6 aggregate release review — 2026-09-22
+
+R6 is the latest completed aggregate static review. Schema 7
+`src/r6-release-manifest.json` supplies `/release.json`; `/publication.json`
+records R6 completed and R7 next/pending. Scope: 104 Learning Units through
+G01-G09, 24 Runnable Examples, 18 Labs, 21 Visual Explainers, 103 Exercise sets,
+103 separate solution sets, 376 Publication Pairs / 752 routes and 478 catalog
+records (115 Practice Bank entries, 207 terms, 117 sources, 18 Labs, 21 visuals).
+PB-R6-001–013 are 13 distinct original multi-GPU/NCCL entries.
+
+[Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58)
+records same-commit CI, Preview and production acceptance separately from the
+[static source review](MAINTENANCE_SOURCES.md#r6-aggregate-source-disposition).
+The [deployment contract](DEPLOYMENT.md#r6-release-acceptance) covers all 752 routes
+and independent device/topology/process/stream/profiler/transport/launcher gates.
+Forty-one Example/Lab subjects remain Pending Hardware Verification; G01-G09
+grant no Evidence Status. R1-R5 snapshots and all dated inventories below are
+historical. R7 and deferred work have no placeholder destinations.
+
 ## Current increment — issue #54, 2026-09-20
 
 G07 publishes PyTorch DDP as an NCCL client, with ownership/gradient/diagnostic Exercises, separate solutions, PB-R6-008/009 and SRC-CUDA-100. Current scope is 102 Learning Units, 24 Runnable Examples, 370 Publication Pairs, 740 source routes, 101 Exercise sets, 101 separate solution sets and 472 catalog records (18 Labs, 111 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms, 115 source records). Its original Python solution selects torch 2.11.0+cu128 and packaged NCCL 2.28.9 independently of EX24. The diagnostic fixture is synthetic; CPU algebra tests establish no distributed run. Existing 41 Example/Lab subjects and G07's external scenarios remain Pending Hardware Verification. R5 remains frozen and R6 remains pending. Earlier dated inventories below are historical.

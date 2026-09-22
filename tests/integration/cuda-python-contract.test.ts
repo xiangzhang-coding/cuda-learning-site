@@ -29,8 +29,8 @@ describe('issue #42 CUDA Python publication contract', () => {
     const [current, r4] = await Promise.all(['current-publication', 'r4-release'].map(async (name) =>
       JSON.parse(await readFile(path.join(root, `src/${name}-manifest.json`), 'utf8'))));
     expect(current).toMatchObject({
-      reviewDate: '2026-09-21',
-      releaseReview: { latestCompleted: 'R5', next: 'R6', status: 'pending' },
+      reviewDate: '2026-09-22',
+      releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
       scope: { publicationPairs: 376, sourceRoutes: 752, exerciseSetPublicationPairs: 103,
         solutionSetPublicationPairs: 103, practiceBankEntries: 115, sourceRecords: 117 },
     });
@@ -54,6 +54,7 @@ describe('issue #42 CUDA Python publication contract', () => {
     });
     expect(current.evidence).toEqual({
       ...r4.evidence,
+      r6EvidenceNeutralLearningUnits: ['G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09'],
       noCompileCheckedClaim: ['LAB18', 'EX24', 'LAB17', ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
         ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
       pendingHardwareVerification: ['LAB18', 'EX24', 'LAB17', ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',

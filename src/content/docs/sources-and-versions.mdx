@@ -3,7 +3,7 @@ title: 来源与版本记录
 description: 覆盖 G03 的精确发布与技术来源，独立记录版本、权利和证据。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -55,7 +55,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -70,11 +70,32 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录列出精确发布、主题、可视化接口，以及扩展至 P01-P12、T01-T08、EX01-EX23、LAB01-LAB16 的课程技术来源。二十项可视化讲解保持无 CUDA 证据。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
+这份记录列出扩展至 G01-G09、EX01-EX24、LAB01-LAB18 的课程及全部既有路径的精确来源。21 项可视化讲解保持无 CUDA 证据。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
 
 ## 记录范围
 
-**2026-09-19 R5 聚合静态复核**冻结 95 个学习单元（Learning Unit）、23 个可运行示例（Runnable Example）、16 个实验（Lab）、20 项可视化讲解（Visual Explainer）、94 组练习与 94 组独立解答的双语发布对（Publication Pair），共 **345 个发布对 / 690 条源路由**。**453 条目录记录**包括 16 个实验、102 个练习题库（Practice Bank）条目、20 项可视化讲解、207 个术语表（Glossary）词条和 108 条来源。既有来源逐项日期不变。R5 是最近完成的聚合静态复核，下一阶段 R6 待复核。[9 月 10 日 R4 复核](#r4-aggregate-review)保持历史记录。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+**2026-09-22 R6 聚合静态复核**冻结 104 个学习单元（Learning Unit）、24 个可运行示例（Runnable Example）、18 个实验（Lab）、21 项可视化讲解（Visual Explainer）、103 组练习与 103 组独立解答，共 **376 个双语发布对（Publication Pair）/ 752 条源路由**。**478 条目录记录**包括 18 个实验、115 个练习题库（Practice Bank）条目、21 项可视化讲解、207 个术语表（Glossary）词条和 117 条来源。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+
+<span id="r6-aggregate-review"></span>
+
+## R6 聚合复核 — 2026-09-22
+
+模式版本 7 的 `src/r6-release-manifest.json` 生成冻结的 `/release.json`；`/publication.json` 记录 R6 已完成、R7 待复核。G01-G09 与全部既有公开先修、练习、独立解答和资源形成闭包。**PB-R6-001 至 PB-R6-013** 为 13 道独立原创多 GPU 与 NCCL 题，保留完整双语先修、硬件门槛、提示、解答、来源与复核日期。R7 和延后内容没有占位目的地。[Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) 单独记录同一源码提交的 CI、Preview、生产和冒烟验收；本静态记录不预先声明动态门禁通过。以下 R1-R5 与增量记录均为历史，数量和逐项来源日期不倒填。
+
+| 场景 | 独立环境与观察边界 |
+| --- | --- |
+| G01-G03 设备、peer、拓扑 | Runtime API 13.3.1、Programming Guide 13.2.0 与有日期的 nvidia-smi 手册分别核对。记录 GPU 数量、可见性、本地编号映射、上下文、peer 能力与权限；本地拓扑不是网络路由或带宽结果。 |
+| EX24 / LAB17 / LAB18 | 原生 Ubuntu 24.04 x86-64、Toolkit 13.3.1、NVCC 13.3.73、NCCL 2.31.2-1+cuda13.3、driver 610.43.02、至少两块 CC 7.5+ GPU。单进程多设备示例逐设备拥有通信器／流；成功入队不等于完成。 |
+| G06 重叠 | Nsight Systems 2026.5 独立于历史分析器记录。只有同设备匹配进程／流／依赖的合格轨迹可支持局部重叠；分析开销、预热、工作量、样本、计时与无分析器对照必须记录。LAB18 时间线为无量纲合成夹具。 |
+| G07 DDP | CPython 3.12.14、torch 2.11.0+cu128、随包 NCCL 2.28.9，使用该 wheel 的 torchrun；不继承独立 NCCL 2.31.2 证据。逐进程独占分配一块 GPU，通过 LOCAL_RANK 从共享可见设备列表中选择；记录组成员、梯度权重、流等待与故障清理。 |
+| G08 图／注册 | NCCL 2.31.2 精确源码约束全 rank 捕获／重放、分配器、偏移、图与缓冲区寿命。注册成功不证明 NVLS、RDMA、PXN 路径或性能；禁用混用后的未完成启动区间与排序限制仍需遵守。 |
+| G09 多节点 | 多节点启动器、provider、网络与硬件尚未选定；准入必须固定版本并记录进程树、节点／rank 映射、NIC/HCA、传输与失败终止方法。引导成功、Socket 回退或启动器退出不证明数据路径、恢复或远端终止。 |
+
+缺失配置会阻止活动，或采用明确选择并独立验证的回退；不从 API 可用性推断回退有效。每份拓扑、集合通信、重叠、DDP、图或多节点观察都需要完整环境清单（Environment Manifest）、精确命令、源码与二进制身份、方法、正确性标准和逐 rank 结果。架构特定能力、NVLS、多节点及性能均无已观察结果。
+
+本次 Context7 `/nvidia/nccl`、`/pytorch/pytorch/v2.11.0`、`/websites/nvidia_nsight-systems` 复查所有权、流、图／注册、DDP／启动器和分析器发现资料。master/main 片段及不完整示例仅用于发现，不能覆盖 SRC-CUDA-094–102 的精确上游依据。新鲜上游核查与完整文件哈希见[来源复核记录](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/MAINTENANCE_SOURCES.md#r6-aggregate-source-disposition)。NCCL 保留 Apache-2.0、原有 BSD 与逐文件声明；PyTorch 保留 BSD-3-Clause、NOTICE 与传递依赖声明；nccl-tests 保留其独立 BSD 声明；NVIDIA CUDA／分析器文档与工具保留独立专有条款。没有复制或改编上游示例、题目、图、报告或软件包。
+
+只有 EX02、EX10、LAB02 保留编译已检查（Compile-Checked）证据。EX10 无需运行验证（Runtime-Not-Applicable）；**41 个示例／实验待硬件验证（Pending Hardware Verification）**。G01-G09 的四个证据数组为空。没有基准环境、运行已验证、社区已观察、捕获分析器报告或性能观察；六份分析器计划为预期内容，拓扑、DDP、重叠与多节点夹具为合成内容。网站、主机、编译与分布式契约门禁不授予 GPU 运行证据。
 
 <span id="r5-aggregate-review"></span>
 

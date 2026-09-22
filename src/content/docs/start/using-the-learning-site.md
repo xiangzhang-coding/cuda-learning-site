@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -98,9 +98,9 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 截至 **2026-09-12**，稳定课程（Stable Curriculum）的当前发布完整双语覆盖 82 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07。可复用库路线保留 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)及各自示例；Python 桥接从 [P01](/python/cuda-python-bridge/)进入，仍需满足已有 CUDA 生命周期与流的先修条件。P04-P07 将这些概念用于 eager PyTorch。下面列出当前完整发布的严格先修关系。
 
-最近完成的聚合静态复核是 2026-09-19 的 R5。冻结的 `/release.json` 记录 95 个学习单元、345 个双语发布对、690 条源路由、94 组练习、94 组独立解答与 453 条目录记录。当前 `/publication.json` 包含 G01–G09：104 个单元、376 个发布对、752 条路由、103 组练习、103 组解答和 478 条目录记录。R1-R5 保留历史快照。下一阶段 R6 待复核；发布不升级运行证据。
+最近完成的聚合静态复核是 **2026-09-22 的 R6**。冻结的 `/release.json` 与当前 `/publication.json` 包含 G01-G09 及全部既有路径：104 个单元、376 个双语发布对、752 条路由、103 组练习、103 组独立解答和 478 条目录记录。115 道原创题包含 13 道多 GPU 与 NCCL 题。R1-R5 保留历史快照，下一阶段 R7 待复核；发布不升级运行证据。
 
-**R5 静态复核与动态验收分开记录。** [Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51)负责同一提交的 CI、Preview、生产与冒烟结果，[聚合来源复核](/sources-and-versions/#r5-aggregate-review)记录独立环境和回退边界。P01-P12 与 T01-T08 已完整发布，不包含多 GPU 支持。[Issue #41](https://github.com/xiangzhang-coding/cuda-learning-site/issues/41)与 R4 的 2026-09-10 复核保留历史日期，技术来源也保留逐项日期。
+**R6 静态复核与动态验收分开记录。** [Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58)负责同一提交的 CI、Preview、生产与冒烟结果，[聚合来源复核](/sources-and-versions/#r6-aggregate-review)记录 GPU 数量、拓扑、进程、流、分析器、传输、启动器与回退边界。41 个示例／实验仍待硬件验证；DDP、图和多节点场景没有观察结果。历史发布与技术来源保留各自日期。
 
 1. [首页](/)
 2. **O01：如何使用学习站**（本页）
@@ -191,4 +191,4 @@ L13 使用归档的 12.9.2 cuSPARSE 教学基线；[SRC-CUDA-075/076 复核](/so
 4. 脚本或持久化不可用时，主题选择器如何回退？
 5. 为什么公开一个页面不会授予 CUDA 证据状态？
 
-**当前发布摘要核对日期：2026-09-19。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。R4 聚合复核和各项来源的历史日期不变。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。
+**当前发布摘要核对日期：2026-09-22。** 本页不依赖特定 CUDA Toolkit 版本，也不会授予 CUDA 证据状态。R1-R5 聚合复核和各项来源的历史日期不变。术语定义见[术语表](/glossary/)，发布接口与 CUDA 来源依据见[来源与版本记录](/sources-and-versions/)。

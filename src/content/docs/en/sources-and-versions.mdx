@@ -3,7 +3,7 @@ title: Sources and Version Record
 description: Exact publishing and technical sources through G03, with independent version, rights and evidence records.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -55,7 +55,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -70,11 +70,32 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names exact publishing, theme and visual interfaces and owner sources for the curriculum through P01-P12, T01-T08, EX01-EX23 and LAB01-LAB16. Twenty Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
+This record names exact sources for the curriculum through G01-G09, EX01-EX24, LAB01-LAB18 and all prior paths. Twenty-one Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
 
 ## Scope of this record
 
-The **2026-09-19 R5 aggregate static review** freezes 95 Learning Units, 23 Runnable Examples, 16 Labs, 20 Visual Explainers, 94 Exercise-set and 94 separate solution-set Publication Pairs: **345 Publication Pairs / 690 source routes**. Its **453 catalog records** contain 16 Labs, 102 Practice Bank entries, 20 Visual Explainers, 207 Glossary terms and 108 source records. Item-level source dates remain unchanged. R5 is the latest completed aggregate static review; R6 is next/pending. The [September 10 R4 review](#r4-aggregate-review) remains history. Website builds use Node.js 24.19.0 and npm 11.17.0.
+The **2026-09-22 R6 aggregate static review** freezes 104 Learning Units, 24 Runnable Examples, 18 Labs, 21 Visual Explainers, 103 Exercise sets and 103 separate solution sets: **376 Publication Pairs / 752 source routes**. Its **478 catalog records** contain 18 Labs, 115 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 117 source records. Website builds use Node.js 24.19.0 and npm 11.17.0.
+
+<span id="r6-aggregate-review"></span>
+
+## R6 aggregate review — 2026-09-22
+
+Schema 7 `src/r6-release-manifest.json` supplies frozen `/release.json`; `/publication.json` records R6 completed and R7 next/pending. G01-G09 and all prior public prerequisites, Exercises, separate solutions and resources form a closure. **PB-R6-001 through PB-R6-013** are 13 distinct original multi-GPU and NCCL questions with complete bilingual prerequisites, hardware gates, hints, solutions, sources and review dates. R7 and deferred material have no placeholder destinations. [Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) separately records same-source-commit CI, Preview, production and smoke acceptance; this static record does not pre-certify dynamic gates. All following R1-R5 and incremental records are historical; their counts and individual source dates are not backfilled.
+
+| Scenario | Independent environment and observation boundary |
+| --- | --- |
+| G01-G03 devices, peers, topology | Runtime API 13.3.1, Programming Guide 13.2.0 and dated nvidia-smi manual checked separately. Record GPU count, visibility, local ordinal mapping, context, peer capability and permission; local topology is not a network route or bandwidth result. |
+| EX24 / LAB17 / LAB18 | Native Ubuntu 24.04 x86-64, Toolkit 13.3.1, NVCC 13.3.73, NCCL 2.31.2-1+cuda13.3, driver 610.43.02, at least two CC 7.5+ GPUs. The one-process multi-device example owns communicators/streams per device; successful enqueue is not completion. |
+| G06 overlap | Nsight Systems 2026.5 is independent of historical profiler records. Only a qualifying same-device trace with matched process/stream/dependency coordinates supports local overlap; record profiling overhead, warm-up, workload, samples, timing and an unprofiled control. LAB18's timeline is a dimensionless synthetic fixture. |
+| G07 DDP | CPython 3.12.14, torch 2.11.0+cu128, packaged NCCL 2.28.9 and that wheel's torchrun; no independent NCCL 2.31.2 evidence transfers. One assigned GPU per process, selected by LOCAL_RANK from the shared visible-device list; record group membership, gradient weighting, stream waits and failure cleanup. |
+| G08 graphs/registration | Exact NCCL 2.31.2 source constrains all-rank capture/replay, allocators, offsets and graph/buffer lifetime. Registration success proves no NVLS, RDMA, PXN path or performance; disabled mixing's outstanding launch interval and ordering constraints still apply. |
+| G09 multi-node | Multi-node launcher, provider, network and hardware remain unselected; admission must pin versions and record process trees, node/rank mapping, NIC/HCA, transport and failure-termination method. Bootstrap success, Socket fallback or launcher exit proves no data path, recovery or remote termination. |
+
+A missing configuration blocks the activity or uses an explicitly selected, independently verified fallback; API availability does not establish fallback success. Every topology, collective, overlap, DDP, graph or multi-node observation requires a complete Environment Manifest, exact command, source/binary identity, method, correctness criteria and per-rank results. No architecture-specific, NVLS, multi-node or performance result has been observed.
+
+Fresh Context7 queries to `/nvidia/nccl`, `/pytorch/pytorch/v2.11.0` and `/websites/nvidia_nsight-systems` revisited ownership, streams, graphs/registration, DDP/launchers and profiler discovery. Master/main snippets and incomplete examples are discovery only, subordinate to SRC-CUDA-094–102's exact owner authority. Fresh owner checks and whole-file hashes are retained in the [source review record](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/MAINTENANCE_SOURCES.md#r6-aggregate-source-disposition). NCCL retains Apache-2.0, original BSD and per-file notices; PyTorch retains BSD-3-Clause, NOTICE and transitive terms; nccl-tests retains its independent BSD notice; NVIDIA CUDA/profiler documents and tools retain separate proprietary terms. No owner example, question, figure, report or package is copied or adapted.
+
+Only EX02, EX10 and LAB02 retain Compile-Checked evidence. EX10 is Runtime-Not-Applicable; **41 Example/Lab subjects remain Pending Hardware Verification**. G01-G09 have four empty evidence arrays. There is no Reference Environment, Runtime-Verified or Community-Observed subject, captured profiler report or performance observation; six profiler plans are expected-only, while topology, DDP, overlap and multi-node fixtures are synthetic. Web, host, compiler and distributed-contract gates grant no GPU runtime evidence.
 
 <span id="r5-aggregate-review"></span>
 

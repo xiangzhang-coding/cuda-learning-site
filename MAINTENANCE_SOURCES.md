@@ -1,5 +1,79 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R6 aggregate source disposition
+
+Reviewed **2026-09-22**, issue #58. The schema-7 R6 snapshot closes G01-G09
+and all prior paths: 104 Learning Units, 24 Runnable Examples, 18 Labs,
+21 Visual Explainers, 103 Exercise sets and 103 separate solution sets,
+376 Publication Pairs / 752 routes, and 478 catalog records. The Practice Bank
+contains 115 original entries, including the 13 distinct PB-R6-001–013 questions.
+R1-R5 and all following dated increment records remain historical. Dynamic
+acceptance is recorded against an exact source commit in issue #58.
+
+Fresh Context7 discovery used `/nvidia/nccl` (device/communicator ownership,
+groups/streams, graphs/registration and transport), `/pytorch/pytorch/v2.11.0`
+(DDP, torchrun, no_sync, wait and cleanup) and `/websites/nvidia_nsight-systems`
+(CUDA/NCCL tracing and measurement overhead). Results mix main/master, old
+examples and incomplete signatures. The discovery example mapping global rank
+directly to a device is not adopted; G07 uses process-local visibility and
+LOCAL_RANK. Exact SRC-CUDA-094–102 owner records govern the contracts.
+
+Fresh HTTP-200 whole-file checks below retain exact bytes as SHA-256, not copied
+upstream content. NCCL paths are relative to commit
+`7b83616df3ae082a1f32bb74c27458bfe8153a13` in NVIDIA/nccl; PyTorch paths to
+`70d99e998b4955e0049d13a98d77ae1b14db1f45` in pytorch/pytorch. Reviewed stream
+enqueue versus completion, group dependencies, all-rank graph capture/replay,
+allocator/offset/lifetime restrictions, PXN and registration, DDP gradient and
+launcher contracts, and transport-selection/failure boundaries against the
+existing item-level records. No execution, new version selection or license
+adaptation is implied.
+
+| Owner file | SHA-256 |
+| --- | --- |
+| NCCL `LICENSE.txt` | `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be` |
+| NCCL `docs/userguide/source/usage/streams.rst` | `de2656dccc299a7594c6a90709f27f662fb7cd40240f64edd87086821475fc71` |
+| NCCL `docs/userguide/source/usage/groups.rst` | `3c97d76b47d1339eb1b60c539e6f80af5c0636bb1311906f68dbdc7287261f44` |
+| NCCL `docs/userguide/source/usage/communicators.rst` | `9b513c465c2358929c1f3ccb3810210db8cdeb2db226d2be00702a79b24d5bb6` |
+| NCCL `docs/userguide/source/usage/cudagraph.rst` | `7b758c4b90e8369d935eb4108a4c8ec629e50ec1160204da4c0fe108a3ed3c3c` |
+| NCCL `docs/userguide/source/usage/bufferreg.rst` | `d13b2ca058afcf7ba8903087b5f636745498c7813154e470ba6d9f8521bec709` |
+| NCCL `docs/userguide/source/env.rst` | `e0ae57e7c592ea41546a5cb04b2ed1ee3be08b8d9e0f26f07727e72c41581980` |
+| NCCL `docs/userguide/source/troubleshooting/networking_troubleshooting.rst` | `a2e3abf1f127b37b604466d854eac88d1657eb60b26335b02cb8f50669683905` |
+| PyTorch `torch/nn/parallel/distributed.py` | `cb4a5fbb455e9915a35951ea160fa1bf1d9a2803ad9aaebf372c05f67bcf0b1c` |
+| PyTorch `torch/distributed/run.py` | `e1c41f86d5cb299410e2ae087e4e070ae634aa87daf2b308939ea7032e65c6e0` |
+| PyTorch `torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp` | `1811985ad18a4b51bf2a27d763be56ebf627bf7cda81ebdbce86c32de846f1e3` |
+| PyTorch `LICENSE` | `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43` |
+| PyTorch `NOTICE` | `c2cc7bf0caec7652c2b460a8a470bea1677f241e4ab8e431df34cf17f5a9fec0` |
+
+Additional owner HTTP-200 checks on this date:
+
+| Exact URL | SHA-256 |
+| --- | --- |
+| [Runtime 13.3.1 context](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/driver-vs-runtime-api.html) | `fe82b96740ca01b48d6c0e8dd5c4f2724978620b1c568e0699bc523122faba22` |
+| [Runtime 13.3.1 peer](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__PEER.html) | `51efab3b9c5200ea05524533b3467cfbb8cfb90010d86ddfb7af50577fcaa0b3` |
+| [Runtime 13.3.1 stream/capture](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-runtime-api/group__CUDART__STREAM.html) | `9514b5ed484c2dcab95ba0102fc1a6d3e0df0ede948749d76ad90386c3010fec` |
+| [Programming Guide 13.2.0 multi-GPU](https://docs.nvidia.com/cuda/archive/13.2.0/cuda-programming-guide/03-advanced/multi-gpu-systems.html) | `48550575775ed24ce740c6e4acd4ecfe88a484fb81c8a0c1e564b00c9c038a15` |
+| [Rolling nvidia-smi manual](https://docs.nvidia.com/deploy/nvidia-smi/index.html) | `017647ae72b332a94e01e6d9672d1d82367e56de1d0685132eb91a972035b17e` |
+| [Rolling Nsight Systems User Guide, v2026.5](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) | `0a505e6bdd47c3709deccc1487f29f6b3b515aee14e644d1d24f52fd2d816fb5` |
+| [nccl-tests separate license at b4d5beebca8a76cf01335f724d154b9b9d394d96](https://github.com/NVIDIA/nccl-tests/blob/b4d5beebca8a76cf01335f724d154b9b9d394d96/LICENSE.txt) | `88e8c1b85269ae234e8c56e1688fd3a1a10ea1d508b9228c38467b6877e10409` |
+
+The guessed NCCL `network_troubleshooting.rst` path returned 404; the exact
+`networking_troubleshooting.rst` path above succeeded. The attempted Nsight
+Systems `/2026.5/UserGuide/index.html` archive returned 404. The live guide
+identifies v2026.5 and explicitly warns that CUDA event tracing can increase
+overhead and false dependencies. Its dated live identity is retained, not
+misrepresented as an archive. Installed build/help/permissions remain mandatory.
+Historical Q07/LAB06 and bundled profiler versions are not upgraded.
+
+Rights: NCCL Apache-2.0 plus retained BSD/per-file terms; PyTorch BSD-3-Clause,
+NOTICE and transitive dependencies; nccl-tests independent BSD-3-Clause;
+NVIDIA CUDA/profiler documentation and tools under separate owner terms.
+Original instruction is CC BY 4.0 and software/tests Apache-2.0. No dependency,
+lock, upstream sample, figure, question, binary or report is added or adapted.
+Every G01-G09 evidence array remains empty. EX24/LAB17/LAB18 retain empty
+compilation/recorded observations and Pending Hardware Verification. There is
+no Reference Environment or observed topology, transport, DDP, graph, recovery,
+overlap or performance result. Owner tests were not run.
+
 ## Post-merge resource-index readiness — 2026-09-21
 
 Main Web Quality run [35523256819](https://github.com/xiangzhang-coding/cuda-learning-site/actions/runs/35523256819)

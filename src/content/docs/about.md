@@ -3,7 +3,7 @@ title: 关于本站
 description: CUDA 学习站的目的、范围、作者和反馈渠道。
 pairId: about
 counterpart: /en/about/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-19'
+      content: '2026-09-22'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -42,7 +42,7 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 稳定课程的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 和 Q01-Q13，共 62 个学习单元（Learning Unit）。[A12](/algorithms/sparse-formats-spmv/)建立 COO/CSR、storage 与 SpMV 合同，[A13](/algorithms/sparse-matrix-multiplication-preprocessing/)建立 SpMM、descriptor、workspace 与 preprocessing 决策边界。
 
-最近完成的聚合静态发布复核是 2026-09-19 的 R5。模式版本 6 的 `src/r5-release-manifest.json` 生成 `/release.json`：95 个学习单元、345 个双语发布对（Publication Pair）、690 条源路由与 453 条目录记录，包括 102 道题、207 个术语和 108 条来源。`/publication.json` 记录最近完成阶段 R5，下一阶段 R6 待复核。P01-P12 与 T01-T08 已完整发布；其中 17 道既有题组成 PyTorch 和 Triton 子集。[Issue #51](https://github.com/xiangzhang-coding/cuda-learning-site/issues/51) 单独记录动态验收。R1-R4 保留精确历史快照。[发布复核](/sources-and-versions/#r5-aggregate-review)汇总独立环境、38 个待硬件验证对象与单 GPU 边界。
+最近完成的聚合静态复核是 **2026-09-22 的 R6**。模式版本 7 的 `src/r6-release-manifest.json` 生成 `/release.json`；当前 `/publication.json` 记录 R6 已完成、R7 待复核。G01-G09 与全部既有路径形成闭包，115 道原创题包含 13 道多 GPU 与 NCCL 题。[Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) 单独记录动态验收。R1-R5 保留历史快照。[发布复核](/sources-and-versions/#r6-aggregate-review)汇总 41 个待硬件验证对象、独立软件环境及多节点证据边界。
 
 Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](https://github.com/xiangzhang-coding/cuda-learning-site/issues/33)在滚动 R4 发布中新增 [L01](/libraries/library-primitive-dsl-custom-kernel/)与 [L02](/libraries/thrust-algorithm-vocabulary/)；[issue #34](https://github.com/xiangzhang-coding/cuda-learning-site/issues/34)发布 [L03：CUB Device Primitives](/libraries/cub-device-primitives/)、[L04：CUB Warp 与 Block Primitives](/libraries/cub-warp-block-primitives/)、[EX17：CUB Device Reduction and Scan](/examples/cub-device-reduction-scan/)和 [LAB11：比较自定义归约与 CUB](/labs/compare-custom-reduction-with-cub/)，随后发布严格依赖 M05、M13 与 M19 的 [L05：libcu++ 同步抽象](/libraries/libcu-plus-plus-synchronization/)。[Issue #36](https://github.com/xiangzhang-coding/cuda-learning-site/issues/36)新增 [L06：cuBLAS GEMM](/libraries/cublas-gemm/)`<-[A08,Q01]`、[L07：cuBLASLt Matmul](/libraries/cublaslt-matmul/)`<-[L06,Q05]`、[EX18](/examples/cublas-gemm/)`<-[L06]`与 [LAB12](/labs/compare-gemm-with-cublas/)`<-[Q13,L06]`。
 
@@ -56,7 +56,7 @@ Issue #31 的严格图新增 `A12<-[M01,M02]`与 `A13<-[A12,A08]`。[Issue #33](
 
 [Issue #42](https://github.com/xiangzhang-coding/cuda-learning-site/issues/42)在当前发布中加入 [P01：CUDA Python 桥接](/python/cuda-python-bridge/)、[P02：设备、上下文与启动](/python/devices-contexts-launches/)和 [P03：运行时编译与链接](/python/runtime-compilation-linking/)，有序直接先修分别为 `[F04,M07]`、`[P01,F07]`和 `[P02,M15,M16]`。每个单元有练习和独立解答；共用的 [EX21：CUDA Python 显式启动](/examples/cuda-python-launch/)仅依赖 `[P02]`，独立记录 Python、包与原生 Toolkit 配置，仍待硬件验证（Pending Hardware Verification）。本次增加十个发布对、二十条路由，不改写 R4 历史或发布框架、Triton 占位入口。
 
-截至 **2026-09-21**，当前发布有 104 个学习单元、24 个可运行示例（EX01-EX24）、18 个实验（LAB01-LAB18）、21 项可视化讲解、115 个[练习题库（Practice Bank）](/practice/)条目、207 个[术语表](/glossary/)词条、117 条[来源记录](/sources-and-versions/)，共 478 条资源目录记录、376 个双语发布对、752 条源路由，含 103 组练习与 103 组独立参考解答。[G09](/multi-gpu/multi-node-transport-failures/)增加多节点传输、日志、故障诊断与恢复证据契约。共 41 个主体待硬件验证，G09 未来多节点执行也尚未观察；R5 冻结复核不变，R6 待复核。
+截至 **2026-09-22**，R6 有 104 个学习单元、24 个可运行示例（EX01-EX24）、18 个实验（LAB01-LAB18）、21 项可视化讲解、115 个[练习题库（Practice Bank）](/practice/)条目、207 个[术语表](/glossary/)词条、117 条[来源记录](/sources-and-versions/)，共 478 条资源目录记录、376 个双语发布对、752 条源路由，含 103 组练习与 103 组独立参考解答。[G09](/multi-gpu/multi-node-transport-failures/)涵盖多节点传输、日志、故障诊断与恢复证据契约。共 41 个主体待硬件验证，G09 未来多节点执行也尚未观察。
 
 Issue #44 增加 [P08](/frameworks/first-custom-operator/)，先修 `[O04,F04,Q01,P04]`；[P09](/frameworks/operator-registration/)，先修 `[P08,Q01]`；[P10](/frameworks/operator-packaging/)，先修 `[P08,M18]`。[EX22](/examples/adjacent-energy/)和 [LAB13](/labs/build-custom-operator/)依赖 `[P08,P09]`，原创相邻能量算子有 CPU/CUDA 路径和独立固定的扩展 Toolkit。两者编译/已记录观察为空，运行待硬件验证（Pending Hardware Verification）。
 
@@ -82,4 +82,4 @@ L13 使用归档的 12.9.2 cuSPARSE 教学基线，并与精确的 11.8.0 和 13
 
 ## 反馈
 
-发现事实、双语对齐、链接、无障碍或源码问题时，请在 [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) 提交可复现说明。当前发布摘要核对日期为 **2026-09-19**；这不改变 R4 聚合复核和各项技术来源的历史日期。
+发现事实、双语对齐、链接、无障碍或源码问题时，请在 [GitHub Issues](https://github.com/xiangzhang-coding/cuda-learning-site/issues) 提交可复现说明。当前发布摘要核对日期为 **2026-09-22**；这不改变 R1-R5 聚合复核和各项技术来源的历史日期。
