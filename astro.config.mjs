@@ -220,6 +220,14 @@ export default defineConfig({
           ],
         },
         {
+          label: '架构演进',
+          translations: { en: 'Architecture Evolution' },
+          items: [
+            { slug: 'architecture/turing-warp-safety' },
+            { slug: 'architecture/ampere-pipelines-tensor-cores' },
+          ],
+        },
+        {
           label: '可运行示例',
           translations: { en: 'Runnable Examples' },
           items: [
@@ -277,6 +285,7 @@ export default defineConfig({
           items: [
             { slug: 'visuals' },
             { slug: 'visuals/collective-paths' },
+            { slug: 'visuals/architecture-evolution' },
             { slug: 'visuals/kernel-journey' },
             { slug: 'visuals/indexing' },
             { slug: 'visuals/warp-divergence' },

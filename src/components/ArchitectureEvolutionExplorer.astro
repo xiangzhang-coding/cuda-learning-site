@@ -1,0 +1,98 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import { ARCHITECTURE_CAPABILITIES, ARCHITECTURE_FEATURES, ARCHITECTURE_CONTRACTS } from '../visuals/architecture-evolution-model';
+import { architectureEvolutionCopy } from '../visuals/architecture-evolution-copy';
+interface Props { locale: 'zh-CN' | 'en' }
+const { locale } = Astro.props;
+const copy = architectureEvolutionCopy[locale];
+const features = ARCHITECTURE_FEATURES.filter(feature => feature !== 'all');
+---
+<architecture-evolution data-locale={locale} data-visual-id="VIS15">
+  <h3>{copy.title}</h3>
+  <p>{copy.notice}</p>
+  <aside class="baseline"><strong>{copy.baseline}</strong><p>{copy.baselineText}</p></aside>
+  <fieldset hidden data-controls>
+    <legend>{copy.controls}</legend>
+    <label>{copy.capability}<select data-capability>{ARCHITECTURE_CAPABILITIES.map(cc => <option value={cc}>{cc === 'all' ? copy.all : `CC ${cc}`}</option>)}</select></label>
+    <label>{copy.feature}<select data-feature>{ARCHITECTURE_FEATURES.map(feature => <option value={feature}>{feature === 'all' ? copy.all : copy.labels[feature]}</option>)}</select></label>
+    <button type="button" data-reset>{copy.reset}</button>
+  </fieldset>
+  <div hidden data-interactive>
+    <p role="status" aria-live="polite" aria-atomic="true" data-status></p>
+    <div class="contracts" data-results></div>
+  </div>
+  <h3>{copy.static}</h3>
+  <div class="comparison" tabindex="0" role="region" aria-label={copy.static}>
+    <table><caption>{copy.static}</caption>
+      <thead><tr><th scope="col">{copy.architecture}</th>{ARCHITECTURE_CONTRACTS.map(row => <th scope="col">{row.architecture}<br/>CC {row.cc}</th>)}</tr></thead>
+      <tbody>
+        <tr><th scope="row">{copy.target}</th>{ARCHITECTURE_CONTRACTS.map(row => <td><code>{row.target}</code></td>)}</tr>
+        <tr><th scope="row">{copy.shared}</th>{ARCHITECTURE_CONTRACTS.map(row => <td>{row.sharedKiB} KiB</td>)}</tr>
+        {features.map(feature => <tr><th scope="row">{copy.labels[feature]}</th>{ARCHITECTURE_CONTRACTS.map(row => <td>{row.features.includes(feature) ? copy.yes : copy.no}</td>)}</tr>)}
+      </tbody>
+    </table>
+  </div>
+  <p>{copy.memory}</p><p>{copy.fallback}</p>
+</architecture-evolution>
+<script>
+  import { filterArchitectures } from '../visuals/architecture-evolution-model';
+  import { architectureEvolutionCopy } from '../visuals/architecture-evolution-copy';
+  class ArchitectureEvolution extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return;
+      const capability = this.querySelector<HTMLSelectElement>('[data-capability]');
+      const feature = this.querySelector<HTMLSelectElement>('[data-feature]');
+      const controls = this.querySelector<HTMLElement>('[data-controls]');
+      const interactive = this.querySelector<HTMLElement>('[data-interactive]');
+      const status = this.querySelector<HTMLElement>('[data-status]');
+      const results = this.querySelector<HTMLElement>('[data-results]');
+      const reset = this.querySelector<HTMLButtonElement>('[data-reset]');
+      if (!capability || !feature || !controls || !interactive || !status || !results || !reset) return;
+      const copy = architectureEvolutionCopy[this.dataset.locale === 'en' ? 'en' : 'zh-CN'];
+      let previous = { capability: 'all', feature: 'all' };
+      const render = () => {
+        let rows;
+        try { rows = filterArchitectures(capability.value, feature.value); }
+        catch {
+          capability.value = previous.capability; feature.value = previous.feature;
+          status.textContent = copy.invalid; return;
+        }
+        previous = { capability: capability.value, feature: feature.value };
+        results.replaceChildren(...rows.map(row => {
+          const card = document.createElement('section');
+          card.dataset.cc = row.cc;
+          const heading = document.createElement('h4');
+          heading.textContent = `${row.architecture} · CC ${row.cc}`;
+          const target = document.createElement('p'); target.textContent = `${copy.target}: ${row.target}`;
+          const memory = document.createElement('p'); memory.textContent = `${copy.shared}: ${row.sharedKiB} KiB`;
+          const list = document.createElement('ul');
+          for (const feature of row.features) { const item = document.createElement('li'); item.textContent = copy.labels[feature]; list.append(item); }
+          card.append(heading, target, memory, list); return card;
+        }));
+        status.textContent = `${copy.count}: ${rows.length}.${rows.length ? '' : ` ${copy.empty}`}`;
+      };
+      render();
+      capability.addEventListener('change', render); feature.addEventListener('change', render);
+      reset.addEventListener('click', () => { capability.value = 'all'; feature.value = 'all'; render(); capability.focus(); });
+      controls.hidden = false; interactive.hidden = false; this.dataset.ready = 'true';
+    }
+  }
+  if (!customElements.get('architecture-evolution')) customElements.define('architecture-evolution', ArchitectureEvolution);
+</script>
+<style>
+  architecture-evolution { display: block; border: 1px solid var(--sl-color-gray-4); padding: 1rem; margin-block: 1.5rem; min-width: 0; }
+  [hidden] { display: none !important; }
+  .baseline { border-inline-start: .3rem solid var(--sl-color-text-accent); padding: .75rem 1rem; background: var(--sl-color-bg-sidebar); }
+  fieldset { display: flex; gap: 1rem; flex-wrap: wrap; margin-block: 1rem; border: 1px solid var(--sl-color-gray-4); }
+  label { display: grid; gap: .4rem; min-width: 0; }
+  select, button { font: inherit; color: var(--sl-color-text); background: var(--sl-color-bg); min-height: 44px; padding: .5rem; max-width: 100%; border: 1px solid var(--sl-color-gray-3); }
+  :is(select, button, .comparison):focus-visible { outline: 3px solid var(--sl-color-text-accent); outline-offset: 3px; }
+  .contracts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .contracts :global(section) { border-block-start: 3px solid var(--sl-color-text-accent); padding: .75rem; background: var(--sl-color-bg-sidebar); margin: 0; overflow-wrap: anywhere; }
+  .contracts :global(h4) { font-family: var(--sl-font-mono); margin: 0; }
+  .comparison { overflow-x: auto; max-width: 100%; } table { width: 100%; font-variant-numeric: tabular-nums; } th, td { vertical-align: top; } code { white-space: normal; }
+  @media (max-width: 42rem) { .contracts { grid-template-columns: 1fr; } fieldset { flex-direction: column; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (forced-colors: active) { .baseline, .contracts :global(section) { border-color: CanvasText; } }
+  @media print { fieldset, [data-interactive] { display: none !important; } .comparison { overflow: visible; } table { font-size: .7rem; } }
+</style>

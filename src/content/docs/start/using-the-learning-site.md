@@ -96,9 +96,11 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
+**当前架构增量，2026-09-22（#59）：**[H01](/architecture/turing-warp-safety/)先修为 `[F06,M06]`，[H02](/architecture/ampere-pipelines-tensor-cores/)先修为 `[H01,M13,L08]`，均有独立练习／解答；[VIS15](/visuals/architecture-evolution/)比较 Turing 与 Ampere。当前有 106 个学习单元、24 个可运行示例、18 个实验、22 项可视化讲解、105 组练习、105 组独立解答、383 个双语发布对、766 条源路由、483 条目录记录（117 个练习题库条目、207 个术语表词条、119 条来源记录，加上实验／可视化）。已有 41 个主体仍待硬件验证，架构执行／性能尚未观察。下方 R6 清单为冻结历史范围，R7 待复核。
+
 截至 **2026-09-12**，稳定课程（Stable Curriculum）的当前发布完整双语覆盖 82 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07。可复用库路线保留 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)及各自示例；Python 桥接从 [P01](/python/cuda-python-bridge/)进入，仍需满足已有 CUDA 生命周期与流的先修条件。P04-P07 将这些概念用于 eager PyTorch。下面列出当前完整发布的严格先修关系。
 
-最近完成的聚合静态复核是 **2026-09-22 的 R6**。冻结的 `/release.json` 与当前 `/publication.json` 包含 G01-G09 及全部既有路径：104 个单元、376 个双语发布对、752 条路由、103 组练习、103 组独立解答和 478 条目录记录。115 道原创题包含 13 道多 GPU 与 NCCL 题。R1-R5 保留历史快照，下一阶段 R7 待复核；发布不升级运行证据。
+最近完成的聚合静态复核是 **2026-09-22 的 R6**。冻结的 `/release.json` 包含 G01-G09 及全部既有路径：104 个单元、376 个双语发布对、752 条路由、103 组练习、103 组独立解答和 478 条目录记录。其中 115 道原创题包含 13 道多 GPU 与 NCCL 题。当前 `/publication.json` 另记录 H01/H02/VIS15。R1-R5 保留历史快照，下一阶段 R7 待复核；发布不升级运行证据。
 
 **R6 静态复核与动态验收分开记录。** [Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58)负责同一提交的 CI、Preview、生产与冒烟结果，[聚合来源复核](/sources-and-versions/#r6-aggregate-review)记录 GPU 数量、拓扑、进程、流、分析器、传输、启动器与回退边界。41 个示例／实验仍待硬件验证；DDP、图和多节点场景没有观察结果。历史发布与技术来源保留各自日期。
 

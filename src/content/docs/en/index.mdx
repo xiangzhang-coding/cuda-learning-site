@@ -46,6 +46,8 @@ head:
 
 ## The route published today
 
+**Current increment — 2026-09-22, #59:** [H01: Turing warp safety](/en/architecture/turing-warp-safety/) requires `[F06,M06]`; [H02: Ampere pipelines and Tensor Cores](/en/architecture/ampere-pipelines-tensor-cores/) requires `[H01,M13,L08]`. Both include Exercises and separate solutions; [VIS15](/en/visuals/architecture-evolution/) compares complete Turing/Ampere capability states. Current scope is **106 Learning Units, 24 Runnable Examples, 18 Labs, 22 Visual Explainers, 105 Exercise sets, 105 separate solution sets, 383 Publication Pairs / 766 source routes and 483 catalog records: 117 Practice Bank entries, 207 Glossary terms and 119 source records, plus the Labs and visuals**. R6 counts below describe the frozen release and earlier dated increments; R7 remains pending. Existing 41 subjects remain Pending Hardware Verification, and H01/H02 architecture execution/performance is unobserved.
+
 As of **2026-09-21**, the current publication includes G01–G09: 104 Learning Units, 24 Runnable Examples, 376 Publication Pairs, 752 source routes and 478 catalog records. Start with [device ownership](/en/multi-gpu/devices-contexts-ownership/), [peer access](/en/multi-gpu/peer-access-copies/) and [topology](/en/multi-gpu/topology-paths/), then [NCCL contracts](/en/multi-gpu/nccl-communicators-collectives/), [stream dependencies](/en/multi-gpu/nccl-stream-dependencies/) and [communication/computation overlap](/en/multi-gpu/communication-computation-overlap/). [G07: PyTorch DDP as an NCCL client](/en/multi-gpu/pytorch-ddp-nccl/) requires `[P04,P05,G04]`; [G08: NCCL graph capture and registration](/en/multi-gpu/nccl-graph-capture/) requires `[G05,M14]`. [G09: Multi-node transport and failures](/en/multi-gpu/multi-node-transport-failures/) requires `[G03,G04,Q07]`. Their external scenarios and [LAB18](/en/labs/pipeline-nccl-computation/) remain Pending Hardware Verification. [T08](/en/triton/attention-capstone/) retains the fused-attention capstone and VIS18. Using Python does not remove the Stable Curriculum's prerequisites.
 
 [P08](/en/frameworks/first-custom-operator/) requires `[O04,F04,Q01,P04]`; [P09](/en/frameworks/operator-registration/) requires `[P08,Q01]`; [P10](/en/frameworks/operator-packaging/) requires `[P08,M18]`. Each has complete Exercises and separate solutions. [EX22](/en/examples/adjacent-energy/) and [LAB13](/en/labs/build-custom-operator/) both require `[P08,P09]`; their extension Toolkit is independently pinned to 12.8.1 with torch 2.11.0+cu128. Compilation and runtime evidence remain independent.
@@ -738,7 +740,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/practice/">
     <span>PRACTICE</span>
     <strong>Practice Bank</strong>
-    <small>Practice evidence, ownership, topology, NCCL, kernels, libraries, PyTorch and Triton through 115 original problems.</small>
+    <small>Practice architecture gates, warp safety, evidence, kernels, libraries and frameworks through 117 original problems.</small>
   </a>
   <a className="route-card" href="/en/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +750,7 @@ The project maintains a prerequisite-bearing Stable Curriculum, while the websit
   <a className="route-card" href="/en/sources-and-versions/">
     <span>RECORD</span>
     <strong>Sources and Version Record</strong>
-    <small>Inspect 117 interface and owner-source records with their individual review dates.</small>
+    <small>Inspect 119 interface and owner-source records with their individual review dates.</small>
   </a>
   <a className="route-card" href="/en/about/">
     <span>PROJECT</span>

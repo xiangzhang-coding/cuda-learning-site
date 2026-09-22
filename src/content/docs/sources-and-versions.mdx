@@ -1025,6 +1025,28 @@ NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[
 
 2026-09-19 的 G01–G03 增量新增 SRC-CUDA-094/095/096，来源目录共 111 条。R5 已完成发布快照保留为历史，R6 待复核。不声称新的 CUDA 证据。
 
+<span id="src-cuda-103" class="resource-target"></span>
+
+### SRC-CUDA-103 — Turing 调度、目标与版本边界
+
+相关：[H01](/architecture/turing-warp-safety/)、[VIS15](/visuals/architecture-evolution/)、PB-R7-001。核对／访问日期 **2026-09-22**。当前 Context7 `/websites/nvidia_cuda` 检索覆盖 ITS、线程束掩码及编译目标，随后直接检查 NVIDIA 精确章节。Turing guide **13.4**，更新于 2026-09-13：[ITS](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html#independent-thread-scheduling)、[调度](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html#instruction-scheduling)、[占用率](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html#occupancy)。ITS 始于 Volta，Turing 为 CC 7.5。调度器数量不是实测占用率或启动建议。
+
+Programming Guide **13.4.2**，更新于 2026-09-10：[线程束同步](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-synchronization-function)、[计算能力表 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[NVCC 目标](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/nvcc.html#nvcc-ptx-and-cubin-generation)。`--list-gpu-arch` 列虚拟目标，`--list-gpu-code` 列真实目标；依据代码／选项定义，不沿用指南引言句中颠倒的措辞。编译目标、运行时设备查询与镜像检查回答不同问题。
+
+[发布说明 **13.4 Update 1** 第 2.1–2.3 节](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)列出 NVCC 13.4.92、CCCL 3.4.3 和 PTX ISA 9.4。这是单独注明日期的当前比较，不改变本站固定的 11.8.0/12.9.2/13.3.1 工具包通道，也不授予 13.4 构建结果。H01/H02 拟议使用已有 13.3.1 环境，而非在线文档的工具链。未复制或改编源码、代码、示例、图片或表格。NVIDIA 文档为受版权保护的专有文档，不采用 Apache-2.0 或 CC BY 4.0，其 Notices 章节约束原资料。原创讲解、伪代码及比较采用 CC BY 4.0，网站实现／测试采用 Apache-2.0。来源核对不授予硬件证据。
+
+<span id="src-cuda-104" class="resource-target"></span>
+
+### SRC-CUDA-104 — Ampere 拷贝、屏障与 Tensor Core
+
+相关：[H02](/architecture/ampere-pipelines-tensor-cores/)、[VIS15](/visuals/architecture-evolution/)、PB-R7-002。核对／访问日期 **2026-09-22**。Context7 `/websites/nvidia_cuda` 异步拷贝及分离屏障检索结果与 [Ampere Tuning Guide **13.4** 第 1.4.1–1.4.2 节](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html)（2026-09-13 更新）及 Programming Guide **13.4.2**（2026-09-10 更新）交叉核对：[LDGSTS 拷贝 4.12.1 节](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html#using-ldgsts)、[屏障初始化、阶段及线程束纠缠 4.10 节](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-barriers.html)、[WMMA 5.4.11 节](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-matrix-functions)以及[原生类型／资源表 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)。
+
+拷贝契约为非批量全局到共享移动，要求 4/8/16 B 对齐、消费前完成，以及复用前读取者完成。C++ WMMA 分块形状不同于调优指南的指令尺寸。在发布的 7.5/8.0/8.6/8.7 行中，仅 8.0 有原生 FP64 Tensor Core，三个 Ampere 行均有 BF16/TF32。单块共享上限为 64/163/99/163 KiB，超过 48 KiB 需动态分配并显式启用。8.7 行是硬件契约，不是已准入的 x86-64 运行配置。
+
+[13.4 Update 1 发布说明](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)还记录一个限定范围的 cuBLAS／Compute Sanitizer `cp.async` 补零诊断问题。它不能豁免这些原创纸面设计的消毒器检查，也不能建立本地结果。来源／权利处理与 SRC-CUDA-103 一致：仅链接权利方事实，不复制／改编示例或表格，没有新增第三方素材或 NOTICE 义务。架构执行与性能仍待硬件验证。
+
+**#59 当前增量：**106 个学习单元、24 个可运行示例、18 个实验、22 项可视化讲解、105 组练习及 105 组独立解答；383 个双语发布对／766 条源路由，483 条目录记录（117 个练习题库条目、207 个词条、119 条来源、18 个实验、22 项可视化）。R6 保留已完成冻结快照，R7 待复核。已有 41 个示例／实验主体仍待硬件验证；H01/H02/VIS15 证据数组为空。
+
 <span id="src-cuda-102" class="resource-target"></span>
 
 ### SRC-CUDA-102 — NCCL 多节点传输、日志与故障

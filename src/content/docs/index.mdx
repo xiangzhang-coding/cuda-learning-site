@@ -46,6 +46,8 @@ head:
 
 ## 当前发布路线
 
+**当前增量 — 2026-09-22，#59：**[H01：Turing 线程束安全](/architecture/turing-warp-safety/)先修为 `[F06,M06]`；[H02：Ampere 流水线与 Tensor Core](/architecture/ampere-pipelines-tensor-cores/)先修为 `[H01,M13,L08]`。两者均含练习（Exercise）和独立解答；[VIS15](/visuals/architecture-evolution/)比较完整的 Turing/Ampere 能力状态。当前有 **106 个学习单元（Learning Unit）、24 个可运行示例（Runnable Example）、18 个实验（Lab）、22 项可视化讲解（Visual Explainer）、105 组练习、105 组独立解答、383 个双语发布对（Publication Pair）／766 条源路由和 483 条目录记录：117 个练习题库（Practice Bank）条目、207 个术语表（Glossary）词条、119 条来源记录，以及实验和可视化**。下方 R6 计数描述冻结发布及较早增量，R7 待复核。已有 41 个主体仍待硬件验证（Pending Hardware Verification），H01/H02 架构执行与性能尚未观察。
+
 截至 **2026-09-21**，当前发布包含 G01–G09，共 104 个学习单元（Learning Unit）、24 个可运行示例、376 个双语发布对（Publication Pair）、752 条源路由和 478 条目录记录。从[设备归属](/multi-gpu/devices-contexts-ownership/)、[对等访问](/multi-gpu/peer-access-copies/)和[拓扑](/multi-gpu/topology-paths/)进入，再学习 [NCCL 契约](/multi-gpu/nccl-communicators-collectives/)、[流依赖](/multi-gpu/nccl-stream-dependencies/)与[通信计算重叠](/multi-gpu/communication-computation-overlap/)。[G07：把 PyTorch DDP 看作 NCCL 客户端](/multi-gpu/pytorch-ddp-nccl/)先修为 `[P04,P05,G04]`；[G08：NCCL 图捕获与注册](/multi-gpu/nccl-graph-capture/)先修为 `[G05,M14]`。[G09：多节点传输与故障](/multi-gpu/multi-node-transport-failures/)先修为 `[G03,G04,Q07]`。各单元外部场景及 [LAB18](/labs/pipeline-nccl-computation/) 仍待硬件验证（Pending Hardware Verification）。[T08](/triton/attention-capstone/) 保留融合注意力综合练习及 VIS18。稳定课程（Stable Curriculum）的先修关系不因使用 Python 而省略。
 
 [P08](/frameworks/first-custom-operator/)依赖 `[O04,F04,Q01,P04]`，[P09](/frameworks/operator-registration/)依赖 `[P08,Q01]`，[P10](/frameworks/operator-packaging/)依赖 `[P08,M18]`，均含完整练习与独立解答。[EX22](/examples/adjacent-energy/)、[LAB13](/labs/build-custom-operator/)都依赖 `[P08,P09]`，扩展 Toolkit 独立固定为 12.8.1，匹配 torch 2.11.0+cu128。编译与运行证据保持独立。
@@ -738,7 +740,7 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/practice/">
     <span>PRACTICE</span>
     <strong>练习题库</strong>
-    <small>用 115 道原创题练习证据、归属、拓扑、NCCL、内核、库、PyTorch 和 Triton。</small>
+    <small>用 117 道原创题练习架构门槛、线程束安全、证据、内核、库和框架。</small>
   </a>
   <a className="route-card" href="/glossary/">
     <span>LOOKUP</span>
@@ -748,7 +750,7 @@ A10-A14、Q06-Q13、L01-L13、VIS13 与 VIS18 的四个证据数组均为空。A
   <a className="route-card" href="/sources-and-versions/">
     <span>RECORD</span>
     <strong>来源与版本记录</strong>
-    <small>查看当前发布依据的 117 条接口与上游来源记录，以及各自复核日期。</small>
+    <small>查看当前发布依据的 119 条接口与上游来源记录，以及各自复核日期。</small>
   </a>
   <a className="route-card" href="/about/">
     <span>PROJECT</span>

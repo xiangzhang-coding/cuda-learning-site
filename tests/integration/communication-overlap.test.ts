@@ -27,7 +27,7 @@ describe('G06 communication/computation overlap publication', () => {
     expect(current.evidence.pendingHardwareVerification).toContain('LAB18');
     expect(current.evidence.noCompileCheckedClaim).toContain('LAB18');
     expect(current.evidence.runtimeVerified).toEqual([]);
-    expect(current.scope.visualExplainers).not.toContain('VIS15');
+    expect(current.scope.visualExplainers).toContain('VIS15');
   });
   it('ships an attributed original fixture without private captured data', async () => {
     const raw = await readFile('public/assets/overlap-fixtures/lab18-timeline.json', 'utf8');

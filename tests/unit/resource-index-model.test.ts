@@ -14,7 +14,7 @@ import {
 } from '../../src/resource-indexes/resource-index-model';
 import { TOOLCHAIN_CATALOG_RELATIONSHIPS } from '../helpers/toolchain-catalog-contract';
 
-const asOf = new Date('2026-09-21T12:00:00Z');
+const asOf = new Date('2026-09-22T12:00:00Z');
 
 function replaceRecord(planningId: string, replacement: (record: ResourceIndexRecord) => ResourceIndexRecord) {
   return RESOURCE_INDEX_RECORDS.map((record) =>
@@ -109,13 +109,13 @@ describe('resource index catalog', () => {
 
   it('validates the complete eligible production catalog and projects every index group', () => {
     expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf })).not.toThrow();
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(271 + currentPublication.scope.glossaryTerms);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(276 + currentPublication.scope.glossaryTerms);
     expect(
       Object.fromEntries(INDEX_GROUPS.map((group) => [
         group,
         projectResourceIndex(RESOURCE_INDEX_RECORDS, group, 'en', { asOf }).length,
       ])),
-    ).toEqual({ labs: 18, practice: 115, visuals: 21, glossary: currentPublication.scope.glossaryTerms, sources: 117 });
+    ).toEqual({ labs: 18, practice: 117, visuals: 22, glossary: currentPublication.scope.glossaryTerms, sources: 119 });
     for (const absentId of ['LAB19']) {
       expect(RESOURCE_INDEX_RECORDS.some(({ planningId }) => planningId === absentId)).toBe(false);
       expect(PUBLISHED_DESTINATIONS[absentId]).toBeUndefined();
@@ -657,6 +657,7 @@ describe('resource index catalog', () => {
       'VIS12',
       'VIS13',
       'VIS14',
+      'VIS15',
       'VIS16',
       'VIS17',
       'VIS18',

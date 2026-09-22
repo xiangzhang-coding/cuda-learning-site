@@ -535,6 +535,18 @@ const multiGpuPractice: readonly ResourceIndexRecord[] = [
 
 const practice: readonly ResourceIndexRecord[] = [
   {
+    planningId: 'PB-R7-001', group: 'practice', title: localized('稀疏掩码不能创造伙伴', 'A sparse mask cannot create a partner'),
+    href: localized('/practice/#pb-r7-001', '/en/practice/#pb-r7-001'),
+    resourceType: 'correctness-debugging', difficulty: 'intermediate', prerequisites: ['H01'], relatedUnits: ['H01'],
+    hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Turing guide 13.4'), reviewedOn: '2026-09-22',
+  },
+  {
+    planningId: 'PB-R7-002', group: 'practice', title: localized('更高 CC 不能证明容量与数值资格', 'A higher CC does not prove capacity or numerical eligibility'),
+    href: localized('/practice/#pb-r7-002', '/en/practice/#pb-r7-002'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['H02'], relatedUnits: ['H02'],
+    hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Ampere guide 13.4'), reviewedOn: '2026-09-22',
+  },
+  {
     planningId: 'PB-R0-001',
     group: 'practice',
     title: localized('修复 Evidence Status 记录', 'Repair an Evidence Status record'),
@@ -1969,6 +1981,13 @@ const practice: readonly ResourceIndexRecord[] = [
 
 const visuals: readonly ResourceIndexRecord[] = [
   {
+    planningId: 'VIS15', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS15.title,
+    href: PUBLISHED_DESTINATIONS.VIS15.href, resourceType: 'execution-model', difficulty: 'advanced',
+    prerequisites: ['H01', 'H02'], relatedUnits: ['F06', 'M13', 'L08'], hardwareGate: noCudaHardware,
+    versionGate: localized('指南 13.4.2；仅 Turing 7.5 与 Ampere 8.0/8.6/8.7。', 'Guide 13.4.2; only Turing 7.5 and Ampere 8.0/8.6/8.7.'),
+    reviewedOn: '2026-09-22',
+  },
+  {
     planningId: 'VIS16', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS16.title,
     href: PUBLISHED_DESTINATIONS.VIS16.href, resourceType: 'execution-model', difficulty: 'advanced',
     prerequisites: ['G04'], relatedUnits: ['G05'], hardwareGate: noCudaHardware,
@@ -2492,7 +2511,7 @@ const glossary: readonly ResourceIndexRecord[] = [
   glossaryRecord('TERM-207', 'memory mask · 内存掩码', 'kernel-vocabulary', ['T02'], 'Triton 3.7.1；逐元素控制内存操作，不缩小形状。', 'Triton 3.7.1; elementwise control of memory operations without shrinking shape.', '2026-09-14'),
 ];
 
-const multiGpuSources: readonly ResourceIndexRecord[] = [
+const multiGpuAndArchitectureSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-094', localized('设备与上下文归属', 'Device and context ownership'), 'cuda-version-record', ['G01'], localized('Runtime API 13.3.1；归档多设备指南 13.2.0。', 'Runtime API 13.3.1; archived multi-device guide 13.2.0.'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-095', localized('有方向的 peer 访问与完成', 'Directional peer access and completion'), 'cuda-version-record', ['G02'], localized('Peer API 13.3.1；13.2.0 事件、拷贝与 Linux IOMMU 合同。', 'Peer API 13.3.1; 13.2.0 event, copy and Linux IOMMU contracts.'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-096', localized('拓扑工具与路径证据边界', 'Topology tools and path-evidence boundaries'), 'linux-tool-record', ['G03'], localized('NVIDIA 滚动手册，2026-09-19 复核；必须记录安装 CLI 版本。', 'NVIDIA rolling manual reviewed 2026-09-19; installed CLI version must be recorded.'), '2026-09-19', '2026-09-19'),
@@ -2500,6 +2519,8 @@ const multiGpuSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-098', localized('NCCL 分组、流和错误进度', 'NCCL grouping, streams and error progress'), 'cuda-version-record', ['G05', 'EX24', 'LAB17'], same('NCCL 2.31.2; CUDA 13.3.1'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-099', localized('通信计算流水线与时间线证据', 'Communication/compute pipelines and timeline evidence'), 'cuda-version-record', ['G06', 'LAB18'], same('NCCL 2.31.2; CUDA 13.3.1; Nsight Systems 2026.5'), '2026-09-20', '2026-09-20'),
   sourceRecord('SRC-CUDA-100', localized('DDP、ProcessGroupNCCL 与有界诊断', 'DDP, ProcessGroupNCCL and bounded diagnosis'), 'cuda-version-record', ['G07'], same('PyTorch 2.11.0+cu128; packaged CUDA runtime 12.8.90; NCCL 2.28.9'), '2026-09-20', '2026-09-20'),
+  sourceRecord('SRC-CUDA-103', localized('Turing 调度、目标与版本边界', 'Turing scheduling, targets and version boundaries'), 'architecture-record', ['H01', 'VIS15'], same('Programming Guide 13.4.2; Turing 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
+  sourceRecord('SRC-CUDA-104', localized('Ampere 拷贝、屏障与 Tensor Core', 'Ampere copies, barriers and Tensor Cores'), 'architecture-record', ['H02', 'VIS15'], same('Programming Guide 13.4.2; Ampere 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-102', localized('NCCL 多节点传输、日志与故障', 'NCCL multi-node transport, logging and failures'), 'cuda-version-record', ['G09'], same('NCCL 2.31.2; nccl-tests b4d5beeb'), '2026-09-21', '2026-09-21'),
   sourceRecord('SRC-CUDA-101', localized('NCCL 捕获、注册与图混用', 'NCCL capture, registration and graph mixing'), 'cuda-version-record', ['G08'], same('NCCL 2.31.2; CUDA 13.3.1; nccl-tests b4d5beeb'), '2026-09-20', '2026-09-20'),
 ];
@@ -3498,5 +3519,5 @@ export const RESOURCE_INDEX_RECORDS: readonly ResourceIndexRecord[] = [
   ...visuals,
   ...glossary,
   ...sources,
-  ...multiGpuSources,
+  ...multiGpuAndArchitectureSources,
 ];

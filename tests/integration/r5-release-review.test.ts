@@ -17,9 +17,9 @@ describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R6', next: 'R7', status: 'pending' });
-    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09']);
-    expect(current.scope).toMatchObject({ publicationPairs: 376, sourceRoutes: 752,
-      exerciseSetPublicationPairs: 103, solutionSetPublicationPairs: 103, practiceBankEntries: 115, sourceRecords: 117 });
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02']);
+    expect(current.scope).toMatchObject({ publicationPairs: 383, sourceRoutes: 766,
+      exerciseSetPublicationPairs: 105, solutionSetPublicationPairs: 105, practiceBankEntries: 117, sourceRecords: 119 });
     const { nccl, r6Distributed, ...priorComponents } = current.compatibility.componentBoundaries;
     expect({ ...current.compatibility, componentBoundaries: priorComponents }).toEqual(release.compatibility);
     expect(nccl.version).toBe('2.31.2');
@@ -27,7 +27,7 @@ describe('R5 aggregate release review', () => {
       r6EvidenceNeutralLearningUnits: ids('G', 9),
       noCompileCheckedClaim: ['LAB18', 'EX24', 'LAB17', ...release.evidence.noCompileCheckedClaim],
       pendingHardwareVerification: ['LAB18', 'EX24', 'LAB17', ...release.evidence.pendingHardwareVerification],
-      evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS16'].sort(),
+      evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS15', 'VIS16'].sort(),
     });
     expect(release.scope.learningUnits).toEqual([...r4.scope.learningUnits, ...ids('P', 12), ...ids('T', 8)]);
     expect(release.scope.practiceBankEntries).toBeGreaterThanOrEqual(95);

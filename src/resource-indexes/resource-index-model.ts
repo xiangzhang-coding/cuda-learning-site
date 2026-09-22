@@ -73,6 +73,34 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  H01: {
+    href: { 'zh-CN': '/architecture/turing-warp-safety/', en: '/en/architecture/turing-warp-safety/' },
+    title: { 'zh-CN': 'H01：Turing 与显式线程束安全', en: 'H01: Turing and Explicit Warp Safety' }, prerequisites: ['F06', 'M06'],
+  },
+  'H01-EXERCISES': {
+    href: { 'zh-CN': '/architecture/turing-warp-safety/exercises/', en: '/en/architecture/turing-warp-safety/exercises/' },
+    title: { 'zh-CN': 'H01 练习：修复线程束并检查目标门槛', en: 'H01 Exercises: Repair the Warp and Gate the Target' }, prerequisites: ['H01'],
+  },
+  'H01-SOLUTIONS': {
+    href: { 'zh-CN': '/architecture/turing-warp-safety/solutions/', en: '/en/architecture/turing-warp-safety/solutions/' },
+    title: { 'zh-CN': 'H01 解答：发布、复用与分派', en: 'H01 Solutions: Publication, Reuse and Dispatch' }, prerequisites: ['H01-EXERCISES'],
+  },
+  H02: {
+    href: { 'zh-CN': '/architecture/ampere-pipelines-tensor-cores/', en: '/en/architecture/ampere-pipelines-tensor-cores/' },
+    title: { 'zh-CN': 'H02：Ampere 流水线与 Tensor Core 契约', en: 'H02: Ampere Pipelines and Tensor Core Contracts' }, prerequisites: ['H01', 'M13', 'L08'],
+  },
+  'H02-EXERCISES': {
+    href: { 'zh-CN': '/architecture/ampere-pipelines-tensor-cores/exercises/', en: '/en/architecture/ampere-pipelines-tensor-cores/exercises/' },
+    title: { 'zh-CN': 'H02 练习：审查阶段与功能门槛', en: 'H02 Exercises: Audit Stages and Feature Gates' }, prerequisites: ['H02'],
+  },
+  'H02-SOLUTIONS': {
+    href: { 'zh-CN': '/architecture/ampere-pipelines-tensor-cores/solutions/', en: '/en/architecture/ampere-pipelines-tensor-cores/solutions/' },
+    title: { 'zh-CN': 'H02 解答：等待、发布、读取、释放', en: 'H02 Solutions: Wait, Publish, Read, Release' }, prerequisites: ['H02-EXERCISES'],
+  },
+  VIS15: {
+    href: { 'zh-CN': '/visuals/architecture-evolution/', en: '/en/visuals/architecture-evolution/' },
+    title: { 'zh-CN': 'VIS15：比较 Turing 与 Ampere 契约', en: 'VIS15: Compare Turing and Ampere Contracts' }, prerequisites: ['H01', 'H02'], indexGroup: 'visuals',
+  },
   G09: {
     href: { 'zh-CN': '/multi-gpu/multi-node-transport-failures/', en: '/en/multi-gpu/multi-node-transport-failures/' },
     title: { 'zh-CN': 'G09：追踪多节点传输与故障证据', en: 'G09: Trace Multi-Node Transport and Failure Evidence' }, prerequisites: ['G03', 'G04', 'Q07'],

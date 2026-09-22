@@ -19,15 +19,17 @@ describe('R6 aggregate release review', () => {
   it('freezes all prior scope and G01-G09 with closed public dependencies and real catalog counts', () => {
     expect(release).toMatchObject({ releaseId: 'R6', schemaVersion: 7, reviewDate: '2026-09-22' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R6', next: 'R7', status: 'pending' });
-    expect(current.scope).toEqual(release.scope);
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'H01', 'H02']);
+    expect(current.scope.visualExplainers).toEqual([...release.scope.visualExplainers, 'VIS15'].sort());
     expect(current.compatibility).toEqual(release.compatibility);
-    expect(current.evidence).toEqual(release.evidence);
+    expect(current.evidence).toEqual({ ...release.evidence,
+      evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS15'].sort() });
     expect(release.scope.learningUnits).toEqual([...r5.scope.learningUnits, ...ids]);
     expect(release.scope).toMatchObject({ publicationPairs: 376, sourceRoutes: 752,
       exerciseSetPublicationPairs: 103, solutionSetPublicationPairs: 103, practiceBankEntries: 115,
       sourceRecords: 117, glossaryTerms: 207 });
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(478);
-    expect(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice')).toHaveLength(115);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(483);
+    expect(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice')).toHaveLength(117);
     const completed = new Set<string>();
     const visit = (id: string, visiting = new Set<string>()) => {
       expect(visiting.has(id), `dependency cycle at ${id}`).toBe(false);

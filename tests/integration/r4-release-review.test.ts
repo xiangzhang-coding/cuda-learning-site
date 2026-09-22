@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '115'], ['glossary', '207'], ['sources-and-versions', '117']]) {
+        for (const [slug, count] of [['practice', '117'], ['glossary', '207'], ['sources-and-versions', '119']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -558,7 +558,7 @@ describe('R4 release review', () => {
 
       const catalogIds: string[] = [];
       for (const [slug, group, count] of [
-        ['labs', 'labs', 18], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 21],
+        ['labs', 'labs', 18], ['practice', 'practice', current.scope.practiceBankEntries], ['visuals', 'visuals', 22],
         ['glossary', 'glossary', current.scope.glossaryTerms], ['sources-and-versions', 'sources', current.scope.sourceRecords],
       ] as const) {
         const route = `${locale === 'en' ? '/en' : ''}/${slug}/`;
@@ -569,7 +569,7 @@ describe('R4 release review', () => {
         expect(new Set(ids).size).toBe(count);
         expectExactMembers(ids, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).map((record) => record.planningId));
         catalogIds.push(...ids);
-        if (group === 'visuals') expectExactMembers(ids, [...visualExplainers, 'VIS16', 'VIS17']);
+        if (group === 'visuals') expectExactMembers(ids, [...visualExplainers, 'VIS15', 'VIS16', 'VIS17']);
         if (group === 'practice' || group === 'glossary' || group === 'sources') {
           const prefix = { practice: 'pb-', glossary: 'term-', sources: 'src-' }[group];
           expectExactMembers([...document.querySelectorAll(`span[id^="${prefix}"]`)].map((node) => node.id.toUpperCase()), ids);
@@ -619,7 +619,9 @@ describe('R4 release review', () => {
       expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018', 'PB-R5-019', 'PB-R5-020']);
       expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08']);
       expect(catalogIds.filter((id) => /^PB-R6-/.test(id)).sort()).toEqual(['PB-R6-001', 'PB-R6-002', 'PB-R6-003', 'PB-R6-004', 'PB-R6-005', 'PB-R6-006', 'PB-R6-007', 'PB-R6-008', 'PB-R6-009', 'PB-R6-010', 'PB-R6-011', 'PB-R6-012', 'PB-R6-013']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[7-9]-|^(?:EX25|LAB19)$/.test(id))).toBe(false);
+      expect([...units.keys()].filter(id => /^H\d{2}$/.test(id)).sort()).toEqual(['H01', 'H02']);
+      expect(catalogIds.filter(id => /^PB-R7-/.test(id)).sort()).toEqual(['PB-R7-001', 'PB-R7-002']);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[8-9]-|^(?:EX25|LAB19)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(
@@ -629,7 +631,7 @@ describe('R4 release review', () => {
       ['', 'en/'].flatMap((prefix) => ['queued-work-timing', 'streams-and-storage-lifetime', 'mixed-precision-contracts', 'python-to-cuda-profiling', 'first-custom-operator', 'operator-registration', 'operator-packaging', 'profile-led-optimization', 'sdpa-dispatch-verification']
         .flatMap((slug) => ['', 'exercises/', 'solutions/'].map((suffix) => `/${prefix}frameworks/${slug}/${suffix}`))).sort(),
     );
-    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P|T|G)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
+    expect(Object.keys(PUBLISHED_DESTINATIONS).filter((id) => /^(?:O|F|M|A|Q|L|P|T|G|H)\d{2}$/.test(id)).sort()).toEqual([...current.scope.learningUnits].sort());
     expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB19');
   }, 30_000);
 });

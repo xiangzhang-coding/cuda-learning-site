@@ -3,7 +3,7 @@ title: 可视化讲解索引
 description: 按概念、相关学习单元（Learning Unit）和版本边界查找当前完整发布的可视化讲解。
 pairId: visuals-index
 counterpart: /en/visuals/
-factCheckDate: '2026-09-19'
+factCheckDate: '2026-09-22'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: visuals-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-19' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -26,7 +26,7 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/visuals/" lang="en">Read the English counterpart</a>
 
-本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。截至 2026-09-19，共有 21 项讲解：VIS01-VIS14、[VIS16 集合通信路径](/visuals/collective-paths/)、[VIS17 SIMT/Triton 映射](/visuals/simt-triton-mapping/)与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)使用十七个独立页面；VIS19-VIS22 嵌入各自学习单元，四张卡片直接深链到页内锚点，导航不会复制页面。
+本索引只列出已经形成完整双语发布对（Publication Pair）、同时提供交互与静态回退的可视化讲解（Visual Explainer）。截至 2026-09-22，共有 22 项讲解：VIS01-VIS18 使用十八个独立页面，包括 [VIS15 Turing/Ampere 契约](/visuals/architecture-evolution/)、[VIS16 集合通信路径](/visuals/collective-paths/)、[VIS17 SIMT/Triton 映射](/visuals/simt-triton-mapping/)与 [VIS18 Attention Memory Traffic](/visuals/attention-memory-traffic/)。VIS19-VIS22 嵌入各自学习单元，四张卡片直接深链到页内锚点，导航不会复制页面。
 
 ## 已发布可视化讲解
 
@@ -38,4 +38,4 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 ## 证据边界
 
-全部 21 项可视化讲解只在浏览器中运行确定性教学模型，保留静态或文字回退，不执行 CUDA。VIS16 模拟合成消息路径，不选择 NCCL 算法。VIS18 的序列／分块值、逻辑字节表与原创 SVG 都属于静态教学分析：它不查询 GPU、不观察实际流量、不选择后端或预测加速比，四个证据数组为空。交互、静态回退和工具文档不授予 CUDA 证据。复核日期：**2026-09-19**。
+全部 22 项可视化讲解只在浏览器中运行确定性教学模型，保留静态或文字回退，不执行 CUDA。VIS15 筛选文档契约，不检测硬件。VIS16 模拟合成消息路径，不选择 NCCL 算法。VIS18 的序列／分块值、逻辑字节表与原创 SVG 都属于静态教学分析：它不查询 GPU、不观察实际流量、不选择后端或预测加速比，四个证据数组为空。交互、静态回退和工具文档不授予 CUDA 证据。复核日期：**2026-09-22**。

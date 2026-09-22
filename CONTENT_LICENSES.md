@@ -1,5 +1,20 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## H01/H02/VIS15 source rights — 2026-09-22
+
+Issue #59 adds original bilingual prose, paper fixtures, Exercises/separate
+solutions, PB-R7-001/002 and a static capability comparison under CC BY 4.0.
+The visual implementation, model and tests are original Apache-2.0 software.
+NVIDIA Programming Guide 13.4.2, Turing/Ampere Tuning Guides 13.4 and release
+notes 13.4 Update 1 retain their proprietary copyright and Notices sections;
+they are linked for facts, not relicensed as site content. No owner code,
+sample, figure, table or benchmark is copied or adapted; no third-party asset
+is added and no new NOTICE obligation arises. Existing exact dependency
+license checks remain required. Sources are recorded as SRC-CUDA-103/104.
+Current inventory is 383 Publication Pairs / 766 routes, 106 Learning Units,
+105 Exercise/solution sets and 483 catalog records. The R6 rights census below
+is historical. This review grants no compilation or runtime evidence.
+
 ## R6 aggregate rights review — 2026-09-22
 
 The schema-7 R6 snapshot includes 104 Learning Units, 24 Runnable Examples,

@@ -1026,6 +1026,28 @@ Historical #53 increment: G04/G05, EX24/LAB17/VIS16 and SRC-CUDA-097/098 brought
 
 The 2026-09-19 G01–G03 increment adds SRC-CUDA-094/095/096, bringing the source catalog to 111 records. R5's completed release snapshot remains historical; R6 is pending. No new CUDA evidence is claimed.
 
+<span id="src-cuda-103" class="resource-target"></span>
+
+### SRC-CUDA-103 — Turing scheduling, targets and version boundaries
+
+Related: [H01](/en/architecture/turing-warp-safety/), [VIS15](/en/visuals/architecture-evolution/), PB-R7-001. Reviewed/accessed **2026-09-22**. Current Context7 `/websites/nvidia_cuda` discovery covered ITS, warp masks and compiler targets; exact NVIDIA sections were then checked directly. Turing guide **13.4**, updated 2026-09-13: [ITS](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html#independent-thread-scheduling), [scheduling](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html#instruction-scheduling), [occupancy](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html#occupancy). ITS originates in Volta; Turing is CC 7.5. Scheduler counts are not measured occupancy or launch recommendations.
+
+Programming Guide **13.4.2**, updated 2026-09-10: [warp synchronization](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-synchronization-function), [compute-capability Tables 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [NVCC targets](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/nvcc.html#nvcc-ptx-and-cubin-generation). `--list-gpu-arch` lists virtual targets and `--list-gpu-code` real targets; use the code/option definitions, not the reversed wording in the guide's introductory sentence. A compile target, runtime device query and inspected image answer different questions.
+
+[Release notes **13.4 Update 1**, sections 2.1–2.3](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) list NVCC 13.4.92, CCCL 3.4.3 and PTX ISA 9.4. These are separately dated current comparisons; they do not change the site's pinned 11.8.0/12.9.2/13.3.1 Toolkit Lanes or grant a 13.4 build result. H01/H02 propose the existing 13.3.1 environment, not the live docs' toolchain. No source/code/sample/figure/table is copied or adapted. NVIDIA documentation is copyrighted proprietary documentation, not Apache-2.0 or CC BY 4.0; its Notices sections govern it. Original prose, pseudocode and comparisons are CC BY 4.0; site implementation/tests are Apache-2.0. Source review grants no hardware evidence.
+
+<span id="src-cuda-104" class="resource-target"></span>
+
+### SRC-CUDA-104 — Ampere copies, barriers and Tensor Cores
+
+Related: [H02](/en/architecture/ampere-pipelines-tensor-cores/), [VIS15](/en/visuals/architecture-evolution/), PB-R7-002. Reviewed/accessed **2026-09-22**. Context7 `/websites/nvidia_cuda` discovery on asynchronous copies and split barriers was checked against [Ampere Tuning Guide **13.4**, §§1.4.1–1.4.2](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html), updated 2026-09-13, and Programming Guide **13.4.2**, updated 2026-09-10: [LDGSTS copies §4.12.1](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html#using-ldgsts), [barrier initialization, phases and warp entanglement §4.10](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-barriers.html), [WMMA §5.4.11](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-matrix-functions), and [native type/resource Tables 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html).
+
+The copy contract is non-bulk global-to-shared movement with 4/8/16 B alignment, completion before consumption and reader completion before reuse. C++ WMMA tile sizes are distinct from the tuning guide's instruction sizes. Within the published 7.5/8.0/8.6/8.7 rows, only 8.0 has native FP64 Tensor Cores; BF16/TF32 are present on the three Ampere rows. Per-block shared limits are 64/163/99/163 KiB, with dynamic allocation and opt-in above 48 KiB. The 8.7 row is a hardware contract, not an admitted x86-64 runtime configuration.
+
+The [13.4 Update 1 release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) also record a narrowly scoped cuBLAS/Compute Sanitizer `cp.async` zero-fill diagnostic issue. That does not waive sanitizer checks for these original paper designs or establish any local result. Source/rights disposition matches SRC-CUDA-103: linked owner facts only, no copied/adapted sample or table, no new third-party asset or changed NOTICE obligation. Architecture execution and performance remain Pending Hardware Verification.
+
+**#59 current increment:** 106 Learning Units, 24 Runnable Examples, 18 Labs, 22 Visual Explainers, 105 Exercise sets and 105 separate solution sets; 383 Publication Pairs / 766 source routes, 483 catalog records (117 Practice Bank entries, 207 terms, 119 sources, 18 Labs, 22 visuals). R6 remains the frozen completed release; R7 is pending. Existing 41 Example/Lab subjects remain Pending Hardware Verification; H01/H02/VIS15 have empty evidence arrays.
+
 <span id="src-cuda-102" class="resource-target"></span>
 
 ### SRC-CUDA-102 — NCCL multi-node transport, logging and failures

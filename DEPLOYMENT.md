@@ -1,5 +1,14 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Current architecture increment — 2026-09-22
+
+Issue #59 extends `/publication.json` to 383 Publication Pairs / 766 routes,
+106 Learning Units, 22 visuals, 105 Exercise/solution sets and 483 catalog
+records (117 practice, 207 glossary, 119 sources, 18 Labs, 22 visuals).
+`/release.json` continues to identify frozen R6. H01/H02/VIS15 add no GPU
+evidence or Reference Environment; architecture execution and performance
+remain Pending Hardware Verification. R7 aggregate acceptance is pending.
+
 ## R6 release acceptance
 
 Aggregate static review: **2026-09-22**. Schema 7 `src/r6-release-manifest.json`

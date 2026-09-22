@@ -38,6 +38,8 @@ CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU
 
 ## Current scope
 
+**2026-09-22 architecture increment (#59):** [H01](/en/architecture/turing-warp-safety/) `[F06,M06]`, [H02](/en/architecture/ampere-pipelines-tensor-cores/) `[H01,M13,L08]` and [VIS15](/en/visuals/architecture-evolution/) bring current scope to 106 Learning Units, 24 Runnable Examples, 18 Labs, 22 Visual Explainers, 105 Exercise sets, 105 separate solution sets, 383 Publication Pairs, 766 source routes and 483 catalog records: 117 Practice Bank entries, 207 Glossary terms, 119 source records, plus Labs/visuals. Existing 41 subjects remain Pending Hardware Verification. H01/H02/VIS15 add no runtime evidence. R6 statistics below are the frozen release; R7 remains pending.
+
 The site maintains a prerequisite-bearing Stable Curriculum alongside Runnable Examples, external Labs, Exercises, Visual Explainers, and a Glossary. Only complete material enters navigation. The website remains static, with no account, progress tracking, server application, API, or in-browser CUDA execution.
 
 The R3 Stable Curriculum release completed its bilingual review in [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32), publishing O01-O08, F01-F08, M01-M19, A01-A14, and Q01-Q13 for 62 Learning Units. [A12](/en/algorithms/sparse-formats-spmv/) establishes COO and CSR, storage, and SpMV contracts. [A13](/en/algorithms/sparse-matrix-multiplication-preprocessing/) establishes SpMM, descriptor, workspace, and preprocessing decision boundaries.

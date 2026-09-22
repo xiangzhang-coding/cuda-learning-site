@@ -427,6 +427,7 @@ describe('Exercises and Practice Bank contract', () => {
       'utf8',
     );
     const entryIds = [
+      'PB-R7-001', 'PB-R7-002',
       'PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005',
       'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
       'PB-R1-006', 'PB-R1-007', 'PB-R1-008',
@@ -462,6 +463,8 @@ describe('Exercises and Practice Bank contract', () => {
       /^## (PB-R\d+-\d{3})[^\n]*\n([\s\S]*?)(?=^## PB-|^## (?:复核记录|Review record)|(?![\s\S]))/gm,
     )].map(([, id, content]) => ({ id, content }));
     const focusedPrerequisitePaths: Readonly<Record<string, string>> = {
+      'PB-R7-001': 'architecture/turing-warp-safety',
+      'PB-R7-002': 'architecture/ampere-pipelines-tensor-cores',
       'PB-R1-009': 'foundations/asynchronous-errors',
       'PB-R1-010': 'foundations/compute-capability',
       'PB-R1-011': 'foundations/runtime-driver-api',
@@ -860,7 +863,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-013': ['multi-gpu/multi-node-transport-failures'],
     };
 
-    expect(entrySections).toHaveLength(115);
+    expect(entrySections).toHaveLength(117);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];
@@ -898,6 +901,8 @@ describe('Exercises and Practice Bank contract', () => {
             ? /\/(?:en\/)?triton\//
           : prerequisitePath?.startsWith('multi-gpu/')
             ? /\/(?:en\/)?multi-gpu\//
+          : prerequisitePath?.startsWith('architecture/')
+            ? /\/(?:en\/)?architecture\//
         : /\/(?:en\/)?(?:start|foundations)\//;
       expect(sectionLinks.some((link) => prerequisiteRoutePattern.test(link))).toBe(true);
       if (prerequisitePath) {
