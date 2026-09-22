@@ -724,7 +724,7 @@ test('serves the exact R6 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(268 + currentPublicationManifest.scope.glossaryTerms);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(478);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
