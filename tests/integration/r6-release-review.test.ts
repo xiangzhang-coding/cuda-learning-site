@@ -63,6 +63,11 @@ describe('R6 aggregate release review', () => {
       expect(release.evidence.noCompileCheckedClaim).toContain(id);
       expect(release.evidence.pendingHardwareVerification).toContain(id);
     }
+    for (const file of ['DEPLOYMENT.md', 'src/content/docs/en/sources-and-versions.mdx', 'src/content/docs/sources-and-versions.mdx']) {
+      const source = await read(file);
+      expect(source, file).toMatch(/LOCAL_RANK[^\n]*(?:shared visible-device list|共享可见设备列表)/);
+      expect(source, file).not.toMatch(/one visible GPU per process|逐进程一个可见 GPU/i);
+    }
   });
 
   it.each(['zh-CN', 'en'] as const)('renders the bilingual R6 closure and 13 distinct qualified questions in %s', async (locale) => {

@@ -87,7 +87,7 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 | G01-G03 设备、peer、拓扑 | Runtime API 13.3.1、Programming Guide 13.2.0 与有日期的 nvidia-smi 手册分别核对。记录 GPU 数量、可见性、本地编号映射、上下文、peer 能力与权限；本地拓扑不是网络路由或带宽结果。 |
 | EX24 / LAB17 / LAB18 | 原生 Ubuntu 24.04 x86-64、Toolkit 13.3.1、NVCC 13.3.73、NCCL 2.31.2-1+cuda13.3、driver 610.43.02、至少两块 CC 7.5+ GPU。单进程多设备示例逐设备拥有通信器／流；成功入队不等于完成。 |
 | G06 重叠 | Nsight Systems 2026.5 独立于历史分析器记录。只有同设备匹配进程／流／依赖的合格轨迹可支持局部重叠；分析开销、预热、工作量、样本、计时与无分析器对照必须记录。LAB18 时间线为无量纲合成夹具。 |
-| G07 DDP | CPython 3.12.14、torch 2.11.0+cu128、随包 NCCL 2.28.9，使用该 wheel 的 torchrun；不继承独立 NCCL 2.31.2 证据。逐进程一个可见 GPU；记录 LOCAL_RANK、组成员、梯度权重、流等待与故障清理。 |
+| G07 DDP | CPython 3.12.14、torch 2.11.0+cu128、随包 NCCL 2.28.9，使用该 wheel 的 torchrun；不继承独立 NCCL 2.31.2 证据。逐进程独占分配一块 GPU，通过 LOCAL_RANK 从共享可见设备列表中选择；记录组成员、梯度权重、流等待与故障清理。 |
 | G08 图／注册 | NCCL 2.31.2 精确源码约束全 rank 捕获／重放、分配器、偏移、图与缓冲区寿命。注册成功不证明 NVLS、RDMA、PXN 路径或性能；禁用混用后的未完成启动区间与排序限制仍需遵守。 |
 | G09 多节点 | 多节点启动器、provider、网络与硬件尚未选定；准入必须固定版本并记录进程树、节点／rank 映射、NIC/HCA、传输与失败终止方法。引导成功、Socket 回退或启动器退出不证明数据路径、恢复或远端终止。 |
 

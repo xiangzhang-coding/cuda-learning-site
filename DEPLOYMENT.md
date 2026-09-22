@@ -26,7 +26,8 @@ deploy commands and clean-main guard, comparing built R6/current manifests.
 EX24/LAB17/LAB18 select native Linux, at least two CC 7.5+ GPUs, Toolkit 13.3.1,
 NVCC 13.3.73, driver 610.43.02 and NCCL 2.31.2-1+cuda13.3. LAB18 separately
 requires Nsight Systems 2026.5. DDP uses CPython 3.12.14, torch 2.11.0+cu128,
-packaged NCCL 2.28.9 and that wheel's torchrun, one visible GPU per process.
+packaged NCCL 2.28.9 and that wheel's torchrun, one assigned GPU per process,
+selected by LOCAL_RANK from the shared visible-device list.
 Multi-node launcher/provider/network/hardware remain unselected admission gates.
 Record GPU count, visibility, topology, process/rank/stream ownership, complete
 Environment Manifest, loaded versions, commands, correctness and measurement
