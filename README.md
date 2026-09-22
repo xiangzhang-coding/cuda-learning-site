@@ -1,5 +1,17 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## Current architecture increment — issue #59, 2026-09-22
+
+H01/H02 publish complete bilingual Learning Units, Exercises and separate solutions;
+VIS15 compares only complete Turing 7.5 and Ampere 8.0/8.6/8.7 contracts with
+deterministic filters and a complete original static table. Exact prerequisites
+are H01 `[F06,M06]`, H02 `[H01,M13,L08]`, VIS15 `[H01,H02]`.
+Current scope: 106 Learning Units, 24 Runnable Examples, 18 Labs, 22 visuals,
+105 Exercise/solution sets, 383 Publication Pairs / 766 routes and 483 catalog
+records (117 Practice Bank entries, 207 terms, 119 sources, 18 Labs, 22 visuals).
+All new evidence arrays are empty; architecture execution/performance remains
+Pending Hardware Verification. R6 below is frozen; R7 aggregate review is pending.
+
 ## R6 aggregate release review — 2026-09-22
 
 R6 is the latest completed aggregate static review. Schema 7

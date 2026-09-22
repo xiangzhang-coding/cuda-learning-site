@@ -13,13 +13,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(752);
-    expect(new Set(routes).size).toBe(752);
+    expect(routes).toHaveLength(766);
+    expect(new Set(routes).size).toBe(766);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
     expect(routeBatches).toHaveLength(64);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(376);
+      expect(localized).toHaveLength(383);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

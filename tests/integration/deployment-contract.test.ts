@@ -168,13 +168,13 @@ describe('Cloudflare assets-only deployment contract', () => {
       reviewDate: '2026-09-22',
       releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
       scope: {
-        publicationPairs: 376,
-        sourceRoutes: 752,
-        exerciseSetPublicationPairs: 103,
-        solutionSetPublicationPairs: 103,
-        practiceBankEntries: 115,
+        publicationPairs: 383,
+        sourceRoutes: 766,
+        exerciseSetPublicationPairs: 105,
+        solutionSetPublicationPairs: 105,
+        practiceBankEntries: 117,
         glossaryTerms: 207,
-        sourceRecords: 117,
+        sourceRecords: 119,
       },
       compatibility: {
         componentBoundaries: {
@@ -249,17 +249,17 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L12');
     expect(publication.evidence.noCompileCheckedClaim).not.toContain('L13');
     expect(publication.evidence.pendingHardwareVerification).not.toContain('L13');
-    expect(publication.scope.learningUnits).toHaveLength(104);
+    expect(publication.scope.learningUnits).toHaveLength(106);
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07']));
     expect(publication.scope.learningUnits).toEqual(expect.arrayContaining(['A10', 'A11', 'A12', 'A13', 'A14', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13', 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13']));
     expect(publication.scope.runnableExamples).toHaveLength(24);
     expect(publication.scope.runnableExamples).toEqual(expect.arrayContaining(['EX17', 'EX18', 'EX19', 'EX20', 'EX21']));
     expect(publication.scope.labs).toHaveLength(18);
     expect(publication.scope.labs).toEqual(expect.arrayContaining(['LAB06', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12']));
-    expect(publication.scope.visualExplainers).toHaveLength(21);
+    expect(publication.scope.visualExplainers).toHaveLength(22);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
     expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
-      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(478);
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(483);
     expect(publication.evidence.pendingHardwareVerification).toHaveLength(41);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',

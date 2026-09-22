@@ -1,0 +1,64 @@
+---
+title: 'VIS15: Compare Turing and Ampere Contracts'
+description: Filter exact compute capabilities and features while retaining a complete original static comparison.
+pairId: vis15
+counterpart: /visuals/architecture-evolution/
+factCheckDate: '2026-09-22'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, controls, model, fallback, evidence, sources]
+resourceKind: visual-explainer
+unitId: VIS15
+prerequisites: [H01, H02]
+relatedUnits: [F06, M13, L08]
+hardwareGate: none
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'CUDA Compute Capabilities', url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html', version: '13.4.2', platform: 'Source-reviewed comparison, not device detection', accessDate: '2026-09-22' }
+  - { title: 'Turing Tuning Guide', url: 'https://docs.nvidia.com/cuda/turing-tuning-guide/index.html', version: '13.4', platform: 'CC 7.5 contracts', accessDate: '2026-09-22' }
+  - { title: 'Ampere Tuning Guide', url: 'https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html', version: '13.4', platform: 'CC 8.x contracts', accessDate: '2026-09-22' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis15 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,controls,model,fallback,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS15 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'H01,H02' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import ArchitectureEvolutionExplorer from '../../../../components/ArchitectureEvolutionExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/visuals/architecture-evolution/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose and prerequisites
+
+Exact ordered prerequisites: [H01](/en/architecture/turing-warp-safety/), [H02](/en/architecture/ampere-pipelines-tensor-cores/). Compare a portable explicit-synchronization baseline with documented feature additions. Turing inherited independent thread scheduling from Volta. Ampere adds hardware copy and split-barrier paths, but native FP64 Tensor Cores are not shared by all 8.x rows. Read a capability contract, not a product ranking.
+
+<ArchitectureEvolutionExplorer locale="en" />
+
+## Controls
+
+Select an **exact compute capability** and a **required feature**. Filters intersect; choosing CC 8.6 and native FP64 Tensor Cores produces an explained empty result, not automatic fallback to 8.0. Reset returns both filters to all reviewed states and focuses the CC select. Native select/button keyboard behavior applies; results are announced politely. There is no animation, autoplay, timer, randomness, persistence or GPU query. Reload starts with all four states. An unknown filter is rejected and the previous selection is retained.
+
+## Model contract
+
+Order is fixed: Turing 7.5, Ampere 8.0, 8.6, 8.7. Every published row has a target, shared-memory limit and all seven feature decisions. Future architectures have no options, rows or placeholders. Feature availability is the reviewed hardware contract, not the set of all instructions accepted by an API or compiler. FP64 here means **native Tensor Core inputs**, not ordinary double arithmetic. FP16/BF16/TF32/FP64 still require H02's precise WMMA types, shapes, layout, participation and caller-approved precision.
+
+The 64/163/99/163 KiB values are per-block maxima; more than 48 KiB requires dynamic shared memory and opt-in. They are not measured occupancy or device memory capacity. The portable site scope is CC 7.5+ with a problem fitting within 8 GB; the Modern Single-GPU Capability Tier requires CC 8.0+ and at least 8 GB. An 8.7 row does not select or verify a platform environment. Consult H02 before proposing execution.
+
+## Original static comparison
+
+The complete comparison is server-rendered and always visible, including when JavaScript is unavailable. Enhancement reveals controls only after the required elements and initial result are ready. On narrow screens, result cards stack and the comparison table scrolls inside a keyboard-focusable region. Text describes each decision without relying on color. Reduced motion requires no alternate progression; print retains the complete table while hiding controls and duplicate results.
+
+## Evidence boundary
+
+The browser executes no CUDA and grants no Compile-Checked, Community-Observed or Runtime-Verified status. Metadata has four empty evidence arrays. Architecture behavior, correctness, selected instructions, overlap and performance remain **Pending Hardware Verification**. The comparison cannot replace an Environment Manifest, qualifying Reference Environment or measured compute-capability contract.
+
+## Sources and licensing
+
+Reviewed **2026-09-22** against [CUDA capabilities, Tables 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [Turing tuning](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html) and [Ampere tuning](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html). [SRC-CUDA-103](/en/sources-and-versions/#src-cuda-103) and [SRC-CUDA-104](/en/sources-and-versions/#src-cuda-104) record current Context7 discovery, exact owner sections and dated versions. The layout, comparison, explanations and filters are original; prose is CC BY 4.0 and implementation is Apache-2.0. No owner diagram or table was copied or adapted; owner material retains its notices.

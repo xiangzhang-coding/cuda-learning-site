@@ -1,0 +1,64 @@
+---
+title: 'VIS15：比较 Turing 与 Ampere 契约'
+description: 按精确计算能力和功能筛选，同时保留完整原创静态对照。
+pairId: vis15
+counterpart: /en/visuals/architecture-evolution/
+factCheckDate: '2026-09-22'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, controls, model, fallback, evidence, sources]
+resourceKind: visual-explainer
+unitId: VIS15
+prerequisites: [H01, H02]
+relatedUnits: [F06, M13, L08]
+hardwareGate: none
+evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
+sources:
+  - { title: 'CUDA Compute Capabilities', url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html', version: '13.4.2', platform: 'Source-reviewed comparison, not device detection', accessDate: '2026-09-22' }
+  - { title: 'Turing Tuning Guide', url: 'https://docs.nvidia.com/cuda/turing-tuning-guide/index.html', version: '13.4', platform: 'CC 7.5 contracts', accessDate: '2026-09-22' }
+  - { title: 'Ampere Tuning Guide', url: 'https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html', version: '13.4', platform: 'CC 8.x contracts', accessDate: '2026-09-22' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis15 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,controls,model,fallback,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS15 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'H01,H02' } }
+  - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import ArchitectureEvolutionExplorer from '../../../components/ArchitectureEvolutionExplorer.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/visuals/architecture-evolution/" lang="en">Read the English counterpart</a>
+
+## 目的与先修
+
+精确有序先修：[H01](/architecture/turing-warp-safety/)、[H02](/architecture/ampere-pipelines-tensor-cores/)。比较显式同步可移植基线与文档记录的新增功能。Turing 从 Volta 继承独立线程调度（Independent Thread Scheduling）。Ampere 增加硬件拷贝与分离屏障路径，但并非全部 8.x 行都有原生 FP64 Tensor Core。请按计算能力（Compute Capability，CC）契约理解，不按产品排名理解。
+
+<ArchitectureEvolutionExplorer locale="zh-CN" />
+
+## 控件
+
+选择**精确计算能力**与**所需功能**。两个筛选条件取交集：CC 8.6 加原生 FP64 Tensor Core 会给出有解释的空结果，不会自动回退为 8.0。重置恢复全部已核对状态，并把焦点移回 CC 选择框。使用原生选择框／按钮的键盘行为，结果通过礼貌实时区域播报。没有动画、自动播放、定时器、随机数、持久化或 GPU 查询。刷新后显示全部四种状态。未知筛选值会被拒绝并保留此前选择。
+
+## 模型契约
+
+顺序固定：Turing 7.5，Ampere 8.0、8.6、8.7。每个已发布状态都具有目标、共享内存上限和全部七项功能结论。后续架构没有选项、行或占位符。功能可用性表示已核对的硬件契约，不等于 API 或编译器接受的全部指令集合。这里 FP64 指**原生 Tensor Core 输入**，不是普通 double 算术。FP16/BF16/TF32/FP64 仍需满足 H02 的精确 WMMA 类型、形状、布局、参与和调用方精度许可。
+
+64/163/99/163 KiB 是每块上限，超过 48 KiB 需要动态共享内存并显式启用；不是实测占用率或设备显存容量。本站可移植范围是 CC 7.5+ 且问题适合 8 GB 内存预算；现代单 GPU 能力层级（Modern Single-GPU Capability Tier）要求 CC 8.0+ 且至少 8 GB。8.7 行不选择或验证平台环境，拟议执行前请参考 H02。
+
+## 原创静态对照
+
+完整对照由服务端生成并始终可见，包括 JavaScript 不可用时。渐进增强仅在必需元素与初始结果就绪后显示控件。窄屏下结果卡纵向排列，对照表在可键盘聚焦区域内部滚动。每项判断都有文字，不依赖颜色。减少动态效果模式不需要另一套步骤；打印保留完整表格，隐藏控件与重复结果。
+
+## 证据边界
+
+浏览器不执行 CUDA，不授予编译已检查（Compile-Checked）、社区已观察（Community-Observed）或运行已验证（Runtime-Verified）状态。元数据的四个证据数组为空。架构行为、正确性、所选指令、重叠及性能仍待硬件验证（Pending Hardware Verification）。对照无法替代环境清单（Environment Manifest）、合格基准环境（Reference Environment）或实测计算能力契约。
+
+## 来源与许可
+
+于 **2026-09-22** 核对 [CUDA 计算能力表 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[Turing 调优](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html)及 [Ampere 调优](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html)。[SRC-CUDA-103](/sources-and-versions/#src-cuda-103)和 [SRC-CUDA-104](/sources-and-versions/#src-cuda-104)记录当前 Context7 检索、权利方精确章节与带日期版本。布局、对照、解释和筛选均为原创；讲解采用 CC BY 4.0，实现采用 Apache-2.0。未复制或改编权利方图表，权利方资料保留各自声明。

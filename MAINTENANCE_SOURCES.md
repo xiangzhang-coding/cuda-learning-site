@@ -1,5 +1,21 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## H01/H02/VIS15 source review — 2026-09-22
+
+Current Context7 `/websites/nvidia_cuda` queries covered ITS/masks, Ampere
+copy/barriers and virtual/real targets. Direct owner review then checked
+Turing/Ampere Tuning Guides 13.4 (2026-09-13), Programming Guide 13.4.2
+(2026-09-10), and release notes 13.4 Update 1. Public SRC-CUDA-103/104 retain
+the exact URLs, section anchors, version/date distinctions and rights.
+The current guide's NVCC introductory target-list sentence reverses virtual
+and real flags; the option/code definitions govern the lesson. ITS originates
+in Volta. CC 8.6/8.7 lack native FP64 Tensor Cores despite the sm_80 API floor.
+Thread-local copy completion must be followed by reader publication and safe
+reuse coordination. No upstream sample or diagram is copied or adapted.
+The 13.4 review does not upgrade pinned Toolkit Lanes or supply build evidence.
+Current scope: 383 Publication Pairs, 766 routes, 106 Learning Units, 105
+Exercise/solution sets, 483 catalog records. R6 remains frozen; R7 is pending.
+
 ## R6 aggregate source disposition
 
 Reviewed **2026-09-22**, issue #58. The schema-7 R6 snapshot closes G01-G09

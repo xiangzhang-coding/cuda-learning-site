@@ -59,6 +59,6 @@ describe('issue #45 optimization and dispatch publication contract', () => {
       '1e-12', 'SM121', 'ineligible', 'nondeterministic', '1280 B']) expect(p12).toContain(text);
     expect(current.evidence.pendingHardwareVerification).toContain('LAB14');
     expect(current.evidence.performanceObservations).toEqual([]);
-    expect(current.scope.visualExplainers).toHaveLength(21);
+    expect(current.scope.visualExplainers).toHaveLength(22);
   });
 });

@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: Apache-2.0
+export const architectureEvolutionCopy = {
+  en: {
+    title: 'VIS15 · From implicit timing to explicit contracts',
+    notice: 'Source-reviewed capability comparison. No GPU detection, CUDA execution, timing or speed ranking.',
+    controls: 'Filter documented capabilities', capability: 'Exact compute capability', feature: 'Required feature',
+    all: 'All reviewed states', reset: 'Reset filters', count: 'Matching CC states',
+    empty: 'No reviewed state matches both filters. Change a filter or reset; keep the portable baseline.',
+    invalid: 'Unknown filter rejected. The previous selection is retained.',
+    static: 'Complete static comparison', baseline: 'Portable baseline first',
+    baselineText: 'CC 7.5+ within the site scope: ordinary loads/stores, explicit warp/block synchronization and FP32 SIMT arithmetic. One GPU; bound problem memory below 8 GB. A kernel still needs a compatible build and device.',
+    architecture: 'Architecture / CC', target: 'Virtual / real target', shared: 'Shared memory limit per block',
+    features: 'Reviewed features', yes: 'Available', no: 'Not available',
+    memory: 'Limits are KiB (1024 B). Above 48 KiB requires dynamic allocation and opt-in; check actual device and kernel resources. These limits are not device memory capacity or an occupancy result.',
+    fallback: 'If a feature, target, alignment, dtype or memory condition fails, explicitly select and revalidate the portable path. Native FP64 Tensor Core availability is separate from ordinary FP64 arithmetic.',
+    labels: { its: 'Independent thread scheduling', 'async-copy': 'Hardware global → shared copy', 'split-barrier': 'Hardware split arrive/wait', fp16: 'FP16 Tensor Core inputs', bf16: 'BF16 Tensor Core inputs', tf32: 'TF32 Tensor Core inputs', fp64: 'Native FP64 Tensor Core inputs' },
+  },
+  'zh-CN': {
+    title: 'VIS15 · 从隐式时序到显式契约',
+    notice: '基于来源核对的能力对照。不检测 GPU，不执行 CUDA，不提供时间或速度排名。',
+    controls: '筛选已核对的能力', capability: '精确计算能力', feature: '所需功能',
+    all: '全部已核对状态', reset: '重置筛选', count: '匹配的 CC 状态数',
+    empty: '没有已核对状态同时满足两个筛选条件。请修改条件或重置，并保留可移植基线。',
+    invalid: '已拒绝未知筛选值，保留之前的选择。',
+    static: '完整静态对照', baseline: '先确定可移植基线',
+    baselineText: '本站范围内 CC 7.5+：普通加载／存储、显式线程束／线程块同步与 FP32 SIMT 运算。单 GPU，问题内存限定在 8 GB 内。内核仍需兼容的构建与设备。',
+    architecture: '架构／CC', target: '虚拟／真实目标', shared: '每线程块共享内存上限',
+    features: '已核对功能', yes: '具备', no: '不具备',
+    memory: '单位为 KiB（1024 B）。超过 48 KiB 需动态分配并显式启用；检查实际设备与内核资源。这些上限不是设备显存容量，也不是占用率结果。',
+    fallback: '功能、目标、对齐、数据类型或内存条件不满足时，显式选择并重新验证可移植路径。原生 FP64 Tensor Core 能力与普通 FP64 运算分别判断。',
+    labels: { its: '独立线程调度', 'async-copy': '硬件全局 → 共享拷贝', 'split-barrier': '硬件分离到达／等待', fp16: 'FP16 Tensor Core 输入', bf16: 'BF16 Tensor Core 输入', tf32: 'TF32 Tensor Core 输入', fp64: '原生 FP64 Tensor Core 输入' },
+  },
+} as const;

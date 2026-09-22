@@ -38,6 +38,8 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 ## 当前范围
 
+**2026-09-22 架构增量（#59）：**[H01](/architecture/turing-warp-safety/) `[F06,M06]`、[H02](/architecture/ampere-pipelines-tensor-cores/) `[H01,M13,L08]` 和 [VIS15](/visuals/architecture-evolution/)使当前范围达到 106 个学习单元（Learning Unit）、24 个可运行示例（Runnable Example）、18 个实验（Lab）、22 项可视化讲解（Visual Explainer）、105 组练习（Exercise）、105 组独立解答、383 个双语发布对（Publication Pair）、766 条源路由及 483 条目录记录：117 个练习题库（Practice Bank）条目、207 个术语表（Glossary）词条、119 条来源记录，加上实验／可视化。已有 41 个主体仍待硬件验证（Pending Hardware Verification）；H01/H02/VIS15 不增加运行证据。下方 R6 统计为冻结发布，R7 待复核。
+
 本站维护按先修关系组织的稳定课程（Stable Curriculum），并搭配可运行示例（Runnable Example）、实验（Lab）、练习（Exercise）、可视化讲解（Visual Explainer）和术语表（Glossary）。只有完整材料会进入导航。本网站保持静态，不提供账号、进度跟踪、服务端应用、API 或浏览器内 CUDA 执行。
 
 稳定课程的 R3 发布已在 [issue #32](https://github.com/xiangzhang-coding/cuda-learning-site/issues/32) 完整双语复核 O01-O08、F01-F08、M01-M19、A01-A14 和 Q01-Q13，共 62 个学习单元（Learning Unit）。[A12](/algorithms/sparse-formats-spmv/)建立 COO/CSR、storage 与 SpMV 合同，[A13](/algorithms/sparse-matrix-multiplication-preprocessing/)建立 SpMM、descriptor、workspace 与 preprocessing 决策边界。

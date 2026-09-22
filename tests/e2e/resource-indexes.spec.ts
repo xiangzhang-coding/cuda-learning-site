@@ -404,11 +404,11 @@ test('the expanded catalog keeps exact cards, anchors, counts, freshness, and pu
     INDEX_GROUPS.map((group) => [group, expectedCount(group)]),
   ) as Record<(typeof INDEX_GROUPS)[number], number>;
   expect(counts.labs).toBe(18);
-  expect(counts.practice).toBe(115);
-  expect(counts.visuals).toBe(21);
+  expect(counts.practice).toBe(117);
+  expect(counts.visuals).toBe(22);
   expect(counts.glossary).toBe(currentPublication.scope.glossaryTerms);
-  expect(counts.sources).toBe(117);
-  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(271 + currentPublication.scope.glossaryTerms);
+  expect(counts.sources).toBe(119);
+  expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(276 + currentPublication.scope.glossaryTerms);
 
   const expectedIds = [
     'PB-R6-008', 'PB-R6-009', 'SRC-CUDA-100',
