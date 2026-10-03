@@ -223,15 +223,15 @@ jobs:
           retention-days: 7
 
   e2e-cross-browser:
-    name: e2e-cross-browser (${{ matrix.shard }}/3)
+    name: e2e-cross-browser (${{ matrix.shard }}/6)
     needs: static-and-integration
     runs-on: ubuntu-24.04
-    # Preserve the complete 684-route sweep plus artifact scanning on slower runners.
+    # Preserve every route and assertion while bounding each growing browser shard.
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5, 6]
     steps:
       - name: Check out public source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -261,7 +261,7 @@ jobs:
           npx playwright install --with-deps firefox webkit
 
       - name: Run Firefox, WebKit, and Mobile Safari emulation
-        run: npm run test:e2e:cross-browser -- --shard=${{ matrix.shard }}/3
+        run: npm run test:e2e:cross-browser -- --shard=${{ matrix.shard }}/6
 
       - name: Scan cross-browser reports before retention
         id: scan-cross-browser
