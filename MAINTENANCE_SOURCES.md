@@ -1,6 +1,23 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## H01/H02/VIS15 source review — 2026-09-22
+## H03/H04/VIS15 source review — 2026-09-22
+
+Issue #60: current Context7 `/websites/nvidia_cuda` discovery covered Ada L2,
+Hopper clusters/DSM/TMA and compiler targets. Direct owner review used Ada/Hopper
+Tuning Guides 13.4 (2026-09-13), Programming Guide 13.4.2 (2026-09-10), NVCC,
+Driver tensor maps, PTX bulk completion, Nsight Compute cache/replay guidance,
+NVIDIA counter-permission guidance and release notes 13.4 Update 1.
+SRC-CUDA-105/106 retain exact section links and rights. Important distinctions:
+AD102 capacity is not an Ada-wide constant; persisting ratios are not hit rates;
+cluster barriers protect owner lifetime but do not replace TMA transaction waits;
+bulk read-completion protects the source, not arbitrary destination consumers.
+Older experimental wrappers in Context7 are not Stable Curriculum dependencies.
+The host-encoded, unswizzled TMA fixture uses compute_90/sm_90, not sm_90a.
+No owner sample/asset is copied, no pinned lane changes and no GPU evidence.
+Current inventory: 389 pairs / 778 routes / 108 units / 107 Exercise/solution
+sets / 487 catalog records. LAB19 stays hidden pending H06. R6 is frozen; R7 pending.
+
+## Historical H01/H02/VIS15 source review — 2026-09-22
 
 Current Context7 `/websites/nvidia_cuda` queries covered ITS/masks, Ampere
 copy/barriers and virtual/real targets. Direct owner review then checked
@@ -13,7 +30,7 @@ in Volta. CC 8.6/8.7 lack native FP64 Tensor Cores despite the sm_80 API floor.
 Thread-local copy completion must be followed by reader publication and safe
 reuse coordination. No upstream sample or diagram is copied or adapted.
 The 13.4 review does not upgrade pinned Toolkit Lanes or supply build evidence.
-Current scope: 383 Publication Pairs, 766 routes, 106 Learning Units, 105
+Historical #59 scope: 383 Publication Pairs, 766 routes, 106 Learning Units, 105
 Exercise/solution sets, 483 catalog records. R6 remains frozen; R7 is pending.
 
 ## R6 aggregate source disposition

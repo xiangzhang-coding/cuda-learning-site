@@ -11,10 +11,10 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 383,
-    "sourceRoutes": 766,
-    "exerciseSetPublicationPairs": 105,
-    "solutionSetPublicationPairs": 105,
+    "publicationPairs": 389,
+    "sourceRoutes": 778,
+    "exerciseSetPublicationPairs": 107,
+    "solutionSetPublicationPairs": 107,
     "learningUnits": [
       "O01",
       "O02",
@@ -121,7 +121,9 @@
       "G08",
       "G09",
       "H01",
-      "H02"
+      "H02",
+      "H03",
+      "H04"
     ],
     "runnableExamples": ["EX01", "EX02", "EX03", "EX04", "EX05", "EX06", "EX07", "EX08", "EX09", "EX10", "EX11", "EX12", "EX13", "EX14", "EX15", "EX16", "EX17", "EX18", "EX19", "EX20", "EX21", "EX22", "EX23", "EX24"],
     "labs": ["LAB01", "LAB02", "LAB03", "LAB04", "LAB05", "LAB06", "LAB07", "LAB08", "LAB09", "LAB10", "LAB11", "LAB12", "LAB13", "LAB14", "LAB15", "LAB16", "LAB17", "LAB18"],
@@ -149,7 +151,7 @@
       "VIS21",
       "VIS22"
     ],
-    "practiceBankEntries": 117,
+    "practiceBankEntries": 119,
     "nsightReportAnalysisPracticeEntries": [
       "PB-R3-002",
       "PB-R3-003",
@@ -175,7 +177,7 @@
     "pytorchAndTritonPracticeEntries": ["PB-R5-004", "PB-R5-005", "PB-R5-006", "PB-R5-007", "PB-R5-008", "PB-R5-009", "PB-R5-010", "PB-R5-011", "PB-R5-012", "PB-R5-013", "PB-R5-014", "PB-R5-015", "PB-R5-016", "PB-R5-017", "PB-R5-018", "PB-R5-019", "PB-R5-020"],
     "multiGpuAndNcclPracticeEntries": ["PB-R6-001", "PB-R6-002", "PB-R6-003", "PB-R6-004", "PB-R6-005", "PB-R6-006", "PB-R6-007", "PB-R6-008", "PB-R6-009", "PB-R6-010", "PB-R6-011", "PB-R6-012", "PB-R6-013"],
     "glossaryTerms": 207,
-    "sourceRecords": 119
+    "sourceRecords": 121
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -609,7 +611,8 @@
     "retainedCompileRuns": [32720214527, 33275734951]
   },
   "knownLimitations": [
-    "Issue #59 adds H01/H02 and VIS15 as seven complete Publication Pairs. All four evidence arrays remain empty; architecture execution, pipeline behavior and performance remain Pending Hardware Verification. Only Turing 7.5 and Ampere 8.0/8.6/8.7 states are published. Current documentation review (13.4.2 guide; 13.4 tuning; 13.4 Update 1 release notes) changes no pinned Toolkit Lane. R6 remains the frozen completed release; R7 review is pending.",
+    "Issue #60 adds H03/H04 as six complete Publication Pairs and extends VIS15 to Ada 8.9 and Hopper 9.0. Exact prerequisites are H03 [H02,M02,Q10] and H04 [H02,M12,M13]. Current scope is 389 pairs / 778 routes / 108 units / 107 Exercise and solution sets / 487 catalog records. All four new-page evidence arrays remain empty; cache, cluster, DSM, TMA and performance behavior remain Pending Hardware Verification. LAB19 stays hidden pending H06. Current documentation review (13.4.2 guide; 13.4 tuning; 13.4 Update 1 release notes) changes no pinned Toolkit Lane. R6 remains frozen; R7 is pending.",
+    "Historical issue #59 added H01/H02 and VIS15 as seven complete Publication Pairs with Turing 7.5 and Ampere 8.0/8.6/8.7 states; it supplied no architecture execution or performance evidence.",
     "Issue #54 adds G06/LAB18, two original Practice Bank entries and an original exercise solution. Nsight Systems 2026.5 was reviewed independently. LAB18 remains Pending Hardware Verification with empty compilation and recorded observations; its synthetic dimensionless fixture is not a captured report. No qualifying two-GPU overlap, throughput or bottleneck conclusion is published.",
     "R6 completes static dependency closure through G01-G09 and all prior scope. Issue #58 separately records source-bound CI, Preview and production acceptance. R7 and deferred destinations are outside this release.",
     "G01-G09 grant no Evidence Status. EX24/LAB17/LAB18 retain empty compilation and recorded observations with Pending Hardware Verification. Topology, collective, overlap, DDP, capture, registration and multi-node scenarios have no qualifying observations. No transport, fallback, algorithm, bandwidth, latency, recovery or performance result is published.",

@@ -1,6 +1,21 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## H01/H02/VIS15 source rights — 2026-09-22
+## H03/H04/VIS15 source rights — 2026-09-22
+
+Issue #60 adds twelve original Markdown pages (H03/H04 Publication Pairs and
+their Exercises/separate solutions), PB-R7-003/004 and the Ada/Hopper extension
+of the original static comparison. Teaching material is CC BY 4.0; the visual
+model/copy and tests are original Apache-2.0 software. SRC-CUDA-105/106 identify
+the exact reference-only NVIDIA owner pages and their proprietary Notices:
+Ada/Hopper Tuning Guides 13.4, Programming Guide 13.4.2, compiler/Driver/PTX,
+profiler/permission documentation and release notes 13.4 Update 1. Those pages
+are linked for facts, not distributed or relicensed. No code/sample/figure/table
+or asset is copied or adapted, so no new third-party NOTICE obligation arises.
+Existing exact dependency-license checks remain required. Current inventory:
+389 pairs / 778 routes / 108 units / 107 Exercise/solution sets / 487 records.
+No compilation, runtime or performance evidence is granted.
+
+## Historical H01/H02/VIS15 source rights — 2026-09-22
 
 Issue #59 adds original bilingual prose, paper fixtures, Exercises/separate
 solutions, PB-R7-001/002 and a static capability comparison under CC BY 4.0.
@@ -11,7 +26,7 @@ they are linked for facts, not relicensed as site content. No owner code,
 sample, figure, table or benchmark is copied or adapted; no third-party asset
 is added and no new NOTICE obligation arises. Existing exact dependency
 license checks remain required. Sources are recorded as SRC-CUDA-103/104.
-Current inventory is 383 Publication Pairs / 766 routes, 106 Learning Units,
+Historical #59 inventory is 383 Publication Pairs / 766 routes, 106 Learning Units,
 105 Exercise/solution sets and 483 catalog records. The R6 rights census below
 is historical. This review grants no compilation or runtime evidence.
 

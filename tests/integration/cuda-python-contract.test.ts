@@ -31,10 +31,10 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current).toMatchObject({
       reviewDate: '2026-09-22',
       releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
-      scope: { publicationPairs: 383, sourceRoutes: 766, exerciseSetPublicationPairs: 105,
-        solutionSetPublicationPairs: 105, practiceBankEntries: 117, sourceRecords: 119 },
+      scope: { publicationPairs: 389, sourceRoutes: 778, exerciseSetPublicationPairs: 107,
+        solutionSetPublicationPairs: 107, practiceBankEntries: 119, sourceRecords: 121 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23', 'EX24']);
     expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18']);
     expect(current.scope.visualExplainers).toEqual([...r4.scope.visualExplainers, 'VIS15', 'VIS16', 'VIS17'].sort());

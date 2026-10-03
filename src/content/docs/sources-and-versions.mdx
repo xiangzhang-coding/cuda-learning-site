@@ -1025,6 +1025,26 @@ NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[
 
 2026-09-19 的 G01–G03 增量新增 SRC-CUDA-094/095/096，来源目录共 111 条。R5 已完成发布快照保留为历史，R6 待复核。不声称新的 CUDA 证据。
 
+<span id="src-cuda-105" class="resource-target"></span>
+
+### SRC-CUDA-105 — Ada 缓存、工作集与测量边界
+
+相关：[H03](/architecture/ada-working-sets/)、[VIS15](/visuals/architecture-evolution/)、[PB-R7-003](/practice/#pb-r7-003)。核对／访问日期 **2026-09-22**。当前 Context7 `/websites/nvidia_cuda` 检索覆盖 Ada L2、持久化及目标。直接核对：[Ada Tuning Guide **13.4** 第 1.4.2 节](https://docs.nvidia.com/cuda/ada-tuning-guide/index.html#memory-system)，2026-09-13 更新；Programming Guide **13.4.2**，2026-09-10 更新，[缓存查询 2.3.3.6 节](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#caches)及 [L2 控制 4.14 节](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/l2-cache-control.html)。AD102 的 98304 KiB 属于具体实现，CC 8.9 不能确定实际 L2；每块共享容量为 99 KiB。持久化窗口既不是私有分配，也不是命中率测量；MIG 禁用预留区，MPS 在服务启动时配置大小。重置旧持久化状态不同于禁用窗口。
+
+精确 [NVCC 目标选项](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-architecture-arch)约束 `compute_89` / `sm_89`。滚动 [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#cache-control)解释缓存清理、串行化及开销。[NVIDIA 计数器权限说明](https://developer.nvidia.com/ERR_NVGPUCTRPERM)包含 R610 基于能力的权限；H03 不要求一概改变主机权限。[发布说明 **13.4 Update 1** 第 2.1–2.3 节](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)中的 NVCC 13.4.92、CCCL 3.4.3 和 PTX ISA 9.4 是核对坐标，不是安装证据。固定工具包通道仍为 11.8.0／12.9.2／13.3.1，拟议执行保留已有 13.3.1 坐标。
+
+<span id="src-cuda-106" class="resource-target"></span>
+
+### SRC-CUDA-106 — Hopper 集群、DSM 与 TMA 完成
+
+相关：[H04](/architecture/hopper-clusters-tma/)、[VIS15](/visuals/architecture-evolution/)、[PB-R7-004](/practice/#pb-r7-004)。核对／访问日期 **2026-09-22**。当前 Context7 检索覆盖集群、DSM、TMA 对齐／事务屏障及目标。直接核对：[Hopper Tuning Guide **13.4** 第 1.4.1.1–1.4.1.3、1.4.2.4 节](https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html)，2026-09-13 更新；Programming Guide **13.4.2**，2026-09-10 更新，[DSM 2.3.3.8 节](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html#distributed-shared-memory)、[TMA 4.12.2 节及表 21／23](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html#using-the-tensor-memory-accelerator-tma)和[屏障追踪](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-barriers.html#asynchronous-barriers-tracking)。CC 9.0 每块共享最多 227 KiB；DSM 汇总逐块存储却不延长所有者生命周期。可移植集群上限八块，实际分区／内核查询决定准入；H100 显式启用 16 属于非可移植路径。
+
+[Driver 张量映射 API **13.4** 第 6.41 节](https://docs.nvidia.com/cuda/cuda-driver-api/cuda_driver_api/group__CUDA__TENSOR__MEMORY.html)，2026-09-14 更新，约束 16×16 int32 题设的不可变主机编码。旧顶层 URL 返回 404，当前 API 索引解析为上述嵌套路径。一维批量与张量对齐不同。[PTX 批量等待语义](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk-wait-group)区分源读取完成、完整目标完成及可见性作用域，二者都不是加载事务屏障等待。[NVCC 选项](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-code-code)和指南的设备端映射修改章节区分基本 `compute_90` / `sm_90` 与架构专属 `sm_90a`。Context7 返回的旧 `cuda::device::experimental` 示例不作为稳定课程依赖。来源摘要不一致时，以所选方向的表／指令契约为准。多播、重排拷贝和设备端映射更新不在 H04 范围内。[当前发布说明](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)不改变固定通道或证据；分析器条件沿用 SRC-CUDA-105。
+
+**SRC-CUDA-105／106 权利说明：**权利方页面只作参考，属于 NVIDIA 专有文档，由其 Notices 及版权约束，不采用 Apache-2.0 或 CC BY 4.0。未复制／改编源码、示例、表格、图片或资产。原创讲解、算术题设、练习及对照采用 CC BY 4.0，原创实现／测试采用 Apache-2.0。来源核对不建立编译、所选指令、缓存驻留、运行或性能结果。架构行为均待硬件验证（Pending Hardware Verification）。LAB19 保持隐藏，等待 H06 提供可移植比较契约。
+
+**#60 当前增量：**108 个学习单元、24 个可运行示例、18 个实验、22 项可视化讲解、107 组练习及 107 组独立解答；389 个双语发布对／778 条源路由、487 条目录记录（119 个练习题库条目、207 个词条、121 条来源、18 个实验、22 项可视化）。R6 冻结、R7 待复核；同样的 41 个示例／实验主体待硬件验证，H03／H04／VIS15 不增加 GPU 证据。下方 #59 统计为历史记录。
+
 <span id="src-cuda-103" class="resource-target"></span>
 
 ### SRC-CUDA-103 — Turing 调度、目标与版本边界

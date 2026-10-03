@@ -427,7 +427,7 @@ describe('Exercises and Practice Bank contract', () => {
       'utf8',
     );
     const entryIds = [
-      'PB-R7-001', 'PB-R7-002',
+      'PB-R7-001', 'PB-R7-002', 'PB-R7-003', 'PB-R7-004',
       'PB-R0-001', 'PB-R0-002', 'PB-R0-003', 'PB-R0-004', 'PB-R0-005',
       'PB-R1-001', 'PB-R1-002', 'PB-R1-003', 'PB-R1-004', 'PB-R1-005',
       'PB-R1-006', 'PB-R1-007', 'PB-R1-008',
@@ -465,6 +465,8 @@ describe('Exercises and Practice Bank contract', () => {
     const focusedPrerequisitePaths: Readonly<Record<string, string>> = {
       'PB-R7-001': 'architecture/turing-warp-safety',
       'PB-R7-002': 'architecture/ampere-pipelines-tensor-cores',
+      'PB-R7-003': 'architecture/ada-working-sets',
+      'PB-R7-004': 'architecture/hopper-clusters-tma',
       'PB-R1-009': 'foundations/asynchronous-errors',
       'PB-R1-010': 'foundations/compute-capability',
       'PB-R1-011': 'foundations/runtime-driver-api',
@@ -863,7 +865,7 @@ describe('Exercises and Practice Bank contract', () => {
       'PB-R6-013': ['multi-gpu/multi-node-transport-failures'],
     };
 
-    expect(entrySections).toHaveLength(117);
+    expect(entrySections).toHaveLength(119);
     expect(entrySections.map(({ id }) => id)).toEqual(entryIds);
     for (const [index, entryId] of entryIds.entries()) {
       const section = entrySections[index];

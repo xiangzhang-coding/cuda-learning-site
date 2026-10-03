@@ -2,10 +2,10 @@
 
 ## Current architecture increment — 2026-09-22
 
-Issue #59 extends `/publication.json` to 383 Publication Pairs / 766 routes,
-106 Learning Units, 22 visuals, 105 Exercise/solution sets and 483 catalog
-records (117 practice, 207 glossary, 119 sources, 18 Labs, 22 visuals).
-`/release.json` continues to identify frozen R6. H01/H02/VIS15 add no GPU
+Issue #60 extends `/publication.json` to 389 Publication Pairs / 778 routes,
+108 Learning Units, 22 visuals, 107 Exercise/solution sets and 487 catalog
+records (119 practice, 207 glossary, 121 sources, 18 Labs, 22 visuals).
+`/release.json` continues to identify frozen R6. H01–H04/VIS15 add no GPU
 evidence or Reference Environment; architecture execution and performance
 remain Pending Hardware Verification. R7 aggregate acceptance is pending.
 

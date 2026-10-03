@@ -11,11 +11,12 @@
   "packageManager": "npm@11.17.0",
   "scripts": {
     "build": "astro build && node scripts/prepare-release-output.mjs",
-    "build:release": "npm run quality:source && npm run quality:dependencies && npm run quality:licenses && npm run quality:canonical-imports && npm run check && npm run test:unit && npm run build && npm run quality:deployment && npm run test:integration && npm run quality:dist",
+    "build:release": "npm run quality:source && npm run quality:dependencies && npm run quality:licenses && npm run quality:audit && npm run quality:canonical-imports && npm run check && npm run test:unit && npm run build && npm run quality:deployment && npm run test:integration && npm run quality:dist",
     "check": "astro check",
     "dev": "astro dev",
     "preview": "astro preview",
     "quality:artifacts": "node scripts/check-artifacts.mjs",
+    "quality:audit": "node scripts/check-dependency-audit.mjs",
     "quality:canonical-imports": "node scripts/check-canonical-imports.mjs",
     "quality:deployment": "wrangler deploy --dry-run --outdir .quality/wrangler-dry-run",
     "quality:dependencies": "node scripts/check-lockfile.mjs",
@@ -42,7 +43,11 @@
     "pagefind": "1.5.2"
   },
   "overrides": {
-    "sharp": "0.35.4"
+    "sharp": "0.35.4",
+    "devalue": "5.9.4",
+    "fast-uri": "3.1.8",
+    "undici@^7": "7.29.1",
+    "undici@^8": "8.10.2"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

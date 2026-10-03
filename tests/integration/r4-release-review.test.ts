@@ -111,7 +111,7 @@ describe('R4 release review', () => {
         expect(raw).toContain(`className="route-card" href="/${prefix}python/cuda-python-bridge/"`);
         const document = parseHTML(raw).document;
         expect(raw).toContain(`className="route-card" href="/${prefix}frameworks/queued-work-timing/"`);
-        for (const [slug, count] of [['practice', '117'], ['glossary', '207'], ['sources-and-versions', '119']]) {
+        for (const [slug, count] of [['practice', '119'], ['glossary', '207'], ['sources-and-versions', '121']]) {
           expect(document.querySelector(`a[href="/${prefix}${slug}/"] small`)?.textContent, `${prefix} ${slug} card`).toContain(count);
         }
       }
@@ -619,8 +619,8 @@ describe('R4 release review', () => {
       expect(catalogIds.filter((id) => /^PB-R5-/.test(id)).sort()).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003', 'PB-R5-004', 'PB-R5-005', 'PB-R5-006', 'PB-R5-007', 'PB-R5-008', 'PB-R5-009', 'PB-R5-010', 'PB-R5-011', 'PB-R5-012', 'PB-R5-013', 'PB-R5-014', 'PB-R5-015', 'PB-R5-016', 'PB-R5-017', 'PB-R5-018', 'PB-R5-019', 'PB-R5-020']);
       expect([...units.keys()].filter((id) => /^T\d{2}$/.test(id)).sort()).toEqual(['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08']);
       expect(catalogIds.filter((id) => /^PB-R6-/.test(id)).sort()).toEqual(['PB-R6-001', 'PB-R6-002', 'PB-R6-003', 'PB-R6-004', 'PB-R6-005', 'PB-R6-006', 'PB-R6-007', 'PB-R6-008', 'PB-R6-009', 'PB-R6-010', 'PB-R6-011', 'PB-R6-012', 'PB-R6-013']);
-      expect([...units.keys()].filter(id => /^H\d{2}$/.test(id)).sort()).toEqual(['H01', 'H02']);
-      expect(catalogIds.filter(id => /^PB-R7-/.test(id)).sort()).toEqual(['PB-R7-001', 'PB-R7-002']);
+      expect([...units.keys()].filter(id => /^H\d{2}$/.test(id)).sort()).toEqual(['H01', 'H02', 'H03', 'H04']);
+      expect(catalogIds.filter(id => /^PB-R7-/.test(id)).sort()).toEqual(['PB-R7-001', 'PB-R7-002', 'PB-R7-003', 'PB-R7-004']);
       expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[8-9]-|^(?:EX25|LAB19)$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);

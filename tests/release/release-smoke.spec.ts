@@ -142,7 +142,7 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
@@ -198,10 +198,10 @@ const currentPendingHardwareVerification = [
 ] as const;
 const currentCatalogCounts = [
   { suffix: 'labs/', count: 18 },
-  { suffix: 'practice/', count: 117 },
+  { suffix: 'practice/', count: 119 },
   { suffix: 'visuals/', count: 22 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 119 },
+  { suffix: 'sources-and-versions/', count: 121 },
 ] as const;
 const exampleRouteSlugs = [
   'nccl-all-reduce',
@@ -542,21 +542,21 @@ test('serves the exact R6 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 383,
-    sourceRoutes: 766,
-    exerciseSetPublicationPairs: 105,
-    solutionSetPublicationPairs: 105,
+    publicationPairs: 389,
+    sourceRoutes: 778,
+    exerciseSetPublicationPairs: 107,
+    solutionSetPublicationPairs: 107,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 117,
+    practiceBankEntries: 119,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     multiGpuAndNcclPracticeEntries: Array.from({ length: 13 }, (_, index) => `PB-R6-${String(index + 1).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 119,
+    sourceRecords: 121,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -689,8 +689,8 @@ test('serves the exact R6 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '383 Publication Pairs' : '383 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '766 source routes' : '766 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '389 Publication Pairs' : '389 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '778 source routes' : '778 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -724,7 +724,7 @@ test('serves the exact R6 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(483);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(487);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -1096,13 +1096,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(766);
-    expect(new Set(routes).size).toBe(766);
+    expect(routes).toHaveLength(778);
+    expect(new Set(routes).size).toBe(778);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(64);
+    expect(routeBatches).toHaveLength(66);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(383);
+      expect(localized).toHaveLength(389);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

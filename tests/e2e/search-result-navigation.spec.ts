@@ -5,6 +5,9 @@ import { collectBrowserFailures, expectSearchReadyForNavigation } from '../helpe
 
 for (const locale of ['', 'en/']) {
   test(`${locale || 'zh-CN/'}navigation waits for delayed search result fragments`, async ({ page, baseURL }) => {
+    // Two independently bounded 15s searches, deliberate fragment delay, and
+    // large-index navigation need a journey budget beyond the default 30s.
+    test.setTimeout(60_000);
     const failures = collectBrowserFailures(page, baseURL!);
     const scenario = {
       label: locale ? 'Search' : '搜索', query: 'P04', href: `/${locale}frameworks/queued-work-timing/`,
