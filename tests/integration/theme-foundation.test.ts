@@ -5,6 +5,7 @@ import { parseHTML } from 'linkedom';
 import { describe, expect, it } from 'vitest';
 
 import { THEME_COPY, THEME_IDS, THEME_STORAGE_KEY } from '../../src/theme-contract';
+import currentPublication from '../../src/current-publication-manifest.json';
 
 const projectRoot = path.resolve(import.meta.dirname, '../..');
 
@@ -14,28 +15,30 @@ async function builtHtmlFiles() {
     .filter((file) => file.endsWith('.html'));
 }
 
+const htmlFiles = (await builtHtmlFiles()).sort();
+
 describe('built theme foundation', () => {
-  it('renders the complete localized theme control and static fallback on every page', async () => {
-    const htmlFiles = await builtHtmlFiles();
-    expect(htmlFiles.length).toBeGreaterThanOrEqual(38);
-    expect(htmlFiles.length % 2).toBe(0);
+  it('covers the complete current route inventory exactly once', () => {
+    expect(htmlFiles).toHaveLength(currentPublication.scope.sourceRoutes);
+    expect(new Set(htmlFiles).size).toBe(htmlFiles.length);
+  });
 
-    for (const file of htmlFiles) {
-      const document = parseHTML(await readFile(path.join(projectRoot, 'dist', file), 'utf8')).document;
-      const locale = document.documentElement.lang === 'zh-CN' ? 'zh-CN' : 'en';
-      const copy = THEME_COPY[locale];
-      const controls = [...document.querySelectorAll('learning-theme-select')];
+  // Each route has its own failure/timeout boundary as the curriculum grows.
+  it.each(htmlFiles)('renders the complete localized theme control and static fallback: %s', async file => {
+    const document = parseHTML(await readFile(path.join(projectRoot, 'dist', file), 'utf8')).document;
+    const locale = document.documentElement.lang === 'zh-CN' ? 'zh-CN' : 'en';
+    const copy = THEME_COPY[locale];
+    const controls = [...document.querySelectorAll('learning-theme-select')];
 
-      expect(controls.length, file).toBeGreaterThanOrEqual(1);
-      expect(controls.length, file).toBeLessThanOrEqual(2);
-      for (const control of controls) {
-        expect(control.querySelector('.sr-only')?.textContent).toBe(copy.controlLabel);
-        expect(
-          [...control.querySelectorAll('option')].map((option) => [option.getAttribute('value'), option.textContent]),
-        ).toEqual(THEME_IDS.map((theme) => [theme, copy.options[theme]]));
-      }
-      expect(document.querySelector('[data-static-theme-fallback]')?.textContent?.trim(), file).toBe(copy.staticFallback);
+    expect(controls.length, file).toBeGreaterThanOrEqual(1);
+    expect(controls.length, file).toBeLessThanOrEqual(2);
+    for (const control of controls) {
+      expect(control.querySelector('.sr-only')?.textContent).toBe(copy.controlLabel);
+      expect(
+        [...control.querySelectorAll('option')].map((option) => [option.getAttribute('value'), option.textContent]),
+      ).toEqual(THEME_IDS.map((theme) => [theme, copy.options[theme]]));
     }
+    expect(document.querySelector('[data-static-theme-fallback]')?.textContent?.trim(), file).toBe(copy.staticFallback);
   }, 15_000);
 
   it('uses one local-storage key and no account or application-state transport', async () => {
