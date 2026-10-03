@@ -128,7 +128,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Audit dependency vulnerabilities
-        run: npm audit --audit-level=high
+        run: npm run quality:audit
 
       - name: Run unit tests with coverage
         run: npm run test:unit

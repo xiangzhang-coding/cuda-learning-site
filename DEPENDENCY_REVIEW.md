@@ -2,6 +2,75 @@
 
 # Dependency Review
 
+## Security disposition — 2026-10-03, issue #60
+
+The existing CI audit began blocking PR #147 on newly reported advisories.
+Maintainer-approved remediation retains every direct dependency and install-script
+coordinate while pinning four transitive patch upgrades through npm overrides:
+
+| Package | Previous → reviewed | Owner basis | License |
+| --- | --- | --- | --- |
+| devalue | 5.9.1 → 5.9.4 | [5.9.3 security fixes](https://github.com/sveltejs/devalue/releases/tag/v5.9.3), [5.9.4](https://github.com/sveltejs/devalue/releases/tag/v5.9.4) | MIT |
+| fast-uri | 3.1.6 → 3.1.8 | [3.1.8 security release](https://github.com/fastify/fast-uri/releases/tag/v3.1.8) | BSD-3-Clause |
+| undici, Miniflare path | 7.29.0 → 7.29.1 | [7.29.1 security fixes](https://github.com/nodejs/undici/releases/tag/v7.29.1) | MIT |
+| undici, unifont path | 8.10.0 → 8.10.2 | [8.10.2 security fixes](https://github.com/nodejs/undici/releases/tag/v8.10.2) | MIT |
+
+Current Context7 `/npm/cli` and npm owner documentation were checked for
+version-scoped overrides and audit advisory/meta-vulnerability behavior. Exact
+registry tarball URLs, versions and SHA-512 integrity values are in the lockfile.
+Installation uses `--ignore-scripts`; the inventory remains **665 records**, zero
+bundled records, the same license-expression set and the same six install-script
+coordinates listed below. No owner code is copied or patched locally.
+
+### One time-limited, reachability-bound audit exception
+
+[GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp), high,
+affects `http-cache-semantics <=4.2.0`. On 2026-10-03 the registry's latest version
+was 4.2.0 and the advisory had **no first patched version**. The package remains
+vulnerable; this is not a fix or a zero-vulnerability claim.
+
+The reported exploit needs a shared response cache that accepts a client's
+`max-stale` request and can replay another user's cached `Set-Cookie` response.
+The only import found in the installed **Astro 7.2.8** distribution is
+`dist/assets/build/remote.js`: `loadRemoteImage` / `revalidateRemoteImage` construct
+their own requests, use cache policy to derive TTL, and return image bytes with
+expiry/ETag/Last-Modified. They do not forward visitor cookies or `max-stale`,
+serve visitor requests, or replay cached Set-Cookie headers. The reviewed site
+has no remote-image component use, no SSR adapter, `output: 'static'`, and an
+assets-only Wrangler configuration with no Worker entry point or bindings.
+Astro, its HTTP cache and Node modules are not deployed to handle requests.
+
+`npm run quality:audit` still retrieves the complete live npm JSON audit, keeps
+the **high** threshold and fails closed on transport/schema errors. It permits
+only this exact advisory for the single root `http-cache-semantics@4.2.0` node
+and npm parent meta-vulnerabilities whose **every** advisory path leads to that
+exception. New advisories, unrelated high/critical findings, cycles or missing
+causes cannot inherit a waiver. Lower severities retain the existing high-level
+blocking policy. The waiver is disabled at **2026-10-17 00:00:00 UTC** (exclusive)
+and on any reviewed configuration, caller or version change. The CLI exposes
+the exception and expiry in its bounded output; raw audit errors are not retained.
+
+The checked SHA-256 boundaries include the whole dependency graph: adding any
+consumer or changing any locked package invalidates the exception, even if it
+reuses the same root cache package. Audit schema/severity totals, direct-advisory
+severity and all graph references/cycles are checked before applying the threshold.
+The checked files are:
+
+| Reviewed file | SHA-256 |
+| --- | --- |
+| `astro.config.mjs` | `1a9ee606c1c6e56987910ef2f5d8cd70c255bfb1b9b87925eb237f6371914551` |
+| `wrangler.jsonc` | `e3f1d938b268baf8d79178175289999b7f850ef539251fde95d106b4063a8655` |
+| `package-lock.json` | `ad5da3bb6e55d6d1e9fa66ab0a40fcf2c3e28fcff0bba7301303d4cd31fb661a` |
+| Installed `astro/dist/assets/build/remote.js` | `f373fa76e3112446db327c79b34e2bbb1ef1dcad41affb60788adf30edc9588e` |
+
+Remove the exception as soon as a reviewed fixed dependency becomes available.
+Do not refresh the expiry or hashes mechanically: recheck the advisory, exact
+caller and build/deployment reachability. The same gate runs locally through
+`build:release` and in Web Quality CI. The regressions cover expiry, changed
+scope/version, new findings, malformed/unavailable reports and parent chains.
+
+## Historical inventory — 2026-09-10
+
 - Lockfile inventory rechecked: 2026-09-10; earlier interface and security reviews retain their dates
 - Runtime: Node.js 24.19.0, npm 11.17.0
 - Lock format: npm lockfile version 3
