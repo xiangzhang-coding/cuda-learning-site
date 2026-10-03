@@ -1,5 +1,5 @@
 ---
-title: 'VIS15：比较 Turing 与 Ampere 契约'
+title: 'VIS15：比较 Turing、Ampere、Ada 与 Hopper 契约'
 description: 按精确计算能力和功能筛选，同时保留完整原创静态对照。
 pairId: vis15
 counterpart: /en/visuals/architecture-evolution/
@@ -9,7 +9,7 @@ provenance: original
 structure: [purpose, controls, model, fallback, evidence, sources]
 resourceKind: visual-explainer
 unitId: VIS15
-prerequisites: [H01, H02]
+prerequisites: [H01, H02, H03, H04]
 relatedUnits: [F06, M13, L08]
 hardwareGate: none
 evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
@@ -17,6 +17,8 @@ sources:
   - { title: 'CUDA Compute Capabilities', url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html', version: '13.4.2', platform: 'Source-reviewed comparison, not device detection', accessDate: '2026-09-22' }
   - { title: 'Turing Tuning Guide', url: 'https://docs.nvidia.com/cuda/turing-tuning-guide/index.html', version: '13.4', platform: 'CC 7.5 contracts', accessDate: '2026-09-22' }
   - { title: 'Ampere Tuning Guide', url: 'https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html', version: '13.4', platform: 'CC 8.x contracts', accessDate: '2026-09-22' }
+  - { title: 'Ada Tuning Guide', url: 'https://docs.nvidia.com/cuda/ada-tuning-guide/index.html', version: '13.4', platform: 'CC 8.9 contracts', accessDate: '2026-09-22' }
+  - { title: 'Hopper Tuning Guide', url: 'https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html', version: '13.4', platform: 'CC 9.0 contracts', accessDate: '2026-09-22' }
 head:
   - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis15 } }
   - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' } }
@@ -24,7 +26,7 @@ head:
   - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,controls,model,fallback,evidence,sources' } }
   - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
   - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS15 } }
-  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'H01,H02' } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'H01,H02,H03,H04' } }
   - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
   - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
   - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
@@ -37,19 +39,21 @@ import ArchitectureEvolutionExplorer from '../../../components/ArchitectureEvolu
 
 ## 目的与先修
 
-精确有序先修：[H01](/architecture/turing-warp-safety/)、[H02](/architecture/ampere-pipelines-tensor-cores/)。比较显式同步可移植基线与文档记录的新增功能。Turing 从 Volta 继承独立线程调度（Independent Thread Scheduling）。Ampere 增加硬件拷贝与分离屏障路径，但并非全部 8.x 行都有原生 FP64 Tensor Core。请按计算能力（Compute Capability，CC）契约理解，不按产品排名理解。
+精确有序先修：[H01](/architecture/turing-warp-safety/)、[H02](/architecture/ampere-pipelines-tensor-cores/)、[H03](/architecture/ada-working-sets/)、[H04](/architecture/hopper-clusters-tma/)。比较显式同步可移植基线与文档记录的新增功能。Turing 从 Volta 继承独立线程调度（Independent Thread Scheduling）；Ampere 增加硬件拷贝与分离屏障路径。Ada 扩大了具体实现的缓存容量，Hopper 引入线程块集群（Thread Block Cluster）、分布式共享内存（Distributed Shared Memory，DSM）和张量内存加速器（Tensor Memory Accelerator，TMA）。请按计算能力（Compute Capability，CC）契约理解，不按产品排名理解。
 
 <ArchitectureEvolutionExplorer locale="zh-CN" />
 
 ## 控件
 
-选择**精确计算能力**与**所需功能**。两个筛选条件取交集：CC 8.6 加原生 FP64 Tensor Core 会给出有解释的空结果，不会自动回退为 8.0。重置恢复全部已核对状态，并把焦点移回 CC 选择框。使用原生选择框／按钮的键盘行为，结果通过礼貌实时区域播报。没有动画、自动播放、定时器、随机数、持久化或 GPU 查询。刷新后显示全部四种状态。未知筛选值会被拒绝并保留此前选择。
+选择**精确计算能力**与**所需功能**，两个条件取交集：CC 8.6 加原生 FP64 Tensor Core，或 CC 8.9 加 TMA，均给出有解释的空结果，不会悄悄改变 CC。重置恢复全部已核对状态，并把焦点移回 CC 选择框。使用原生选择框／按钮键盘行为，结果通过礼貌实时区域播报。没有动画、自动播放、定时器、随机数、持久化或 GPU 查询。刷新后显示全部六种状态。未知筛选值会被拒绝并保留此前选择。
 
 ## 模型契约
 
-顺序固定：Turing 7.5，Ampere 8.0、8.6、8.7。每个已发布状态都具有目标、共享内存上限和全部七项功能结论。后续架构没有选项、行或占位符。功能可用性表示已核对的硬件契约，不等于 API 或编译器接受的全部指令集合。这里 FP64 指**原生 Tensor Core 输入**，不是普通 double 算术。FP16/BF16/TF32/FP64 仍需满足 H02 的精确 WMMA 类型、形状、布局、参与和调用方精度许可。
+顺序固定：Turing 7.5，Ampere 8.0、8.6、8.7，Ada 8.9，Hopper 9.0。每行具有目标、共享内存上限和全部十一项功能结论。后续架构没有选项、行或占位符。FP64 指**原生 Tensor Core 输入**，不是普通 double 算术；在这些行中 8.0 与 9.0 合格。FP16/BF16/TF32/FP64 仍需满足 H02 的精确 WMMA 类型、形状、布局、参与和调用方精度许可。硬件可用性不能证明所选指令。
 
-64/163/99/163 KiB 是每块上限，超过 48 KiB 需要动态共享内存并显式启用；不是实测占用率或设备显存容量。本站可移植范围是 CC 7.5+ 且问题适合 8 GB 内存预算；现代单 GPU 能力层级（Modern Single-GPU Capability Tier）要求 CC 8.0+ 且至少 8 GB。8.7 行不选择或验证平台环境，拟议执行前请参考 H02。
+64/163/99/163/99/227 KiB 是每块上限，超过 48 KiB 需动态共享内存及显式启用；不是实测占用率或设备显存容量。本站可移植范围是 CC 7.5+ 且问题适合 8 GB 内存预算；现代单 GPU 能力层级（Modern Single-GPU Capability Tier）要求 CC 8.0+ 且至少 8 GB。8.7 行不选择或验证平台环境。
+
+L2 策略资格始于 8.0；实际缓存容量按设备查询，不由 CC 推断。MIG／MPS、窗口／预留区限制仍是门槛。集群／DSM／TMA 筛选在这些行中只选择 9.0。集群需通过实际维度／资源查询，DSM 需初始化及退出同步。单块 TMA 不需要集群，但需满足 H04 的描述符／对齐、事务等待、代理可见性及按方向区分的存储完成。H03／H04 指明精确内存、目标、分析器权限和普通拷贝／全局暂存回退。
 
 ## 原创静态对照
 
@@ -61,4 +65,4 @@ import ArchitectureEvolutionExplorer from '../../../components/ArchitectureEvolu
 
 ## 来源与许可
 
-于 **2026-09-22** 核对 [CUDA 计算能力表 29–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[Turing 调优](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html)及 [Ampere 调优](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html)。[SRC-CUDA-103](/sources-and-versions/#src-cuda-103)和 [SRC-CUDA-104](/sources-and-versions/#src-cuda-104)记录当前 Context7 检索、权利方精确章节与带日期版本。布局、对照、解释和筛选均为原创；讲解采用 CC BY 4.0，实现采用 Apache-2.0。未复制或改编权利方图表，权利方资料保留各自声明。
+于 **2026-09-22** 核对 [CUDA 计算能力](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[Turing](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html)、[Ampere](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html)、[Ada](https://docs.nvidia.com/cuda/ada-tuning-guide/index.html)及 [Hopper](https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html)调优。[SRC-CUDA-103](/sources-and-versions/#src-cuda-103)、[104](/sources-and-versions/#src-cuda-104)、[105](/sources-and-versions/#src-cuda-105)和 [106](/sources-and-versions/#src-cuda-106)记录当前 Context7 检索、权利方精确章节与带日期版本。布局、对照、解释和筛选均为原创；讲解采用 CC BY 4.0，实现采用 Apache-2.0。未复制或改编权利方图表，权利方资料保留各自声明。

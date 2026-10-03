@@ -12,8 +12,8 @@ export const architectureEvolutionCopy = {
     architecture: 'Architecture / CC', target: 'Virtual / real target', shared: 'Shared memory limit per block',
     features: 'Reviewed features', yes: 'Available', no: 'Not available',
     memory: 'Limits are KiB (1024 B). Above 48 KiB requires dynamic allocation and opt-in; check actual device and kernel resources. These limits are not device memory capacity or an occupancy result.',
-    fallback: 'If a feature, target, alignment, dtype or memory condition fails, explicitly select and revalidate the portable path. Native FP64 Tensor Core availability is separate from ordinary FP64 arithmetic.',
-    labels: { its: 'Independent thread scheduling', 'async-copy': 'Hardware global → shared copy', 'split-barrier': 'Hardware split arrive/wait', fp16: 'FP16 Tensor Core inputs', bf16: 'BF16 Tensor Core inputs', tf32: 'TF32 Tensor Core inputs', fp64: 'Native FP64 Tensor Core inputs' },
+    fallback: 'Query actual L2 capacity and persistence limits; CC does not set a cache size. MIG disables L2 set-aside; MPS controls its size at server startup. For clusters, query supported dimensions and occupancy (portable ceiling 8, possibly lower on a partition); keep every block alive through remote accesses. TMA needs direction-specific completion, aligned storage and safe reuse, not necessarily a cluster. H03/H04 specify the gates. If a gate fails, revalidate ordinary loads/stores or global scratch plus ordered kernels. No cache, cluster or TMA speedup is implied.',
+    labels: { its: 'Independent thread scheduling', 'async-copy': 'Hardware global → shared copy', 'split-barrier': 'Hardware split arrive/wait', fp16: 'FP16 Tensor Core inputs', bf16: 'BF16 Tensor Core inputs', tf32: 'TF32 Tensor Core inputs', fp64: 'Native FP64 Tensor Core inputs', 'l2-policy': 'L2 persistence policy (environment-gated)', clusters: 'Thread block clusters', dsm: 'Distributed shared memory (within cluster)', tma: 'TMA bulk / tensor copies' },
   },
   'zh-CN': {
     title: 'VIS15 · 从隐式时序到显式契约',
@@ -27,7 +27,7 @@ export const architectureEvolutionCopy = {
     architecture: '架构／CC', target: '虚拟／真实目标', shared: '每线程块共享内存上限',
     features: '已核对功能', yes: '具备', no: '不具备',
     memory: '单位为 KiB（1024 B）。超过 48 KiB 需动态分配并显式启用；检查实际设备与内核资源。这些上限不是设备显存容量，也不是占用率结果。',
-    fallback: '功能、目标、对齐、数据类型或内存条件不满足时，显式选择并重新验证可移植路径。原生 FP64 Tensor Core 能力与普通 FP64 运算分别判断。',
-    labels: { its: '独立线程调度', 'async-copy': '硬件全局 → 共享拷贝', 'split-barrier': '硬件分离到达／等待', fp16: 'FP16 Tensor Core 输入', bf16: 'BF16 Tensor Core 输入', tf32: 'TF32 Tensor Core 输入', fp64: '原生 FP64 Tensor Core 输入' },
+    fallback: '查询实际 L2 容量与持久化限制，CC 不能确定缓存大小。MIG 禁用 L2 预留区，MPS 在服务启动时控制大小。集群需查询支持维度与占用率（可移植上限 8，分区上可能更低），远端访问结束前所有块保持存活。TMA 需按方向区分完成、存储对齐与安全复用，并不总需集群。H03/H04 列出门槛。不满足时重新验证普通加载／存储，或全局暂存加有序内核。这里不推断缓存、集群或 TMA 加速比。',
+    labels: { its: '独立线程调度', 'async-copy': '硬件全局 → 共享拷贝', 'split-barrier': '硬件分离到达／等待', fp16: 'FP16 Tensor Core 输入', bf16: 'BF16 Tensor Core 输入', tf32: 'TF32 Tensor Core 输入', fp64: '原生 FP64 Tensor Core 输入', 'l2-policy': 'L2 持久化策略（受环境门槛约束）', clusters: '线程块集群', dsm: '分布式共享内存（集群内）', tma: 'TMA 批量／张量拷贝' },
   },
 } as const;

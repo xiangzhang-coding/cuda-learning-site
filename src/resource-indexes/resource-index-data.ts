@@ -547,6 +547,18 @@ const practice: readonly ResourceIndexRecord[] = [
     hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Ampere guide 13.4'), reviewedOn: '2026-09-22',
   },
   {
+    planningId: 'PB-R7-003', group: 'practice', title: localized('持久化窗口不是私有缓存', 'Persistence windows are not private caches'),
+    href: localized('/practice/#pb-r7-003', '/en/practice/#pb-r7-003'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['H03'], relatedUnits: ['H03'],
+    hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Ada guide 13.4'), reviewedOn: '2026-09-22',
+  },
+  {
+    planningId: 'PB-R7-004', group: 'practice', title: localized('集群支持不能授权 TMA 消费', 'Cluster support cannot authorize TMA consumption'),
+    href: localized('/practice/#pb-r7-004', '/en/practice/#pb-r7-004'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['H04'], relatedUnits: ['H04'],
+    hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Hopper guide 13.4'), reviewedOn: '2026-09-22',
+  },
+  {
     planningId: 'PB-R0-001',
     group: 'practice',
     title: localized('修复 Evidence Status 记录', 'Repair an Evidence Status record'),
@@ -1983,8 +1995,8 @@ const visuals: readonly ResourceIndexRecord[] = [
   {
     planningId: 'VIS15', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS15.title,
     href: PUBLISHED_DESTINATIONS.VIS15.href, resourceType: 'execution-model', difficulty: 'advanced',
-    prerequisites: ['H01', 'H02'], relatedUnits: ['F06', 'M13', 'L08'], hardwareGate: noCudaHardware,
-    versionGate: localized('指南 13.4.2；仅 Turing 7.5 与 Ampere 8.0/8.6/8.7。', 'Guide 13.4.2; only Turing 7.5 and Ampere 8.0/8.6/8.7.'),
+    prerequisites: ['H01', 'H02', 'H03', 'H04'], relatedUnits: ['F06', 'M13', 'L08'], hardwareGate: noCudaHardware,
+    versionGate: localized('指南 13.4.2；Turing 7.5、Ampere 8.0/8.6/8.7、Ada 8.9、Hopper 9.0。', 'Guide 13.4.2; Turing 7.5, Ampere 8.0/8.6/8.7, Ada 8.9, Hopper 9.0.'),
     reviewedOn: '2026-09-22',
   },
   {
@@ -2519,6 +2531,8 @@ const multiGpuAndArchitectureSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-098', localized('NCCL 分组、流和错误进度', 'NCCL grouping, streams and error progress'), 'cuda-version-record', ['G05', 'EX24', 'LAB17'], same('NCCL 2.31.2; CUDA 13.3.1'), '2026-09-19', '2026-09-19'),
   sourceRecord('SRC-CUDA-099', localized('通信计算流水线与时间线证据', 'Communication/compute pipelines and timeline evidence'), 'cuda-version-record', ['G06', 'LAB18'], same('NCCL 2.31.2; CUDA 13.3.1; Nsight Systems 2026.5'), '2026-09-20', '2026-09-20'),
   sourceRecord('SRC-CUDA-100', localized('DDP、ProcessGroupNCCL 与有界诊断', 'DDP, ProcessGroupNCCL and bounded diagnosis'), 'cuda-version-record', ['G07'], same('PyTorch 2.11.0+cu128; packaged CUDA runtime 12.8.90; NCCL 2.28.9'), '2026-09-20', '2026-09-20'),
+  sourceRecord('SRC-CUDA-105', localized('Ada 缓存、工作集与测量边界', 'Ada caches, working sets and measurement boundaries'), 'architecture-record', ['H03', 'VIS15'], same('Programming Guide 13.4.2; Ada 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
+  sourceRecord('SRC-CUDA-106', localized('Hopper 集群、DSM 与 TMA 完成', 'Hopper clusters, DSM and TMA completion'), 'architecture-record', ['H04', 'VIS15'], same('Programming Guide 13.4.2; Hopper 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-103', localized('Turing 调度、目标与版本边界', 'Turing scheduling, targets and version boundaries'), 'architecture-record', ['H01', 'VIS15'], same('Programming Guide 13.4.2; Turing 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-104', localized('Ampere 拷贝、屏障与 Tensor Core', 'Ampere copies, barriers and Tensor Cores'), 'architecture-record', ['H02', 'VIS15'], same('Programming Guide 13.4.2; Ampere 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-102', localized('NCCL 多节点传输、日志与故障', 'NCCL multi-node transport, logging and failures'), 'cuda-version-record', ['G09'], same('NCCL 2.31.2; nccl-tests b4d5beeb'), '2026-09-21', '2026-09-21'),

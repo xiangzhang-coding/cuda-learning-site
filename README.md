@@ -1,14 +1,15 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## Current architecture increment — issue #59, 2026-09-22
+## Current architecture increment — issue #60, 2026-09-22
 
-H01/H02 publish complete bilingual Learning Units, Exercises and separate solutions;
-VIS15 compares only complete Turing 7.5 and Ampere 8.0/8.6/8.7 contracts with
+H01–H04 publish complete bilingual Learning Units, Exercises and separate solutions;
+VIS15 compares Turing 7.5, Ampere 8.0/8.6/8.7, Ada 8.9 and Hopper 9.0 contracts with
 deterministic filters and a complete original static table. Exact prerequisites
-are H01 `[F06,M06]`, H02 `[H01,M13,L08]`, VIS15 `[H01,H02]`.
-Current scope: 106 Learning Units, 24 Runnable Examples, 18 Labs, 22 visuals,
-105 Exercise/solution sets, 383 Publication Pairs / 766 routes and 483 catalog
-records (117 Practice Bank entries, 207 terms, 119 sources, 18 Labs, 22 visuals).
+are H01 `[F06,M06]`, H02 `[H01,M13,L08]`, H03 `[H02,M02,Q10]`,
+H04 `[H02,M12,M13]`, VIS15 `[H01,H02,H03,H04]`. LAB19 stays hidden pending H06.
+Current scope: 108 Learning Units, 24 Runnable Examples, 18 Labs, 22 visuals,
+107 Exercise/solution sets, 389 Publication Pairs / 778 routes and 487 catalog
+records (119 Practice Bank entries, 207 terms, 121 sources, 18 Labs, 22 visuals).
 All new evidence arrays are empty; architecture execution/performance remains
 Pending Hardware Verification. R6 below is frozen; R7 aggregate review is pending.
 

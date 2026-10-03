@@ -225,6 +225,8 @@ export default defineConfig({
           items: [
             { slug: 'architecture/turing-warp-safety' },
             { slug: 'architecture/ampere-pipelines-tensor-cores' },
+            { slug: 'architecture/ada-working-sets' },
+            { slug: 'architecture/hopper-clusters-tma' },
           ],
         },
         {

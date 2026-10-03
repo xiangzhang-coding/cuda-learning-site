@@ -97,9 +97,33 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/architecture/ampere-pipelines-tensor-cores/solutions/', en: '/en/architecture/ampere-pipelines-tensor-cores/solutions/' },
     title: { 'zh-CN': 'H02 解答：等待、发布、读取、释放', en: 'H02 Solutions: Wait, Publish, Read, Release' }, prerequisites: ['H02-EXERCISES'],
   },
+  H03: {
+    href: { 'zh-CN': '/architecture/ada-working-sets/', en: '/en/architecture/ada-working-sets/' },
+    title: { 'zh-CN': 'H03：Ada 缓存与有界工作集', en: 'H03: Ada Caches and Bounded Working Sets' }, prerequisites: ['H02', 'M02', 'Q10'],
+  },
+  'H03-EXERCISES': {
+    href: { 'zh-CN': '/architecture/ada-working-sets/exercises/', en: '/en/architecture/ada-working-sets/exercises/' },
+    title: { 'zh-CN': 'H03 练习：预算复用与审查缓存证据', en: 'H03 Exercises: Budget Reuse and Audit Cache Evidence' }, prerequisites: ['H03'],
+  },
+  'H03-SOLUTIONS': {
+    href: { 'zh-CN': '/architecture/ada-working-sets/solutions/', en: '/en/architecture/ada-working-sets/solutions/' },
+    title: { 'zh-CN': 'H03 解答：容量、复用距离与测量', en: 'H03 Solutions: Capacity, Reuse Distance and Measurement' }, prerequisites: ['H03-EXERCISES'],
+  },
+  H04: {
+    href: { 'zh-CN': '/architecture/hopper-clusters-tma/', en: '/en/architecture/hopper-clusters-tma/' },
+    title: { 'zh-CN': 'H04：Hopper 集群、分布式共享内存与 TMA', en: 'H04: Hopper Clusters, Distributed Shared Memory and TMA' }, prerequisites: ['H02', 'M12', 'M13'],
+  },
+  'H04-EXERCISES': {
+    href: { 'zh-CN': '/architecture/hopper-clusters-tma/exercises/', en: '/en/architecture/hopper-clusters-tma/exercises/' },
+    title: { 'zh-CN': 'H04 练习：集群生命周期与 TMA 完成条件', en: 'H04 Exercises: Cluster Lifetimes and TMA Completion' }, prerequisites: ['H04'],
+  },
+  'H04-SOLUTIONS': {
+    href: { 'zh-CN': '/architecture/hopper-clusters-tma/solutions/', en: '/en/architecture/hopper-clusters-tma/solutions/' },
+    title: { 'zh-CN': 'H04 解答：远端所有权与方向相关等待', en: 'H04 Solutions: Remote Ownership and Directional Waits' }, prerequisites: ['H04-EXERCISES'],
+  },
   VIS15: {
     href: { 'zh-CN': '/visuals/architecture-evolution/', en: '/en/visuals/architecture-evolution/' },
-    title: { 'zh-CN': 'VIS15：比较 Turing 与 Ampere 契约', en: 'VIS15: Compare Turing and Ampere Contracts' }, prerequisites: ['H01', 'H02'], indexGroup: 'visuals',
+    title: { 'zh-CN': 'VIS15：比较 Turing、Ampere、Ada 与 Hopper 契约', en: 'VIS15: Compare Turing, Ampere, Ada and Hopper Contracts' }, prerequisites: ['H01', 'H02', 'H03', 'H04'], indexGroup: 'visuals',
   },
   G09: {
     href: { 'zh-CN': '/multi-gpu/multi-node-transport-failures/', en: '/en/multi-gpu/multi-node-transport-failures/' },

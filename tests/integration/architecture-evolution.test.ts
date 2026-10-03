@@ -8,9 +8,9 @@ import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-inde
 import current from '../../src/current-publication-manifest.json';
 import r6 from '../../src/r6-release-manifest.json';
 
-const ids = ['H01', 'H01-EXERCISES', 'H01-SOLUTIONS', 'H02', 'H02-EXERCISES', 'H02-SOLUTIONS', 'VIS15'];
+const ids = [...['H01', 'H02', 'H03', 'H04'].flatMap(id => [id, `${id}-EXERCISES`, `${id}-SOLUTIONS`]), 'VIS15'];
 const empty = { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] };
-describe('issue #59 complete architecture publication', () => {
+describe('issues #59/#60 complete architecture publication', () => {
   it.each(ids)('%s has aligned source, structure, prerequisites, locale and evidence contracts', async id => {
     const destination = PUBLISHED_DESTINATIONS[id];
     const pair = await Promise.all((['zh-CN', 'en'] as const).map(async locale => {
@@ -33,32 +33,43 @@ describe('issue #59 complete architecture publication', () => {
     const code = (document: Document) => [...document.querySelectorAll('main pre')].map(node => node.textContent);
     expect(code(pair[0].document)).toEqual(code(pair[1].document));
   });
-  it('publishes only complete Turing/Ampere states and the owner-reviewed static matrix', async () => {
+  it('publishes complete Turing/Ampere/Ada/Hopper states and the owner-reviewed static matrix', async () => {
     for (const prefix of ['', 'en/']) {
       const document = parseHTML(await readFile(`dist/${prefix}visuals/architecture-evolution/index.html`, 'utf8')).document;
       const visual = document.querySelector('[data-visual-id="VIS15"]')!;
       const rows = [...visual.querySelectorAll('tbody tr')];
       const cells = (i: number) => [...rows[i].querySelectorAll('td')].map(node => node.textContent?.trim());
-      expect(cells(1)).toEqual(['64 KiB', '163 KiB', '99 KiB', '163 KiB']);
-      expect(cells(8)).toEqual(prefix ? ['Not available', 'Available', 'Not available', 'Not available'] : ['不具备', '具备', '不具备', '不具备']);
-      expect(visual.querySelectorAll('[data-capability] option')).toHaveLength(5);
+      expect(cells(1)).toEqual(['64 KiB', '163 KiB', '99 KiB', '163 KiB', '99 KiB', '227 KiB']);
+      const yes = prefix ? 'Available' : '具备';
+      const no = prefix ? 'Not available' : '不具备';
+      expect(cells(8)).toEqual([no, yes, no, no, no, yes]);
+      expect(cells(9)).toEqual([no, yes, yes, yes, yes, yes]);
+      for (const row of [10, 11, 12]) expect(cells(row)).toEqual([no, no, no, no, no, yes]);
+      expect(visual.querySelectorAll('[data-capability] option')).toHaveLength(7);
       expect(visual.querySelector('[data-controls]')?.hasAttribute('hidden')).toBe(true);
       expect(visual.querySelector('.comparison')?.getAttribute('tabindex')).toBe('0');
-      expect(visual.textContent).not.toMatch(/Hopper|Ada|Blackwell|Coming soon/);
+      expect(visual.textContent).toContain('Hopper');
+      expect(visual.textContent).toContain('Ada');
+      expect(visual.textContent).not.toMatch(/Blackwell|Coming soon/);
     }
   });
   it('keeps exact new prerequisites and current counts separate from frozen R6 and GPU evidence', () => {
     expect(PUBLISHED_DESTINATIONS.H01.prerequisites).toEqual(['F06', 'M06']);
     expect(PUBLISHED_DESTINATIONS.H02.prerequisites).toEqual(['H01', 'M13', 'L08']);
-    expect(current.scope).toMatchObject({ publicationPairs: 383, sourceRoutes: 766, exerciseSetPublicationPairs: 105,
-      solutionSetPublicationPairs: 105, practiceBankEntries: 117, sourceRecords: 119 });
-    expect(current.scope.learningUnits).toHaveLength(106);
+    expect(PUBLISHED_DESTINATIONS.H03.prerequisites).toEqual(['H02', 'M02', 'Q10']);
+    expect(PUBLISHED_DESTINATIONS.H04.prerequisites).toEqual(['H02', 'M12', 'M13']);
+    expect(PUBLISHED_DESTINATIONS.VIS15.prerequisites).toEqual(['H01', 'H02', 'H03', 'H04']);
+    expect(current.scope).toMatchObject({ publicationPairs: 389, sourceRoutes: 778, exerciseSetPublicationPairs: 107,
+      solutionSetPublicationPairs: 107, practiceBankEntries: 119, sourceRecords: 121 });
+    expect(current.scope.learningUnits).toHaveLength(108);
     expect(current.scope.visualExplainers).toHaveLength(22);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(483);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(487);
     expect(r6.scope.publicationPairs).toBe(376);
     expect(current.evidence.pendingHardwareVerification).toEqual(r6.evidence.pendingHardwareVerification);
     expect(current.evidence.runtimeVerified).toEqual([]);
-    for (const id of ['PB-R7-001', 'PB-R7-002', 'SRC-CUDA-103', 'SRC-CUDA-104']) {
+    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB19');
+    expect(RESOURCE_INDEX_RECORDS.some(record => record.planningId === 'LAB19')).toBe(false);
+    for (const id of ['PB-R7-001', 'PB-R7-002', 'PB-R7-003', 'PB-R7-004', 'SRC-CUDA-103', 'SRC-CUDA-104', 'SRC-CUDA-105', 'SRC-CUDA-106']) {
       expect(RESOURCE_INDEX_RECORDS.filter(record => record.planningId === id)).toHaveLength(1);
     }
   });

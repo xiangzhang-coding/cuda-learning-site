@@ -83,14 +83,15 @@ const features = ARCHITECTURE_FEATURES.filter(feature => feature !== 'all');
   architecture-evolution { display: block; border: 1px solid var(--sl-color-gray-4); padding: 1rem; margin-block: 1.5rem; min-width: 0; }
   [hidden] { display: none !important; }
   .baseline { border-inline-start: .3rem solid var(--sl-color-text-accent); padding: .75rem 1rem; background: var(--sl-color-bg-sidebar); }
-  fieldset { display: flex; gap: 1rem; flex-wrap: wrap; margin-block: 1rem; border: 1px solid var(--sl-color-gray-4); }
+  fieldset { display: flex; gap: 1rem; flex-wrap: wrap; min-width: 0; margin-block: 1rem; border: 1px solid var(--sl-color-gray-4); }
   label { display: grid; gap: .4rem; min-width: 0; }
   select, button { font: inherit; color: var(--sl-color-text); background: var(--sl-color-bg); min-height: 44px; padding: .5rem; max-width: 100%; border: 1px solid var(--sl-color-gray-3); }
+  select { min-width: 0; width: 100%; }
   :is(select, button, .comparison):focus-visible { outline: 3px solid var(--sl-color-text-accent); outline-offset: 3px; }
   .contracts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
   .contracts :global(section) { border-block-start: 3px solid var(--sl-color-text-accent); padding: .75rem; background: var(--sl-color-bg-sidebar); margin: 0; overflow-wrap: anywhere; }
   .contracts :global(h4) { font-family: var(--sl-font-mono); margin: 0; }
-  .comparison { overflow-x: auto; max-width: 100%; } table { width: 100%; font-variant-numeric: tabular-nums; } th, td { vertical-align: top; } code { white-space: normal; }
+  .comparison { overflow-x: auto; max-width: 100%; } table { display: table; overflow: visible; width: 100%; font-variant-numeric: tabular-nums; } th, td { vertical-align: top; } code { white-space: normal; }
   @media (max-width: 42rem) { .contracts { grid-template-columns: 1fr; } fieldset { flex-direction: column; } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   @media (forced-colors: active) { .baseline, .contracts :global(section) { border-color: CanvasText; } }
