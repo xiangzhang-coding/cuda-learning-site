@@ -14,7 +14,7 @@ export const dateSchema = z
   .refine((value) => Boolean(parseIsoDate(value)), 'Date must be a real calendar date.');
 export const curriculumIdSchema = z
   .string()
-  .regex(/^(?:(?:O|F|M|A|Q|L|P|T|G|H)\d{2}(?:-[A-Z]+)?|LAB\d{2}|EX\d{2}|VIS\d{2}|PB-R\d+(?:-\d{3})?)$/);
+  .regex(/^(?:(?:O|F|M|A|Q|L|P|T|G|H)\d{2}(?:-[A-Z]+)?|W\d{2}|LAB\d{2}|EX\d{2}|VIS\d{2}|PB-R\d+(?:-\d{3})?)$/);
 export const resourceKindSchema = z.enum([
   'learning-unit',
   'lab',
@@ -23,7 +23,33 @@ export const resourceKindSchema = z.enum([
   'practice-bank',
   'runnable-example',
   'visual-explainer',
+  'emerging-feature-watch',
 ]);
+
+// These are evidence targets admitted by the compile policy, not release discovery.
+export const toolkitLaneSchema = z.enum(['cuda-11.8', 'cuda-12.9', 'cuda-13.3']);
+
+export function watchBoundaryIssues(metadata: {
+  unitId?: string;
+  resourceKind?: string;
+  prerequisites?: readonly string[];
+  toolkitLanes?: readonly string[];
+}): string[] {
+  const issues: string[] = [];
+  const watch = /^W\d{2}$/.test(metadata.unitId ?? '');
+  if (watch !== (metadata.resourceKind === 'emerging-feature-watch')) {
+    issues.push('W identifiers require the Emerging Feature Watch resource kind and vice versa.');
+  }
+  // Reject W edges for every resource: this also prevents transitive dependencies
+  // from Stable Curriculum units through a Lab, example, or exercise.
+  if (metadata.prerequisites?.some((id) => /^W\d{2}$/.test(id))) {
+    issues.push('An Emerging Feature Watch entry cannot be a prerequisite.');
+  }
+  if (watch && metadata.toolkitLanes?.length) {
+    issues.push('Emerging Feature Watch entries cannot claim a Toolkit Lane.');
+  }
+  return issues;
+}
 
 export const compilationEvidenceStatusSchema = z.enum(COMPILATION_EVIDENCE_STATUSES);
 export const runtimeEvidenceStatusSchema = z.enum(RUNTIME_EVIDENCE_STATUSES);

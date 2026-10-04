@@ -184,8 +184,8 @@ describe('published resource indexes', () => {
     const counts = Object.fromEntries(
       INDEX_GROUPS.map((group) => [group, RESOURCE_INDEX_RECORDS.filter((record) => record.group === group).length]),
     );
-    expect(counts).toEqual({ labs: 20, practice: 121, visuals: 22, glossary: currentPublication.scope.glossaryTerms, sources: 123 });
-    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(286 + currentPublication.scope.glossaryTerms);
+    expect(counts).toEqual({ labs: 20, practice: 121, visuals: 22, glossary: currentPublication.scope.glossaryTerms, sources: 124 });
+    expect(Object.values(counts).reduce((total, count) => total + count, 0)).toBe(287 + currentPublication.scope.glossaryTerms);
     expect(counts.glossary).toBeGreaterThanOrEqual(30);
 
     const indexDocuments = await Promise.all(INDEX_GROUPS.map((group) => readRoute(INDEX_ROUTES[group].en)));

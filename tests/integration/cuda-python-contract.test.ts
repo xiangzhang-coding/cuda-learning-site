@@ -31,8 +31,8 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current).toMatchObject({
       reviewDate: '2026-10-04',
       releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
-      scope: { publicationPairs: 398, sourceRoutes: 796, exerciseSetPublicationPairs: 109,
-        solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 123 },
+      scope: { publicationPairs: 405, sourceRoutes: 810, exerciseSetPublicationPairs: 109,
+        solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 124 },
     });
     expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
     expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23', 'EX24', 'EX25']);

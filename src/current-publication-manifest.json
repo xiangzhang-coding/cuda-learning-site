@@ -11,8 +11,9 @@
     "status": "pending"
   },
   "scope": {
-    "publicationPairs": 398,
-    "sourceRoutes": 796,
+    "publicationPairs": 405,
+    "sourceRoutes": 810,
+    "emergingFeatureWatch": ["W01", "W02", "W03", "W04", "W05", "W06"],
     "exerciseSetPublicationPairs": 109,
     "solutionSetPublicationPairs": 109,
     "learningUnits": [
@@ -179,7 +180,7 @@
     "pytorchAndTritonPracticeEntries": ["PB-R5-004", "PB-R5-005", "PB-R5-006", "PB-R5-007", "PB-R5-008", "PB-R5-009", "PB-R5-010", "PB-R5-011", "PB-R5-012", "PB-R5-013", "PB-R5-014", "PB-R5-015", "PB-R5-016", "PB-R5-017", "PB-R5-018", "PB-R5-019", "PB-R5-020"],
     "multiGpuAndNcclPracticeEntries": ["PB-R6-001", "PB-R6-002", "PB-R6-003", "PB-R6-004", "PB-R6-005", "PB-R6-006", "PB-R6-007", "PB-R6-008", "PB-R6-009", "PB-R6-010", "PB-R6-011", "PB-R6-012", "PB-R6-013"],
     "glossaryTerms": 207,
-    "sourceRecords": 123
+    "sourceRecords": 124
   },
   "compatibility": {
     "supportedEnvironment": "native-linux",
@@ -619,6 +620,7 @@
     "retainedCompileRuns": [32720214527, 33275734951]
   },
   "knownLimitations": [
+    "Issue #62 adds the Emerging Feature Watch index and W01-W06 as seven Publication Pairs: 405 pairs, 810 routes, 494 catalog records including 124 sources. The 110 Stable Curriculum Learning Units and all example/Lab evidence remain unchanged. W entries cannot be prerequisites or claim Toolkit Lanes. Review coordinates do not admit CUDA 13.4 or any preview lane; no promotion or optional probe is published. Earlier increment counts are historical; R7 remains pending.",
     "Issue #61 adds H05/H06 with Exercises/solutions, EX25 and LAB19/LAB20 as nine complete Publication Pairs. Current scope: 398 pairs / 796 routes / 110 units / 109 Exercise and solution sets / 493 catalog records. VIS15 covers twelve Turing-through-Blackwell states, with 10.7 explicitly outside EX25's 13.3.1 build profile. EX25 compilation remains empty and target-specific; EX25/LAB19/LAB20 and all architecture/performance behavior remain Pending Hardware Verification. No qualifying runtime comparison is recorded. R7 remains pending.",
     "Issue #60 adds H03/H04 as six complete Publication Pairs and extends VIS15 to Ada 8.9 and Hopper 9.0. Exact prerequisites are H03 [H02,M02,Q10] and H04 [H02,M12,M13]. Current scope is 389 pairs / 778 routes / 108 units / 107 Exercise and solution sets / 487 catalog records. All four new-page evidence arrays remain empty; cache, cluster, DSM, TMA and performance behavior remain Pending Hardware Verification. LAB19 stays hidden pending H06. Current documentation review (13.4.2 guide; 13.4 tuning; 13.4 Update 1 release notes) changes no pinned Toolkit Lane. R6 remains frozen; R7 is pending.",
     "Historical issue #59 added H01/H02 and VIS15 as seven complete Publication Pairs with Turing 7.5 and Ampere 8.0/8.6/8.7 states; it supplied no architecture execution or performance evidence.",

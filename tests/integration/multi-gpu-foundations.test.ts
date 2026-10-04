@@ -42,10 +42,10 @@ describe('G01–G03 dependency-closed Publication Pairs', () => {
   });
   it('extends the current inventory without changing the completed R5 or granting GPU evidence', () => {
     expect(current.scope.learningUnits).toEqual([...r5.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
-    expect(current.scope.publicationPairs).toBe(r5.scope.publicationPairs + 53);
+    expect(current.scope.publicationPairs).toBe(r5.scope.publicationPairs + 60);
     expect(current.scope.practiceBankEntries).toBe(r5.scope.practiceBankEntries + 19);
     expect(current.evidence.compileChecked).toEqual(r5.evidence.compileChecked);
     expect(current.evidence.runtimeVerified).toEqual([]);
-    for (const id of ['W01', 'LAB21']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
+    for (const id of ['LAB21']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
   });
 });

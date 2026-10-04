@@ -96,7 +96,7 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 
 ## 当前发布路线
 
-**当前架构增量，2026-10-04（#61）：**[H05](/architecture/blackwell-families/)先修为 `[H04,M17,L08]`，[H06](/architecture/portable-specialization/)先修为 `[H01,H02,H04,H05]`，均有独立练习／解答。随后进入 EX25、LAB19、LAB20；[VIS15](/visuals/architecture-evolution/)覆盖 Turing 至 Blackwell。当前有 110 个学习单元、25 个可运行示例、20 个实验、22 项可视化讲解、109 组练习、109 组独立解答、398 个双语发布对、796 条源路由、493 条目录记录（121 个练习题库条目、207 个术语表词条、123 条来源记录，加上实验／可视化）。44 个待验证主体仍待硬件验证，架构执行／性能尚未观察。下方 R6 冻结，R7 待复核。
+**当前发布增量，2026-10-04（#62）：**[新特性观察（Emerging Feature Watch）](/watch/)新增六个可选的 W01–W06 条目，不增加稳定课程前置条件，也不晋升接口。[H05](/architecture/blackwell-families/)先修为 `[H04,M17,L08]`，[H06](/architecture/portable-specialization/)先修为 `[H01,H02,H04,H05]`，均有独立练习／解答。随后进入 EX25、LAB19、LAB20；[VIS15](/visuals/architecture-evolution/)覆盖 Turing 至 Blackwell。当前有 110 个学习单元、25 个可运行示例、20 个实验、22 项可视化讲解、109 组练习、109 组独立解答、405 个双语发布对、810 条源路由、494 条目录记录（121 个练习题库条目、207 个术语表词条、124 条来源记录，加上实验／可视化）。44 个待验证主体仍待硬件验证，架构执行／性能尚未观察。下方 R6 冻结，R7 待复核。
 
 截至 **2026-09-12**，稳定课程（Stable Curriculum）的当前发布完整双语覆盖 82 个学习单元：O01-O08、F01-F08、M01-M19、A01-A14、Q01-Q13、L01-L13 与 P01-P07。可复用库路线保留 [L12：cuFFT 计划、布局与启动](/libraries/cufft-plans-layouts-startup/)和 [L13：cuSPARSE 描述符、SpMV 与 SpMM](/libraries/cusparse-descriptors-spmv-spmm/)及各自示例；Python 桥接从 [P01](/python/cuda-python-bridge/)进入，仍需满足已有 CUDA 生命周期与流的先修条件。P04-P07 将这些概念用于 eager PyTorch。下面列出当前完整发布的严格先修关系。
 

@@ -30,6 +30,6 @@ describe('NCCL publication and independent evidence contract', () => {
       expect(current.evidence.pendingHardwareVerification).toContain(id);
       expect(current.evidence.compileChecked).not.toContain(id);
     }
-    expect(current.scope).toMatchObject({ publicationPairs: 398, sourceRoutes: 796, exerciseSetPublicationPairs: 109, solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 123 });
+    expect(current.scope).toMatchObject({ publicationPairs: 405, sourceRoutes: 810, exerciseSetPublicationPairs: 109, solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 124 });
   });
 });

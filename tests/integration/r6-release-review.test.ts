@@ -30,7 +30,7 @@ describe('R6 aggregate release review', () => {
     expect(release.scope).toMatchObject({ publicationPairs: 376, sourceRoutes: 752,
       exerciseSetPublicationPairs: 103, solutionSetPublicationPairs: 103, practiceBankEntries: 115,
       sourceRecords: 117, glossaryTerms: 207 });
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(493);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(494);
     expect(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice')).toHaveLength(121);
     const completed = new Set<string>();
     const visit = (id: string, visiting = new Set<string>()) => {
@@ -43,7 +43,7 @@ describe('R6 aggregate release review', () => {
     for (const id of [...release.scope.learningUnits, ...release.scope.runnableExamples,
       ...release.scope.labs, ...release.scope.visualExplainers]) visit(id);
     for (const record of RESOURCE_INDEX_RECORDS) for (const id of record.prerequisites) visit(id);
-    for (const id of ['D01', 'W01', 'LAB21', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
+    for (const id of ['D01', 'LAB21', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
     expect(r5.scope.learningUnits).toHaveLength(95);
     expect(r5.scope.practiceBankEntries).toBe(102);
   });

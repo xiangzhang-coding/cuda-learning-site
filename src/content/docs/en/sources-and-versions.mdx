@@ -1046,6 +1046,25 @@ The [Driver tensor-map API **13.4**, §6.41](https://docs.nvidia.com/cuda/cuda-d
 
 **#60 current increment:** 108 Learning Units, 24 Runnable Examples, 18 Labs, 22 Visual Explainers, 107 Exercise sets and 107 separate solution sets; 389 Publication Pairs / 778 source routes and 487 catalog records (119 Practice Bank entries, 207 terms, 121 sources, 18 Labs, 22 visuals). R6 remains frozen, R7 pending; the same 41 Example/Lab subjects remain Pending Hardware Verification. H03/H04/VIS15 add no GPU evidence. The #59 counts below are historical.
 
+<span id="src-cuda-109" class="resource-target"></span>
+
+### SRC-CUDA-109 — Emerging interface status and licensing
+
+Related IDs: W01, W02, W03, W04, W05, W06. Reviewed/accessed **2026-10-04**. [W01](/en/watch/cuda-tile-cpp/), [W02](/en/watch/cutile-python-tile-ir/), [W03](/en/watch/developer-preview/), [W04](/en/watch/nccl-device-fabric/), [W05](/en/watch/cccl-experimental-python/), [W06](/en/watch/cutlass-python-dsls/). Context7 discovery used `/websites/nvidia_cuda`, `/nvidia/cccl`, and `/websites/nvidia_cutlass`; exact owner sources govern the distinctions below.
+
+| Surface | Owner coordinates and review result |
+| --- | --- |
+| Tile C++ | [NVCC tile compilation](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html), current 13.4: introduced 13.3, C++20+, opt-in, explicit supported target; no automatic Stable Curriculum admission |
+| cuTile / Tile IR | [1.6.0 release notes](https://docs.nvidia.com/cuda/cutile-python/generated/release_notes.html) and [quickstart](https://docs.nvidia.com/cuda/cutile-python/quickstart.html): calling convention and compiler versions matter; Hopper arrives with CTK 13.3. [README at 5cf2361](https://github.com/NVIDIA/cutile-python/blob/5cf2361e1527b136dff68af1f70ce402fd0c1231/README.md) still describes 13.2 restrictions; its preview namespace is separate |
+| Preview | [Owner archive](https://developer.nvidia.com/cuda-toolkit-archive): 13.4.0 Developer Preview is historical; current download is 13.4.2. [Release notes](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html) separate minor compatibility from new-feature R615 requirements |
+| NCCL | [2.32.3 guide](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/deviceapi.html), [v2.32.3-1 CFT source](https://github.com/NVIDIA/nccl/blob/v2.32.3-1/docs/userguide/source/usage/cft.rst) and [release notes](https://github.com/NVIDIA/nccl/releases/tag/v2.32.3-1): backend-specific gates, GIN recompilation and CFT capabilities; socket GIN needs opt-in GDRCopy |
+| CCCL | [v3.4.3 cudax](https://github.com/NVIDIA/cccl/blob/v3.4.3/docs/cudax/index.rst), [Python beta API](https://github.com/NVIDIA/cccl/blob/v3.4.3/docs/python/compute_api.rst) and [package metadata](https://github.com/NVIDIA/cccl/blob/v3.4.3/python/cuda_cccl/pyproject.toml): experimental API/ABI, public beta, exact extras and dependency exclusions |
+| CUTLASS DSL | [v4.8.0 quickstart](https://github.com/NVIDIA/cutlass/blob/v4.8.0/media/docs/pythonDSL/quick_start.rst), [release notes](https://github.com/NVIDIA/cutlass/releases/tag/v4.8.0), [deprecation policy](https://github.com/NVIDIA/cutlass/blob/v4.8.0/media/docs/pythonDSL/deprecation.rst): distinguish released, experimental and preview paths; match wheel and source |
+
+**Rights:** cuTile README declares Apache-2.0; CCCL's inspected Python metadata has Apache-2.0 WITH LLVM-exception. [NCCL v2.32.3-1 LICENSE](https://github.com/NVIDIA/nccl/blob/v2.32.3-1/LICENSE.txt) combines Apache-2.0 with retained BSD/per-file notices. [CUTLASS compiler LICENSE](https://github.com/NVIDIA/cutlass/blob/v4.8.0/cutlass_compiler/LICENSE.txt) explicitly excludes `python/CuTeDSL` from the general BSD grant and points to the [DSL agreement, 2025-05-08](https://github.com/NVIDIA/cutlass/blob/v4.8.0/media/docs/pythonDSL/license.rst). CUDA components retain their [EULA](https://docs.nvidia.com/cuda/eula/index.html). Documentation remains owner material. Only original paraphrase and links are published: no copied example, binary, private material or measured result.
+
+**#62 current scope:** 405 Publication Pairs / 810 routes; 110 Stable Curriculum Learning Units plus six Watch entries; 494 catalog records including 124 sources. Other #59–#61 counts are historical. No new evidence, Toolkit Lane, automatic promotion or promised implementation; R7 remains pending.
+
 <span id="src-cuda-107" class="resource-target"></span>
 
 ### SRC-CUDA-107 — Blackwell families and target scopes

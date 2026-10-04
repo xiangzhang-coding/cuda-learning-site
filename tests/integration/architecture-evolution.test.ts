@@ -63,11 +63,11 @@ describe('issues #59/#60 complete architecture publication', () => {
     expect(PUBLISHED_DESTINATIONS.H05.prerequisites).toEqual(['H04', 'M17', 'L08']);
     expect(PUBLISHED_DESTINATIONS.H06.prerequisites).toEqual(['H01', 'H02', 'H04', 'H05']);
     expect(PUBLISHED_DESTINATIONS.VIS15.prerequisites).toEqual(['H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
-    expect(current.scope).toMatchObject({ publicationPairs: 398, sourceRoutes: 796, exerciseSetPublicationPairs: 109,
-      solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 123 });
+    expect(current.scope).toMatchObject({ publicationPairs: 405, sourceRoutes: 810, exerciseSetPublicationPairs: 109,
+      solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 124 });
     expect(current.scope.learningUnits).toHaveLength(110);
     expect(current.scope.visualExplainers).toHaveLength(22);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(493);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(494);
     expect(r6.scope.publicationPairs).toBe(376);
     expect(current.evidence.pendingHardwareVerification).toEqual(['EX25', 'LAB19', 'LAB20', ...r6.evidence.pendingHardwareVerification]);
     expect(current.evidence.runtimeVerified).toEqual([]);
