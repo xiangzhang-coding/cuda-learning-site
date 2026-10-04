@@ -87,9 +87,9 @@ describe('R4 release review', () => {
     for (const file of ['index.mdx', 'about.md', 'start/using-the-learning-site.md']) {
       const raw = await readFile(path.join(projectRoot, 'src/content/docs', prefix, file), 'utf8');
       const { frontmatter } = parseFrontmatter(raw);
-      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-09-22');
+      expect(frontmatter.factCheckDate, `${prefix}${file}`).toBe('2026-10-04');
       expect(frontmatter.head.find((entry: { attrs: { name: string } }) => entry.attrs.name === 'cuda:fact-check-date')?.attrs.content)
-        .toBe('2026-09-22');
+        .toBe('2026-10-04');
       const prose = raw.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replaceAll('**', '').replace(/（[^）]*）/g, '');
       for (const count of [
         /376 (?:Publication Pairs|pairs|个双语发布对|个发布对)/, /752 (?:source routes|routes|条源路由|条路由)/,
@@ -164,7 +164,7 @@ describe('R4 release review', () => {
       schemaVersion: 1,
       publicationId: 'current',
       reviewDate: '2026-10-04',
-      releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
+      releaseReview: { latestCompleted: 'R7', next: null, status: 'complete' },
       scope: { libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds },
     });
     const reviewed = await readJson('src/r4-release-manifest.json');
@@ -193,7 +193,7 @@ describe('R4 release review', () => {
       // Run the real metadata emitter in isolation, never touching the coordinated site build.
       for (const file of [
         'scripts/prepare-release-output.mjs',
-        'src/r3-release-manifest.json', 'src/r4-release-manifest.json', 'src/r6-release-manifest.json', 'src/current-publication-manifest.json',
+        'src/r3-release-manifest.json', 'src/r4-release-manifest.json', 'src/r7-release-manifest.json', 'src/current-publication-manifest.json',
         'LICENSE', 'LICENSE-CONTENT', 'NOTICE', 'CONTENT_LICENSES.md', 'THIRD_PARTY_NOTICES.md',
         'node_modules/astro/LICENSE', 'node_modules/@astrojs/starlight/LICENSE',
         'node_modules/pagefind/LICENSE/LICENSE', 'node_modules/pagefind/LICENSE/LICENSE-vscode-ripgrep',
@@ -205,7 +205,7 @@ describe('R4 release review', () => {
         cwd: root,
         env: { ...process.env, WORKERS_CI_COMMIT_SHA: sourceCommit },
       });
-      expect(JSON.parse(await readFile(path.join(root, 'dist/release.json'), 'utf8'))).toEqual({ ...await readJson('src/r6-release-manifest.json'), sourceCommit });
+      expect(JSON.parse(await readFile(path.join(root, 'dist/release.json'), 'utf8'))).toEqual({ ...await readJson('src/r7-release-manifest.json'), sourceCommit });
       expect(JSON.parse(await readFile(path.join(root, 'dist/publication.json'), 'utf8'))).toEqual({ ...current, sourceCommit });
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -362,7 +362,7 @@ describe('R4 release review', () => {
       readJson('src/r4-release-manifest.json'), readJson('src/current-publication-manifest.json'),
       readJson('dist/release.json'), readJson('dist/publication.json'),
     ]);
-    expect(release).toEqual({ ...await readJson('src/r6-release-manifest.json'), sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/) });
+    expect(release).toEqual({ ...await readJson('src/r7-release-manifest.json'), sourceCommit: expect.stringMatching(/^[0-9a-f]{40}$/) });
     expect(publication).toEqual({ ...current, sourceCommit: release.sourceCommit });
     expect(reviewed.scope).toEqual({
       publicationPairs: 277,

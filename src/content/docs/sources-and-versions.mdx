@@ -3,7 +3,7 @@ title: 来源与版本记录
 description: 覆盖 G03 的精确发布与技术来源，独立记录版本、权利和证据。
 pairId: sources-and-versions
 counterpart: /en/sources-and-versions/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -55,7 +55,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-22'
+      content: '2026-10-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -70,15 +70,31 @@ import ResourceIndex from '../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/en/sources-and-versions/" lang="en">Read the English counterpart</a>
 
-这份记录列出扩展至 G01-G09、EX01-EX24、LAB01-LAB18 的课程及全部既有路径的精确来源。21 项可视化讲解保持无 CUDA 证据。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
+本记录覆盖至 H01–H06 的完整稳定课程、EX01–EX25、LAB01–LAB20，以及 22 项不授予证据的可视化讲解。W01–W06 是独立设置版本门槛的新特性观察条目。工具版本、浏览器行为、硬件能力、项目支持政策和观察分别记录。
 
 ## 记录范围
 
-**2026-09-22 R6 聚合静态复核**冻结 104 个学习单元（Learning Unit）、24 个可运行示例（Runnable Example）、18 个实验（Lab）、21 项可视化讲解（Visual Explainer）、103 组练习与 103 组独立解答，共 **376 个双语发布对（Publication Pair）/ 752 条源路由**。**478 条目录记录**包括 18 个实验、115 个练习题库（Practice Bank）条目、21 项可视化讲解、207 个术语表（Glossary）词条和 117 条来源。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
+<span id="r7-full-curriculum-review"></span>
+
+## R7 全课程复核 — 2026-10-04（UTC）
+
+模式版本 8 的 `src/r7-release-manifest.json` 生成 `/release.json`；`/publication.json` 记录 R7 完成，未指定下一次聚合发布。冻结范围为 **110 个学习单元、25 个可运行示例、20 个实验、22 项可视化讲解、109 组练习和 109 组独立解答，共 405 个双语发布对／810 条源路由**。**494 条目录记录**包括 121 道原创练习题、207 个术语表词条、124 条来源，以及实验与可视化。O、F、M、A、Q、L、P、T、G、H 的先修依赖均闭合于已发布目的地。延后 D01／LAB21／T09 没有占位页面。W01–W06 不得成为稳定课程先修；晋升须另行决策，预览版本不会自动进入工具包通道。
+
+[前 100 题学习顺序](/practice/#r7-first-100)明确选出 100 道互不重复的既有题，每题只计入一个主要类别：**18 道核心心智模型、18 道 CUDA C++ 实现、15 道调试／正确性、18 道内存／性能、10 道 Nsight 报告分析、8 道库／算法选择、8 道 PyTorch／Triton、5 道多 GPU／NCCL**。历史 ID 不是学习位置编号。其余 21 道原创题继续发布。实现类位置须提交完成修复的源码、不变量和测试用例，仅文字审查不算完成。每题保留先修、门槛、提示、已审查解答、来源依据及逐项来源日期。
+
+[R7 来源处理记录](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/MAINTENANCE_SOURCES.md#r7-full-curriculum-source-disposition)保留本次 Context7 检索与精确所有者核对。Context7 混合归档、标签与主分支资料：全局 rank 直接选设备的示例及概括性目标描述不能裁定所选契约。124 条逐项记录仍分别裁定 API、组件、编译器、框架、架构、已知问题、许可、通知与引用；聚合复核不倒填或刷新历史观察。未变更的组件／分析器快照显式保留在 R6，并与当前发布比较；EX25 有独立的逐目标项目配置。原生 Linux、普通工具包通道 11.8.0／12.9.2／13.3.1，以及独立固定的 CUDA Python、PyTorch、Triton、NCCL 环境相互区分。当前能力文档不能为 EX25 增加 10.7 目标，也不能扩大 `a`／`f` 二进制资格。成功回退必须保留路径身份，并独立满足相同正确性契约。
+
+NVIDIA 文档与二进制保留所有者条款；NCCL／CCCL 保留 Apache／BSD／逐文件通知，PyTorch 保留 BSD 许可与 NOTICE，Triton 为 MIT，CUTLASS C++ 为 BSD，Python DSL 保留独立专有条款。来源记录只链接或转述；未引入所有者示例、图片、题目、报告或未经审查的改编。原创文字采用 CC BY 4.0，软件／测试采用 Apache-2.0。公开源码、源码归档、索引／搜索、规范下载、生成的许可通知、CI 产物／报告、Preview 与生产沿用泄漏与许可门禁。Workers 仍只提供静态资源，固定 Wrangler 4.125.0、Node 24.19.0 与 npm 11.17.0；没有新增基础设施能力。
+
+只有 **EX02、EX10、LAB02** 保留来自运行 `32720214527` 和 `33275734951` 的编译已检查证据。**EX10 无需运行验证；44 个主体（24 个示例与全部 20 个实验）仍待硬件验证。** 没有基准环境、运行已验证或社区已观察主体，没有已捕获分析器报告与性能观察。六份分析器计划只有预期内容。主机测试、编译门禁、静态回退与浏览器模型不能证明 GPU 执行、计时、传输、后端、架构优势或普遍加速。H01–H06 与 W01–W06 不增加已观察证据。架构与多节点执行需要完整环境清单及合格硬件；未选择启动器或不支持的路径阻止准入。
+
+[Issue #63](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63)记录精确源码提交、审查结果、同一提交的 Web／CUDA／框架／分布式 CI、扫描后产物、Preview 版本与完整冒烟，再记录生产版本／部署、完整冒烟及实际发布日期。必需门禁覆盖全部 810 条路由、规范导入／下载、链接、单元／集成／E2E、无障碍、键盘、减少动态效果、移动布局、打印、主题、双语搜索、可视化／截图、示例、实验与分布式契约。本静态复核不预先认证动态门禁。下方 R1–R6 与增量记录保留原有范围、日期和当时措辞。
+
+## R6 聚合复核 — 2026-09-22
 
 <span id="r6-aggregate-review"></span>
 
-## R6 聚合复核 — 2026-09-22
+**2026-09-22 R6 聚合静态复核**冻结 104 个学习单元（Learning Unit）、24 个可运行示例（Runnable Example）、18 个实验（Lab）、21 项可视化讲解（Visual Explainer）、103 组练习与 103 组独立解答，共 **376 个双语发布对（Publication Pair）/ 752 条源路由**。**478 条目录记录**包括 18 个实验、115 个练习题库（Practice Bank）条目、21 项可视化讲解、207 个术语表（Glossary）词条和 117 条来源。网站构建使用 Node.js 24.19.0 与 npm 11.17.0。
 
 模式版本 7 的 `src/r6-release-manifest.json` 生成冻结的 `/release.json`；`/publication.json` 记录 R6 已完成、R7 待复核。G01-G09 与全部既有公开先修、练习、独立解答和资源形成闭包。**PB-R6-001 至 PB-R6-013** 为 13 道独立原创多 GPU 与 NCCL 题，保留完整双语先修、硬件门槛、提示、解答、来源与复核日期。R7 和延后内容没有占位目的地。[Issue #58](https://github.com/xiangzhang-coding/cuda-learning-site/issues/58) 单独记录同一源码提交的 CI、Preview、生产和冒烟验收；本静态记录不预先声明动态门禁通过。以下 R1-R5 与增量记录均为历史，数量和逐项来源日期不倒填。
 

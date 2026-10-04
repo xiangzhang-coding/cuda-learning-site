@@ -11,21 +11,21 @@ const legalRoot = path.join(distRoot, 'legal');
 const environmentCommit = process.env.WORKERS_CI_COMMIT_SHA || process.env.GITHUB_SHA;
 const sourceCommit = environmentCommit ?? (await execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot })).stdout.trim();
 const [releaseManifest, publicationManifest] = await Promise.all(
-  ['src/r6-release-manifest.json', 'src/current-publication-manifest.json'].map(async (relativePath) =>
+  ['src/r7-release-manifest.json', 'src/current-publication-manifest.json'].map(async (relativePath) =>
     JSON.parse(await readFile(path.join(projectRoot, relativePath), 'utf8')),
   ),
 );
 
 if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error(`Invalid release source commit: ${sourceCommit}`);
-if (releaseManifest.releaseId !== 'R6' || releaseManifest.schemaVersion !== 7) {
-  throw new Error('The source release manifest is not the reviewed R6 schema.');
+if (releaseManifest.releaseId !== 'R7' || releaseManifest.schemaVersion !== 8) {
+  throw new Error('The source release manifest is not the reviewed R7 schema.');
 }
 if (
   publicationManifest.publicationId !== 'current' ||
   publicationManifest.schemaVersion !== 1 ||
-  publicationManifest.releaseReview?.latestCompleted !== 'R6' ||
-  publicationManifest.releaseReview?.next !== 'R7' ||
-  publicationManifest.releaseReview?.status !== 'pending'
+  publicationManifest.releaseReview?.latestCompleted !== 'R7' ||
+  publicationManifest.releaseReview?.next !== null ||
+  publicationManifest.releaseReview?.status !== 'complete'
 ) {
   throw new Error('The source publication manifest is not the current rolling publication schema.');
 }

@@ -3,7 +3,7 @@ title: Lab Index
 description: Find every completely published Lab by prerequisites, hardware, version, and Evidence Status.
 pairId: labs-index
 counterpart: /labs/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -15,7 +15,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: labs-index }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-10-04' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -25,6 +25,8 @@ head:
 import ResourceIndex from '../../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/labs/" lang="zh-CN">阅读中文对应页</a>
+
+**R7: reviewed 2026-10-04 (UTC).** All 20 Labs, LAB01–LAB20, remain Pending Hardware Verification. LAB19/LAB20 architecture paths and fallbacks require independent hardware, target and correctness evidence. The [full-curriculum review](/en/sources-and-versions/#r7-full-curriculum-review) retains compatibility and evidence boundaries. R5/R6 counts below are historical snapshots; the catalog is the complete current inventory.
 
 This index lists complete Lab Publication Pairs with executable steps and acceptance criteria. As of 2026-09-20, the current publication contains eighteen Labs, LAB01-LAB18; frozen R5 has sixteen. [LAB18](/en/labs/pipeline-nccl-computation/) requires G05/Q05/Q07 and investigates a dependency-safe NCCL pipeline. [LAB17](/en/labs/nccl-all-reduce/) requires G04/G05 and uses independently pinned NCCL 2.31.2 with EX24. LAB16 requires T04/T05; [LAB15: Verify and Measure Fused Softmax](/en/labs/verify-fused-softmax/) requires T02/A10/Q05. [LAB14](/en/labs/profile-custom-operator/) retains P11; [LAB13](/en/labs/build-custom-operator/) retains P08/P09. A complete page does not mean Runtime-Verified execution.
 

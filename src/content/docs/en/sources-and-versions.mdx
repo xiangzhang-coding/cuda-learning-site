@@ -1,9 +1,9 @@
 ---
 title: Sources and Version Record
-description: Exact publishing and technical sources through G03, with independent version, rights and evidence records.
+description: R7 full-curriculum source, compatibility, rights and evidence review, with Emerging Feature Watch kept separate.
 pairId: sources-and-versions
 counterpart: /sources-and-versions/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -55,7 +55,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-22'
+      content: '2026-10-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -70,9 +70,25 @@ import ResourceIndex from '../../../components/ResourceIndex.astro';
 
 <a class="locale-pair" data-locale-counterpart href="/sources-and-versions/" lang="zh-CN">阅读中文对应页</a>
 
-This record names exact sources for the curriculum through G01-G09, EX01-EX24, LAB01-LAB18 and all prior paths. Twenty-one Visual Explainers remain evidence-neutral. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
+This record covers the complete Stable Curriculum through H01–H06, EX01–EX25, LAB01–LAB20 and 22 evidence-neutral Visual Explainers. W01–W06 are separately version-gated Emerging Feature Watch entries. Tool versions, browser behavior, hardware capability, project support policy and observations are separate.
 
 ## Scope of this record
+
+<span id="r7-full-curriculum-review"></span>
+
+## R7 full-curriculum review — 2026-10-04 (UTC)
+
+Schema 8 `src/r7-release-manifest.json` supplies `/release.json`; `/publication.json` records R7 complete with no scheduled next aggregate release. The frozen scope is **110 Learning Units, 25 Runnable Examples, 20 Labs, 22 Visual Explainers, 109 Exercise sets and 109 separate solution sets: 405 Publication Pairs / 810 source routes**. The **494 catalog records** include 121 original Practice Bank entries, 207 Glossary terms and 124 source records, plus Labs and visuals. All O, F, M, A, Q, L, P, T, G and H dependencies close on published destinations. Deferred D01/LAB21/T09 have no placeholders. W01–W06 cannot be Stable Curriculum prerequisites; promotion is a separate decision, and no preview enters a Toolkit Lane.
+
+The [first 100 study positions](/en/practice/#r7-first-100) explicitly select 100 distinct existing questions, one primary category each: **18 core mental models, 18 CUDA C++ implementation, 15 debugging/correctness, 18 memory/performance, 10 Nsight report analysis, 8 libraries/algorithm choice, 8 PyTorch/Triton and 5 Multi-GPU/NCCL**. Historical IDs are not study positions. The other 21 original questions remain published. Implementation positions require source implementing the repair, invariants and test cases; a prose-only audit is insufficient. Every entry keeps its prerequisites, gates, hints, reviewed solution, source basis and individual source date.
+
+The [R7 source disposition](https://github.com/xiangzhang-coding/cuda-learning-site/blob/main/MAINTENANCE_SOURCES.md#r7-full-curriculum-source-disposition) records fresh Context7 discovery and exact owner checks. Context7 mixes archived, tagged and main-branch material: its global-rank device example and generalized target descriptions are not authority for the selected contracts. The 124 item-level records remain the authority for each API, component, compiler, framework, architecture, known issue, license, notice and citation; aggregate review does not backdate or refresh a historical observation. The unchanged component/profiler snapshot is explicitly retained in R6 and compared with current publication; EX25 has an independent target-specific project profile. Native Linux, ordinary Toolkit Lanes 11.8.0 / 12.9.2 / 13.3.1, independently pinned CUDA Python, PyTorch, Triton and NCCL environments remain separate. Current capability documentation cannot add a 10.7 EX25 target or broaden an `a`/`f` binary's eligibility. Successful fallback must preserve its path identity and independently meet the same correctness contract.
+
+NVIDIA documentation and binaries retain their owner terms; NCCL/CCCL retain Apache/BSD/per-file notices, PyTorch its BSD license and NOTICE, Triton MIT, CUTLASS C++ BSD and Python DSL its separate proprietary terms. Source records link or paraphrase; no owner example, figure, question, report or unreviewed adaptation is introduced. Original prose is CC BY 4.0; software/tests are Apache-2.0. Public source, source archives, indexes/search, canonical downloads, generated legal notices, CI artifacts/reports, Preview and production use the existing leak/license gates. Workers remains static-assets-only with pinned Wrangler 4.125.0, Node 24.19.0 and npm 11.17.0; no infrastructure capability is added.
+
+Only **EX02, EX10 and LAB02** retain Compile-Checked evidence from runs `32720214527` and `33275734951`. **EX10 is Runtime-Not-Applicable; 44 subjects (24 examples and all 20 Labs) remain Pending Hardware Verification.** There is no Reference Environment, Runtime-Verified or Community-Observed subject, captured profiler report or performance observation. Six profiler plans remain expected-only. Host tests, compilation gates, static fallbacks and browser models establish no GPU execution, timing, transport, backend, architecture advantage or universal speedup. H01–H06 and W01–W06 add no observed evidence. Architecture and multi-node execution require complete Environment Manifests and qualifying hardware; an unselected launcher or unsupported path blocks admission.
+
+[Issue #63](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63) records the exact source commit, review results, same-commit web/CUDA/framework/distributed CI, scanned artifacts, Preview version and full smoke, then production version/deployment and full smoke with the actual deployment date. Required gates include all 810 routes, canonical imports/downloads, links, unit/integration/E2E, accessibility, keyboard, reduced motion, mobile, print, themes, both-locale search, visuals/screenshots, examples, Labs and distributed contracts. This static review does not pre-certify those dynamic gates. Historical R1–R6 and increment records below retain their original scope, dates and then-current wording.
 
 The **2026-09-22 R6 aggregate static review** freezes 104 Learning Units, 24 Runnable Examples, 18 Labs, 21 Visual Explainers, 103 Exercise sets and 103 separate solution sets: **376 Publication Pairs / 752 source routes**. Its **478 catalog records** contain 18 Labs, 115 Practice Bank entries, 21 Visual Explainers, 207 Glossary terms and 117 source records. Website builds use Node.js 24.19.0 and npm 11.17.0.
 

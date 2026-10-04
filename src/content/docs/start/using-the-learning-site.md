@@ -3,7 +3,7 @@ title: 'O01：如何使用学习站'
 description: 认识学习资源、当前发布路线和本站边界。
 pairId: o01
 counterpart: /en/start/using-the-learning-site/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-22'
+      content: '2026-10-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -95,6 +95,12 @@ CUDA 学习站（Learning Site）不是按发布时间堆叠内容的博客。�
 每个公开页面还必须和另一种语言的对应页组成**双语发布对（Publication Pair）**。两页共享事实、结构、元数据和来源日期，但各自使用自然的中文或英文表达。
 
 ## 当前发布路线
+
+**R7 全课程静态复核于 2026-10-04（UTC）完成。** 从 O01–O08 到 H01–H06 的 110 个学习单元形成闭包：25 个示例、20 个实验、22 项可视化讲解、109 组练习及独立解答，共 405 个双语发布对／810 条路由与 494 条目录记录。121 道原创题的[前 100 题学习顺序](/practice/#r7-first-100)分别满足八类门槛。W01–W06 不成为稳定课程先修；44 个示例／实验仍待硬件验证。[全课程复核](/sources-and-versions/#r7-full-curriculum-review)说明来源、兼容性和证据，[issue #63](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63)记录同一提交的动态验收与实际发布日期。
+
+### 历史路线记录
+
+以下“当前”和 R7 待复核表述均为当时记录，保留原始数量与日期；当前范围以上方 R7 为准。
 
 **当前发布增量，2026-10-04（#62）：**[新特性观察（Emerging Feature Watch）](/watch/)新增六个可选的 W01–W06 条目，不增加稳定课程前置条件，也不晋升接口。[H05](/architecture/blackwell-families/)先修为 `[H04,M17,L08]`，[H06](/architecture/portable-specialization/)先修为 `[H01,H02,H04,H05]`，均有独立练习／解答。随后进入 EX25、LAB19、LAB20；[VIS15](/visuals/architecture-evolution/)覆盖 Turing 至 Blackwell。当前有 110 个学习单元、25 个可运行示例、20 个实验、22 项可视化讲解、109 组练习、109 组独立解答、405 个双语发布对、810 条源路由、494 条目录记录（121 个练习题库条目、207 个术语表词条、124 条来源记录，加上实验／可视化）。44 个待验证主体仍待硬件验证，架构执行／性能尚未观察。下方 R6 冻结，R7 待复核。
 

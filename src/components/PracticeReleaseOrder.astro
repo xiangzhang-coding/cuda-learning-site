@@ -1,0 +1,45 @@
+---
+// SPDX-License-Identifier: Apache-2.0
+import release from '../r7-release-manifest.json';
+import { RESOURCE_INDEX_RECORDS } from '../resource-indexes/resource-index-data';
+import type { IndexLocale } from '../resource-indexes/resource-index-model';
+
+interface Props { locale: IndexLocale }
+const { locale } = Astro.props;
+const english = locale === 'en';
+const labels = [
+  ['核心心智模型', 'Core mental models'], ['CUDA C++ 实现', 'CUDA C++ implementation'],
+  ['调试与正确性', 'Debugging and correctness'], ['内存与性能', 'Memory and performance'],
+  ['Nsight 报告分析', 'Nsight report analysis'], ['库与算法选择', 'Libraries and algorithm choice'],
+  ['PyTorch 与 Triton', 'PyTorch and Triton'], ['多 GPU 与 NCCL', 'Multi-GPU and NCCL'],
+];
+const records = new Map(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice').map(record => [record.planningId, record]));
+const groups = release.practiceFirst100.map((group, index) => ({
+  ...group,
+  label: labels[index][english ? 1 : 0],
+  start: 1 + release.practiceFirst100.slice(0, index).reduce((sum, previous) => sum + previous.entries.length, 0),
+  records: group.entries.map(id => {
+    const record = records.get(id);
+    if (!record) throw new Error(`Unknown R7 practice entry: ${id}`);
+    return record;
+  }),
+}));
+---
+
+<section aria-labelledby="r7-first-100" data-practice-release-order>
+  <h2 id="r7-first-100">{english ? 'R7: the first 100 study positions' : 'R7：前 100 题学习顺序'}</h2>
+  <p>{english
+    ? 'Follow this explicit study order after completing each entry’s prerequisites. These are 100 distinct existing questions, each counted once under its primary category; IDs retain their historical release names. The remaining 21 questions and the searchable catalog follow. Category order is not prerequisite order.'
+    : '完成各题先修后，按以下明确顺序学习。这 100 道既有题目互不重复，每题只计入一个主要类别；ID 保留历史发布名称。其余 21 题及可检索目录仍在下文。类别顺序不代表先修顺序。'}</p>
+  <p>{english
+    ? 'For positions 19–36, submit CUDA C++ source implementing the repaired contract, alongside the entry’s requested invariants and tests. Include host launch/error/lifetime handling where applicable; position 26 also needs the separate-compilation build commands. Use the linked Learning Unit’s original solution as a review rubric. A prose-only audit does not complete this implementation path. Source review needs no GPU; compilation and execution, when attempted externally, require the declared environment and separate evidence. No result is supplied by this study order.'
+    : '第 19–36 题须提交实现修复后契约的 CUDA C++ 源码，以及各题要求的不变量和测试。适用时包括主机启动、错误与生命周期处理；第 26 题还需分离编译的构建命令。以关联学习单元的原创解答为审查标准。只交文字审查不能完成这条实现路径。源码审查无需 GPU；若在外部尝试编译或运行，须使用声明的环境并分别记录证据。本学习顺序不提供任何运行结果。'}</p>
+  {groups.map(group => (
+    <section data-practice-category={group.category}>
+      <h3>{group.label} · {group.entries.length}</h3>
+      <ol start={group.start}>
+        {group.records.map(record => <li data-practice-position={record.planningId}><a href={record.href[locale]}>{record.planningId}: {record.title[locale]}</a></li>)}
+      </ol>
+    </section>
+  ))}
+</section>

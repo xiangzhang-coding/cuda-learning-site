@@ -1,5 +1,73 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R7 full-curriculum source disposition
+
+Aggregate review: **2026-10-04 UTC**, issue #63. R7 closes all 110 O–H Learning
+Units and their eligible resources; W01–W06 remain outside the prerequisite
+graph. The 405 Publication Pairs / 810 routes and 494 catalog records retain
+124 item-level source records. Those records preserve exact selected versions,
+owner URLs/sections, access dates, known issues, rights and bounded claims.
+Earlier dates below remain historical, including statements that R7 was pending.
+
+Fresh Context7 discovery used `/websites/nvidia_cuda` for virtual/real and
+`a`/`f` target scope, `/pytorch/pytorch/v2.11.0` for DDP device ownership, and
+`/cloudflare/workers-sdk` for static-assets deployment and Preview isolation.
+The results include old target lists, main-branch launcher snippets and a
+global-rank-to-device example. They are discovery, not exact-version authority:
+LOCAL_RANK selects from the shared visible-device list, and pinned NVCC target
+lists govern EX25 rather than the newest capability table. No dependency,
+compiler, ABI, cloud binding, ordinary dialect or preview promotion is changed.
+
+The review follows these existing exact-source and rights boundaries:
+
+| Scope | Authority retained for R7 |
+| --- | --- |
+| O/F/M/A/Q and CUDA C++ | Item-level Runtime/Driver, Programming Guide, archived lane release notes, NVCC/PTX and compiler records; original algorithms and numerical contracts |
+| Libraries L01–L13 | Exact bundled component versions in the R6 compatibility snapshot; independent CCCL 3.4.2, CUTLASS C++ 4.7.0, cuDNN 9.24.0/frontend 1.27.0; per-file and binary terms remain distinct |
+| Profilers | Pinned Nsight/CUPTI records and non-admin permission policy; G06 independently selects Systems 2026.5, not a retroactive change to Q07 |
+| Python/PyTorch/Triton | Exact environment profiles, requirements/compiler locks and tagged source/license records; compiler-only installation is not a GPU runtime environment |
+| G01–G09 | SRC-CUDA-094–102 and R6 exact-source hashes; standalone NCCL 2.31.2 is independent of DDP wheel NCCL 2.28.9; multi-node launcher/provider remain unselected |
+| H01–H06 | SRC-CUDA-103–108, Programming Guide 13.4.2, tuning 13.4, pinned NVCC 13.3.1 and PTX 9.3; EX25 project independently selects targets and fallback |
+| W01–W06 | SRC-CUDA-109 and Watch per-entry status/access/license records, reviewed 2026-10-04; separate CUTLASS Python DSL terms; no promotion or execution |
+| Publishing | Exact lock, Node 24.19.0/npm 11.17.0, Astro 7.2.8/Starlight 0.41.7/Pagefind 1.5.2/Wrangler 4.125.0; assets-only config and complete notices |
+
+Fresh HTTP-200 whole-response checks below record bytes as SHA-256; upstream
+content is not redistributed. Immutable hashes for NCCL registration/license
+and PyTorch launcher/LICENSE/NOTICE match the R6 record. The CUDA compiler
+owner document was also read for compilation phases, supported dialects and
+target restrictions; Cloudflare's owner page confirms no script/binding is
+required for static assets and missing assets return 404. Preview upload and
+production deployment remain separate commands. Reachability/hashes are not
+runtime verification or a claim that every historical document was reauthored.
+
+| Exact owner URL | SHA-256 |
+| --- | --- |
+| [Toolkit 11.8.0 release notes](https://docs.nvidia.com/cuda/archive/11.8.0/cuda-toolkit-release-notes/index.html) | `53cc3339efdbef18108b41898c9d8c126f26b4c07ea8f36d34225d174a7e5dcd` |
+| [Toolkit 12.9.2 release notes](https://docs.nvidia.com/cuda/archive/12.9.2/cuda-toolkit-release-notes/index.html) | `5741f09dd8c06bfd8c313d73428c879230fdc41accdaa12b225065d51482ff59` |
+| [Toolkit 13.3.1 release notes](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-toolkit-release-notes/index.html) | `28010f748fdd8c23f436b204cf33b05ed90632c96e767ae129f1e1c5a3d95d86` |
+| [NVCC 13.3.1](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html) | `666431ea365e365713510e9e2a0c0d9d418eaf6655f90b76d5cf7f0362c8f6c1` |
+| [Capability appendix](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html) | `a5e04ca6b859266611b0deb04d231e02adb620b9087d9e82f68bb13bca21020b` |
+| [Blackwell tuning](https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html) | `5c28d25cffdce18216fa850b392ff07a99e970df6b9d4c4a55204092c49eb38b` |
+| [NCCL LICENSE](https://raw.githubusercontent.com/NVIDIA/nccl/7b83616df3ae082a1f32bb74c27458bfe8153a13/LICENSE.txt) | `c1f53beabe4dbf05bd87c00f7ca6084c0cb541c3f7bf8edab7913f266018b7be` |
+| [NCCL registration](https://raw.githubusercontent.com/NVIDIA/nccl/7b83616df3ae082a1f32bb74c27458bfe8153a13/docs/userguide/source/usage/bufferreg.rst) | `d13b2ca058afcf7ba8903087b5f636745498c7813154e470ba6d9f8521bec709` |
+| [PyTorch launcher](https://raw.githubusercontent.com/pytorch/pytorch/70d99e998b4955e0049d13a98d77ae1b14db1f45/torch/distributed/run.py) | `e1c41f86d5cb299410e2ae087e4e070ae634aa87daf2b308939ea7032e65c6e0` |
+| [PyTorch LICENSE](https://raw.githubusercontent.com/pytorch/pytorch/70d99e998b4955e0049d13a98d77ae1b14db1f45/LICENSE) | `bd018feef8825e88181c84eb7e3aa4eafb8f08a20d9fd6ef948569610c4a3e43` |
+| [PyTorch NOTICE](https://raw.githubusercontent.com/pytorch/pytorch/70d99e998b4955e0049d13a98d77ae1b14db1f45/NOTICE) | `c2cc7bf0caec7652c2b460a8a470bea1677f241e4ab8e431df34cf17f5a9fec0` |
+| [CCCL LICENSE](https://raw.githubusercontent.com/NVIDIA/cccl/d36012203ef73ac7f966e848dd88482273e91e02/LICENSE) | `f96f51edda77fb9897de29d924d615e6bd153f4969db85fc6b7a22d7a624631e` |
+| [CUTLASS C++ LICENSE](https://raw.githubusercontent.com/NVIDIA/cutlass/dcf215af68a2d08d305076c152a06f201728cd53/LICENSE.txt) | `ad1513ca983da737a6843364ad19e8424a56d860736c2da773b8c5be527e1475` |
+| [Triton LICENSE](https://raw.githubusercontent.com/triton-lang/triton/f797708c0626e5f9840ca5b0a98790e2c7cb09ad/LICENSE) | `92640fb97222fd0a698ff28ce0c3782c172623f8d6c609b557636a80f28fb946` |
+| [cuDNN 9.24.0 notes](https://docs.nvidia.com/deeplearning/cudnn/backend/v9.24.0/release-notes.html) | `240189ad1b09d57754435e16eac4048413bc41c5b4908114526704178fe52718` |
+| [Workers assets](https://developers.cloudflare.com/workers/static-assets/) | `ab8e68acbccee13bb2356dbfe45507bbbd244266342419a319b97cfb50fb34d3` |
+| [Workers previews](https://developers.cloudflare.com/workers/configuration/previews/) | `c1f30c8e5b4987377d3b08881d097129e7d47b2d385d46c97b19d01057730437` |
+
+No source, binary, owner sample, figure, question or report is imported by this
+review. Existing exact license/notice ledgers govern original and linked works;
+all new software is Apache-2.0 and original prose CC BY 4.0. The eight first-100
+categories reference existing original questions once each, not duplicate new
+entries. The implementation path adds an explicit source-delivery requirement.
+Evidence stays at EX02/EX10/LAB02 Compile-Checked, EX10 Runtime-Not-Applicable,
+44 Pending Hardware Verification subjects and zero observed GPU results.
+
 ## H05/H06/EX25/LAB19/LAB20/VIS15 source review — 2026-10-04
 
 Current Context7 discovery covered Blackwell family sets, a/f target scopes and

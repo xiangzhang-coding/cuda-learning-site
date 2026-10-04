@@ -1,9 +1,9 @@
 ---
 title: Practice Bank
-description: 119 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 121 original cross-unit practice entries, including a categorized first-100 study order, prerequisites, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -330,7 +330,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-10-04' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -354,6 +354,9 @@ head:
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
+import PracticeReleaseOrder from '../../../components/PracticeReleaseOrder.astro';
+
+<PracticeReleaseOrder locale="en" />
 
 <a class="locale-pair" data-locale-counterpart href="/practice/" lang="zh-CN">阅读中文对应页</a>
 
