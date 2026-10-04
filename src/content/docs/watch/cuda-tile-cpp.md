@@ -37,7 +37,7 @@ head:
 
 ## 稳定前置知识
 
-[M03：共享内存分块](/memory/shared-memory-tiling/)、[M17：架构目标](/toolchain/compiler-architecture-targets/)和 [M19：C++ 方言](/toolchain/cpp-dialect-boundaries/)提供本条目比较所需的概念。稳定课程（Stable Curriculum）没有任何学习单元需要 W01。
+[M03：共享内存分块](/memory/shared-memory-tiling/)、[M17：架构目标](/toolchain/compiler-architecture-targets/)和 [M19：C++ 方言](/toolchain/cpp-dialect-boundaries/)提供本条目比较所需的概念。稳定课程（Stable Curriculum）没有任何学习单元（Learning Unit）需要 W01。
 
 ## 当前接口状态
 

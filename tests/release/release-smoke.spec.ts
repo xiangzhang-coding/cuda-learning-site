@@ -547,6 +547,7 @@ test('serves the exact R6 release and current publication with production canoni
   expect(publication.scope).toEqual({
     publicationPairs: 405,
     sourceRoutes: 810,
+    emergingFeatureWatch: ['W01', 'W02', 'W03', 'W04', 'W05', 'W06'],
     exerciseSetPublicationPairs: 109,
     solutionSetPublicationPairs: 109,
     learningUnits: currentLearningUnits,

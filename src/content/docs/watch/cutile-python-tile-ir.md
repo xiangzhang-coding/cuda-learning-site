@@ -38,7 +38,7 @@ Python tile 前端、中间表示（Intermediate Representation，IR）和机器
 
 ## 稳定前置知识
 
-[P03：运行时编译](/python/runtime-compilation-linking/)、[T01：块值](/triton/programs-and-block-values/)和 [T04：分块 GEMM](/triton/blocked-matrix-multiplication/)提供比较所需的概念。完成这些学习单元不需要 W02，也不需要安装 cuTile。
+[P03：运行时编译](/python/runtime-compilation-linking/)、[T01：块值](/triton/programs-and-block-values/)和 [T04：分块 GEMM](/triton/blocked-matrix-multiplication/)提供比较所需的概念。完成这些学习单元（Learning Unit）不需要 W02，也不需要安装 cuTile。
 
 ## 当前接口状态
 

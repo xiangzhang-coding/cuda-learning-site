@@ -26,7 +26,7 @@ head:
 | --- | --- | --- |
 | [W01：CUDA Tile C++](/watch/cuda-tile-cpp/) | 用 tile 表达工作后，哪些责任交给了编译器？ | CUDA 13.3 引入；当前 13.4 编译器文档 |
 | [W02：cuTile Python 与 Tile IR](/watch/cutile-python-tile-ir/) | 前端、字节码与调用约定如何配套？ | cuda-tile 1.6.0；Tile IR 13.4 |
-| [W03：Developer Preview 边界](/watch/developer-preview/) | 新下载版本会改变工具包通道吗？ | 已归档的 13.4.0 Developer Preview；当前下载为 13.4.2 |
+| [W03：Developer Preview 边界](/watch/developer-preview/) | 新下载版本会改变工具包通道（Toolkit Lane）吗？ | 已归档的 13.4.0 Developer Preview；当前下载为 13.4.2 |
 | [W04：NCCL 设备端与 fabric](/watch/nccl-device-fabric/) | 谁发起通信，走哪条路径？ | NCCL 2.32.3；CFT 从 2.31 引入 |
 | [W05：CCCL 实验接口与 Python](/watch/cccl-experimental-python/) | 哪个命名空间真正承诺稳定性？ | CCCL v3.4.3；cuda.compute public beta |
 | [W06：CUTLASS Python DSL](/watch/cutlass-python-dsls/) | 哪个编译器、布局模型和许可适用？ | CUTLASS v4.8.0；DSL 单独条款 |
@@ -37,7 +37,7 @@ head:
 
 ## 晋升需要单独决策
 
-晋升要求非预览的稳定接口、明确的项目支持、持久的教学价值，以及适用工具包通道（Toolkit Lane）内编译已检查（Compile-Checked）的规范可运行示例（Runnable Example），和声明的基准环境（Reference Environment）内运行已验证（Runtime-Verified）的必需实验（Lab）。还须核对许可和双语发布对（Publication Pair）。本次发布不晋升任何条目，也不承诺未来实现。O–H 学习单元不能依赖 W 条目，包括通过中间资源形成的依赖。已准入通道仍为 cuda-11.8、cuda-12.9、cuda-13.3；版本号不是准入决策。
+晋升要求非预览的稳定接口、明确的项目支持、持久的教学价值，以及适用工具包通道内编译已检查（Compile-Checked）的规范可运行示例（Runnable Example），和声明的基准环境（Reference Environment）内运行已验证（Runtime-Verified）的必需实验（Lab）。还须核对许可和双语发布对（Publication Pair）。本次发布不晋升任何条目，也不承诺未来实现。O–H 学习单元（Learning Unit）不能依赖 W 条目，包括通过中间资源形成的依赖。已准入通道仍为 cuda-11.8、cuda-12.9、cuda-13.3；版本号不是准入决策。
 
 ## 证据边界
 

@@ -8,7 +8,7 @@ for (const prefix of ['', 'en/']) {
   test(`${prefix}Watch reaches all six version-gated entries and direct counterparts`, async ({ page }) => {
     for (const slug of slugs) {
       await page.goto(`/${prefix}watch/`);
-      await page.locator(`main a[href="/${prefix}watch/${slug}/"]`).click();
+      await page.locator(`main table a[href="/${prefix}watch/${slug}/"]`).click();
       await expect(page.locator('main')).toContainText('2026-10-04');
       await expect(page.locator('meta[name="cuda:resource-kind"]')).toHaveAttribute('content', 'emerging-feature-watch');
       await page.locator('[data-locale-counterpart]').focus();
