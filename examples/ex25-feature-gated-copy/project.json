@@ -1,0 +1,49 @@
+{
+  "SPDX-License-Identifier": "Apache-2.0",
+  "schemaVersion": 1,
+  "id": "EX25",
+  "title": "Feature-gated tile copy",
+  "purpose": "Compare an explicit portable staging baseline with an admitted bulk-copy path using independent host correctness and bounded timing.",
+  "root": "examples/ex25-feature-gated-copy",
+  "license": "Apache-2.0",
+  "provenance": "original",
+  "build": {
+    "standard": "c++17",
+    "inputs": ["include/contract.hpp", "include/launch.hpp", "src/main.cu", "src/portable.cu", "src/specialized.cu", "src/unavailable.cu"],
+    "hostTestInputs": ["include/contract.hpp", "tests/host_test.cpp"],
+    "contractFiles": ["Makefile", "scripts/compile-check.sh"],
+    "stages": ["preprocess", "compile", "link", "inspect"],
+    "commands": {
+      "preprocess": "make TARGET={target} preprocess",
+      "compile": "make TARGET={target} compile",
+      "link": "make TARGET={target} link",
+      "inspect": "make TARGET={target} inspect",
+      "hostTest": "make host-test"
+    },
+    "artifacts": ["build/{target}/specialized.ii", "build/{target}/portable.o", "build/{target}/specialized.o", "build/{target}/main.o", "build/{target}/ex25-copy"]
+  },
+  "compatibility": {
+    "supportedEnvironment": "Native Linux",
+    "capabilityTier": "Baseline GPU Capability Tier with explicit specialization gates",
+    "minimumComputeCapability": "7.5",
+    "maximumProblemMemoryBytes": 524352,
+    "target": ["sm_75", "compute_75", "sm_90", "compute_90", "sm_100f", "compute_100f", "sm_103f", "compute_103f", "sm_110f", "compute_110f", "sm_120f", "compute_120f", "sm_121f", "compute_121f"],
+    "lanes": [
+      { "id": "cuda-11.8", "toolkit": "11.8.0", "nvcc": "11.8.89", "operatingSystem": "Ubuntu 22.04 x86-64", "dialects": ["c++17"], "targets": ["portable"], "image": "nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f" },
+      { "id": "cuda-12.9", "toolkit": "12.9.2", "nvcc": "12.9.86", "operatingSystem": "Ubuntu 24.04 x86-64", "dialects": ["c++17"], "targets": ["portable"], "image": "nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5" },
+      { "id": "cuda-13.3", "toolkit": "13.3.1", "nvcc": "13.3.73", "operatingSystem": "Ubuntu 24.04 x86-64", "dialects": ["c++17"], "targets": ["portable", "90", "100f", "103f", "110f", "120f", "121f"], "image": "nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87" }
+    ]
+  },
+  "ranges": {
+    "dispatch": { "file": "include/contract.hpp", "startMarker": "// [ex25-dispatch-start]", "endMarker": "// [ex25-dispatch-end]", "language": "cpp" },
+    "oracle": { "file": "include/contract.hpp", "startMarker": "// [ex25-oracle-start]", "endMarker": "// [ex25-oracle-end]", "language": "cpp" },
+    "portable": { "file": "src/portable.cu", "startMarker": "// [ex25-portable-start]", "endMarker": "// [ex25-portable-end]", "language": "cpp" },
+    "specialized": { "file": "src/specialized.cu", "startMarker": "// [ex25-specialized-start]", "endMarker": "// [ex25-specialized-end]", "language": "cpp" }
+  },
+  "evidence": {
+    "compilation": [],
+    "runtime": "Pending Hardware Verification",
+    "expectedObservations": ["Each admitted path should exactly reproduce all inputs and preserve every guard after checked completion."],
+    "recordedObservations": []
+  }
+}
