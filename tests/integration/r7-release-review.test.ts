@@ -31,11 +31,15 @@ describe('R7 full-curriculum release review', () => {
   });
 
   it('closes every published dependency without cycles or Watch prerequisites in stable paths', () => {
+    const completed = new Set<string>();
     const visit = (id: string, ancestors: string[] = [], stable = true) => {
       expect(ancestors, `cycle at ${id}`).not.toContain(id);
       expect(PUBLISHED_DESTINATIONS[id], `missing ${id}`).toBeDefined();
       if (stable) expect(id).not.toMatch(/^W\d/);
+      const key = `${stable}:${id}`;
+      if (completed.has(key)) return;
       for (const dependency of PUBLISHED_DESTINATIONS[id].prerequisites) visit(dependency, [...ancestors, id], stable);
+      completed.add(key);
     };
     for (const id of Object.keys(PUBLISHED_DESTINATIONS)) visit(id, [], !/^W\d/.test(id));
     for (const record of RESOURCE_INDEX_RECORDS) for (const prerequisite of record.prerequisites) visit(prerequisite);
