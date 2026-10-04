@@ -12,7 +12,7 @@ unitId: LAB20
 prerequisites: [H05, H06]
 relatedUnits: [EX25]
 exampleIds: [EX25]
-hardwareGate: 'Native Linux; one exact CC 10.0, 10.3, 11.0, 12.0 or 12.1 GPU; 8 GB total and 512 MiB free; Toolkit 13.3.1'
+hardwareGate: 'Native Linux x86-64; one exact CC 10.0, 10.3 or 12.0 GPU; 8 GB total and 512 MiB free; 11.0/12.1 compile-target coverage only'
 toolkitLanes: [cuda-13.3]
 minimumComputeCapability: '10.0'
 maximumProblemMemoryBytes: 524352
@@ -51,7 +51,7 @@ head:
 
 仅原生 Linux：**Ubuntu 24.04 x86-64 / Toolkit 13.3.1 / NVCC 13.3.73 / GCC 13.3.0 / C++17 / 驱动 610.43.02**。单设备，**总显存 8 GB／可用 512 MiB**，精确 CC 必须来自准入表。使用 Toolkit 随附 Compute Sanitizer 并记录版本；可选 profiler 为 **Nsight Compute 2026.2.1.5**。确认实际配置；这些尚不是基准环境（Reference Environment）。
 
-| TARGET | EX25 准入 CC | 特化镜像 | 普通附加 cubin |
+| TARGET | EX25 中的 GPU 镜像成员范围 | 特化镜像 | 普通附加 cubin |
 | --- | --- | --- | --- |
 | 100f | 10.0, 10.3 | compute_100f / sm_100f + PTX | sm_100 |
 | 103f | 10.3 | compute_103f / sm_103f + PTX | sm_103 |
@@ -59,7 +59,9 @@ head:
 | 120f | 12.0, 12.1 | compute_120f / sm_120f + PTX | sm_120 |
 | 121f | 12.1 | compute_121f / sm_121f + PTX | sm_121 |
 
-所有基线另含普通 compute_75 PTX 与 sm_75。**此项目配置排除 10.7**，即使当前文档给部分家族目标更广的范围。数值下限不是准入规则。CC 12.1 明确选择 120f 或 121f 并记录，不能把一个目标的输出当成另一个目标的证据。
+所有基线另含普通 compute_75 PTX 与 sm_75。**运行准入另有主机平台门槛：此处仅准入所选 x86-64 主机上的 CC 10.0/10.3/12.0。**11.0 和 12.1 行**仅覆盖编译目标**。Jetson 11.0 与 GB10/DGX Spark 12.1 使用 Arm 主机；x86-64 程序不是原生 Arm 程序。其 Jetson/Arm64-SBSA 平台软件、驱动、原生工具链及 profiler 配置需独立核对，之后才能执行本实验。不能仅替换目标／路径就运行。表格描述 GPU 镜像成员范围，不是完整环境准入。
+
+**此项目配置排除 10.7**，即使当前文档给家族目标更广的集合。数值下限不是准入规则。120f 与 121f 的编译必须分开记录；两者都不能提供 CC 12.1 运行证据。
 
 负载：规模 **256/4096/65536**，三种 int32 输入，每 tile 256 个值，每块 128 线程，两端各四个保护元素。输入／输出最多 **524352 B**，共享 tile **1024 B**，特化事务屏障 **8 B** 加对齐填充。载荷 16 B 对齐；无尾部、张量映射、集群、多播或 TMA 存储。不改变精度。计数器采集需要管理员批准的非管理员权限和精确指标支持；拒绝时阻断该观察。普通正确性／event 计时无需计数器权限。
 

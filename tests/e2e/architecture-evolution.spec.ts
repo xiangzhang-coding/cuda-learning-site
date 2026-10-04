@@ -91,11 +91,11 @@ for (const prefix of ['', 'en/']) {
     await page.goto(`/${prefix}visuals/architecture-evolution/`);
     const visual = page.locator('architecture-evolution');
     await expect(visual.locator('[data-controls]')).toBeHidden();
-    await expect(visual.locator('table tbody tr')).toHaveCount(15);
-    await expect(visual.locator('table')).toContainText('CC 8.9');
-    await expect(visual.locator('table')).toContainText('CC 9.0');
-    await expect(visual.locator('table')).toContainText('CC 12.1');
-    await expect(visual.locator('table')).toContainText('227 KiB');
+    await expect(visual.locator('.comparison table tbody tr')).toHaveCount(15);
+    await expect(visual.locator('.comparison table')).toContainText('CC 8.9');
+    await expect(visual.locator('.comparison table')).toContainText('CC 9.0');
+    await expect(visual.locator('.comparison table')).toContainText('CC 12.1');
+    await expect(visual.locator('.comparison table')).toContainText('227 KiB');
     await context.close();
   });
   test(`${prefix}VIS15 default and empty states @accessibility`, async ({ page }) => {
@@ -128,7 +128,16 @@ for (const prefix of ['', 'en/']) {
     await expect(page.locator('[data-results] section')).toHaveCount(1);
     await page.emulateMedia({ media: 'print' });
     await expect(page.locator('[data-controls]')).toBeHidden();
-    await expect(page.locator('architecture-evolution table')).toContainText('Ada');
-    await expect(page.locator('architecture-evolution table')).toContainText('Hopper');
+    await page.evaluate(() => { document.documentElement.style.fontSize = ''; });
+    await page.setViewportSize({ width: 794, height: 1123 });
+    await expect(page.locator('.comparison')).toBeHidden();
+    await expect(page.locator('[data-print-cc]')).toHaveCount(12);
+    await expect(page.locator('.print-comparison')).toContainText('Ada');
+    await expect(page.locator('.print-comparison')).toContainText('Hopper');
+    await expect(page.locator('.print-comparison')).toContainText('CC 12.1');
+    expect(await page.locator('.print-comparison table').evaluateAll(tables => tables.every(table => {
+      const rect = table.getBoundingClientRect();
+      return rect.width > 0 && rect.right <= document.documentElement.clientWidth && table.scrollWidth <= rect.width + 1;
+    }))).toBe(true);
   });
 }

@@ -18,7 +18,7 @@ canonicalRanges:
   - oracle
   - portable
   - specialized
-hardwareGate: 'Native Linux; one CC 7.5+ GPU; 8 GB total and 512 MiB free; specialization requires exact target admission'
+hardwareGate: 'Native Linux x86-64; one CC 7.5+ GPU; 8 GB total and 512 MiB free; CC 11.0/12.1 compile-target coverage only'
 toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
 minimumComputeCapability: '7.5'
 maximumProblemMemoryBytes: 524352
@@ -56,7 +56,7 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 
 ## 规范项目
 
-[固定源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/00525bab414284b0b35a6fc1ac9ed0ca2776db04/examples/ex25-feature-gated-copy) · [同版本下载](https://github.com/xiangzhang-coding/cuda-learning-site/archive/00525bab414284b0b35a6fc1ac9ed0ca2776db04.zip)。提取 `examples/ex25-feature-gated-copy/`。本可运行示例（Runnable Example）的两个语言版本导入同一组声明构建输入。原创软件采用 Apache-2.0，页面采用 CC BY 4.0；不重新分发 CUDA 包。
+[固定源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c6b85ed1b178cedb5302605687d0e6e6b33a36dd/examples/ex25-feature-gated-copy) · [同版本下载](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c6b85ed1b178cedb5302605687d0e6e6b33a36dd.zip)。提取 `examples/ex25-feature-gated-copy/`。本可运行示例（Runnable Example）的两个语言版本导入同一组声明构建输入。原创软件采用 Apache-2.0，页面采用 CC BY 4.0；不重新分发 CUDA 包。
 
 ## 显式分派
 
@@ -83,6 +83,8 @@ import CanonicalCode from '../../../components/CanonicalCode.astro';
 只有线程 0 初始化并到达 8 B 屏障，精确登记 1024 预期字节、提交对齐拷贝并等待第零阶段。块屏障发布完成，最终屏障在失效前保护生命周期。不使用集群、张量映射、多播、TMA 存储或家族独有指令。同一协议按不同精确目标范围构建，后缀选择不能证明性能。
 
 ## 构建、检查与运行
+
+**主机平台门槛：**这些二进制面向 x86-64。CC 11.0 Jetson 和 CC 12.1 GB10/DGX Spark 使用 Arm 主机，因此 110f/121f 及 120f 的 12.1 成员资格**仅覆盖编译目标**。原生 Jetson/Arm64-SBSA 软件、驱动、编译器和 profiler 配置需独立核对。LAB20 当前运行范围选择 CC 10.0/10.3/12.0，LAB19 选择 9.0。纯镜像成员函数不是完整平台准入。
 
 | 工具包通道（Toolkit Lane） | C++17 项目配置 | 虚拟／真实代码 |
 | --- | --- | --- |

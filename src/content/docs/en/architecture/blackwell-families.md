@@ -69,6 +69,8 @@ The 11.8.0/NVCC 11.8.89 and 12.9.2/NVCC 12.9.86 lanes select only EX25's `portab
 
 ## Features and resource gates
 
+GPU image membership is only one gate. EX25's selected runtime host is x86-64; CC 11.0 Jetson and CC 12.1 GB10/DGX Spark are Arm platforms. Their 110f/121f targets remain compile-target coverage, while native platform software, driver, toolchain and profiler profiles await separate review. LAB20 currently admits only CC 10.0/10.3/12.0 on the selected x86-64 profile. A target flag cannot port the host executable.
+
 Current capability tables list clusters, DSM and TMA for 10.x, 11.0 and 12.x. Their presence does not remove H04's lifetime, resource or completion obligations. Tensor Core formats differ: native FP64 inputs are listed for 10.0 and 10.7, but not 10.3, 11.0 or 12.x. FP4/FP6 support is not a license to replace FP32 arithmetic; define scaling, rounding, accumulation, output precision and an accepted error budget first. EX25 uses exact int32 copies and changes no precision.
 
 For the reviewed per-block shared-memory ceilings: 10.0/10.3/11.0 allow **227 KiB**, 12.x **99 KiB**, and 10.7 **327 KiB**. More than 48 KiB requires dynamic allocation and explicit opt-in; 10.7's 328 KiB per-SM configuration additionally needs the documented oversized-shared-memory mode. Query actual device and kernel limits. The Blackwell tuning guide's broader 12.0 resource statements differ from the current capability table in some per-SM details; this unit uses the capability table for this selected per-block ledger and does not infer occupancy from either.

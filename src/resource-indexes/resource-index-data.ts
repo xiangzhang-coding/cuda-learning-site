@@ -446,7 +446,7 @@ const labs: readonly ResourceIndexRecord[] = [
     planningId: 'LAB20', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB20.title,
     href: PUBLISHED_DESTINATIONS.LAB20.href, resourceType: 'guided-lab', difficulty: 'advanced',
     prerequisites: ['H05', 'H06'], relatedUnits: ['EX25'],
-    hardwareGate: localized('原生 Linux；一张精确 CC 10.0/10.3/11.0/12.0/12.1 GPU，总显存 8 GB、可用 512 MiB。', 'Native Linux; one exact CC 10.0/10.3/11.0/12.0/12.1 GPU, 8 GB total and 512 MiB free.'),
+    hardwareGate: localized('原生 Linux x86-64；一张精确 CC 10.0/10.3/12.0 GPU，总显存 8 GB、可用 512 MiB。11.0/12.1 仅覆盖编译目标，Arm 运行配置待核对。', 'Native Linux x86-64; one exact CC 10.0/10.3/12.0 GPU, 8 GB total and 512 MiB free. 11.0/12.1 are compile-target coverage only; Arm runtime profiles await review.'),
     versionGate: same('CUDA 13.3.1; NVCC 13.3.73; GCC 13.3.0; C++17; driver 610.43.02; Nsight Compute 2026.2.1.5'),
     evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-10-04',
   },

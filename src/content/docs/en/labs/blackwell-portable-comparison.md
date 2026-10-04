@@ -12,7 +12,7 @@ unitId: LAB20
 prerequisites: [H05, H06]
 relatedUnits: [EX25]
 exampleIds: [EX25]
-hardwareGate: 'Native Linux; one exact CC 10.0, 10.3, 11.0, 12.0 or 12.1 GPU; 8 GB total and 512 MiB free; Toolkit 13.3.1'
+hardwareGate: 'Native Linux x86-64; one exact CC 10.0, 10.3 or 12.0 GPU; 8 GB total and 512 MiB free; 11.0/12.1 compile-target coverage only'
 toolkitLanes: [cuda-13.3]
 minimumComputeCapability: '10.0'
 maximumProblemMemoryBytes: 524352
@@ -51,7 +51,7 @@ Exact prerequisites **[H05, H06]**: [H05](/en/architecture/blackwell-families/) 
 
 Native Linux only: **Ubuntu 24.04 x86-64 / Toolkit 13.3.1 / NVCC 13.3.73 / GCC 13.3.0 / C++17 / driver 610.43.02**. One device, **8 GB total / 512 MiB free**, with exact CC from the admission table. Use Toolkit-bundled Compute Sanitizer and record its version; optional profiler is **Nsight Compute 2026.2.1.5**. Confirm actual coordinates; none is already a Reference Environment.
 
-| TARGET | EX25 admitted CC | Specialized image | Ordinary extra cubin |
+| TARGET | GPU image membership in EX25 | Specialized image | Ordinary extra cubin |
 | --- | --- | --- | --- |
 | 100f | 10.0, 10.3 | compute_100f / sm_100f + PTX | sm_100 |
 | 103f | 10.3 | compute_103f / sm_103f + PTX | sm_103 |
@@ -59,7 +59,9 @@ Native Linux only: **Ubuntu 24.04 x86-64 / Toolkit 13.3.1 / NVCC 13.3.73 / GCC 1
 | 120f | 12.0, 12.1 | compute_120f / sm_120f + PTX | sm_120 |
 | 121f | 12.1 | compute_121f / sm_121f + PTX | sm_121 |
 
-Every baseline also includes ordinary compute_75 PTX and sm_75. **10.7 is excluded by this project profile**, even though current documentation gives some family targets a broader set. A numeric minimum is not the admission rule. On CC 12.1 choose 120f or 121f explicitly and record which; do not compare one target's output as evidence for the other.
+Every baseline also includes ordinary compute_75 PTX and sm_75. **Runtime admission adds a host-platform gate: only CC 10.0/10.3/12.0 on the selected x86-64 host is admitted here.** The 11.0 and 12.1 rows are **compile-target coverage only**. Jetson 11.0 and GB10/DGX Spark 12.1 have Arm hosts; x86-64 executables are not native Arm executables. Their Jetson/Arm64-SBSA platform software, driver, native toolchain and profiler profiles require separate review before this Lab can run there. Do not merely replace a target/path and execute. The table describes GPU image membership, not full environment admission.
+
+**10.7 is excluded by this project profile**, despite broader current documented family sets. A numeric minimum is not the admission rule. Compilation for 120f versus 121f must be recorded separately; neither result supplies CC 12.1 runtime evidence.
 
 Workload: counts **256/4096/65536**, three int32 patterns, 256 values/tile, 128 threads/block, four guards at each end. Maximum input/output allocation **524352 B**, shared tile **1024 B**, specialized transaction barrier **8 B** plus alignment padding. Payload alignment is 16 B; no tails, tensor map, cluster, multicast or TMA store. No precision changes. Counter collection needs administrator-approved non-admin access and exact metric support; denial blocks that observation. Ordinary correctness/event timing needs no counter privilege.
 

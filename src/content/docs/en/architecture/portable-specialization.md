@@ -56,6 +56,8 @@ For this fixed 128-thread, ~1 KiB shared-memory kernel, the reviewed architectur
 
 ## Keep separate build images
 
+Before the device-image decision, admit the host platform. EX25 currently selects native Linux x86-64. CC 11.0/12.1 target builds are compile-target coverage only; Jetson/Arm64-SBSA runtime software, drivers and profiler support are not yet selected. H05 and LAB20 explicitly withhold those runtime rows. The pure dispatch function tests image membership and does not certify a host port.
+
 EX25 uses separate translation units so the ordinary baseline never compiles the bulk-copy PTX for `compute_75`. The specialized unit uses exactly `compute_90/sm_90` for Hopper or the selected Blackwell `f` pair; the portable unit includes ordinary 75 PTX/cubin plus the selected family's numeric baseline cubin. Ordinary PTX retains a fallback where the driver supports its PTX version. No `a` image is used because this protocol needs no architecture-exclusive instruction.
 
 The full build profile is **Toolkit 13.3.1 / NVCC 13.3.73 / GCC 13.3.0 / C++17 / Ubuntu 24.04 x86-64**. Runtime Labs select driver **610.43.02**, recording any admitted substitution separately. The earlier 11.8.0 and 12.9.2 lanes only build the `portable` project profile. Separate target directories, compiler outputs and artifact listings prevent an old specialization object from masquerading as the new target. Compiler support, image compatibility and runtime correctness are separate checks.

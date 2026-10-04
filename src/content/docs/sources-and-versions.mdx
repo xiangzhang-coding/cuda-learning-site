@@ -1061,6 +1061,8 @@ NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[
 
 所选指令要求 sm_90+、源／目的地址 16 B 对齐、字节数为 16 的倍数。CTA 目的空间写法从 PTX 8.6 引入。EX25 使用不带可选语义限定的 bulk-copy 形式，不使用新语义限定、多播或 TMA 存储。单提交者登记一次到达及 1024 事务字节；阶段等待加块级发布先于消费，最终块同步保护失效操作。完整配置固定为 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17；11.8、12.9 仅为项目 portable 配置。各构建目标独立检查，不外推运行或其他目标证据。性能分析条件延续 [Nsight Compute 缓存／重放说明](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#cache-control)及[获准计数器访问](https://developer.nvidia.com/ERR_NVGPUCTRPERM)；实验独立选择 2026.2.1.5，不混同来源文档标签。
 
+**主机平台核对：**[13.3.1 Linux 安装指南](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html)区分 x86-64、Arm64-SBSA 与 Jetson 配置。[权利方 GPU/CC 映射](https://developer.nvidia.com/cuda-gpus)将 11.0 关联到 Jetson，将 12.1 关联到 GB10/DGX Spark。EX25 保留 GPU 编译目标，但在平台／软件／驱动／profiler 核对前暂缓原生 Arm 运行准入。LAB20 当前仅准入所选 x86-64 主机上的 10.0/10.3/12.0；x86 程序不是 Arm 运行产物。
+
 **SRC-CUDA-107/108 权利说明：**NVIDIA 文档为受其 Notices 约束的专有参考资料，不重新许可。未复制或改编权利方源码／示例／表格／图片。原创讲解／账本／模板采用 CC BY 4.0，原创 EX25 和网站／测试代码采用 Apache-2.0。不新增依赖或第三方资产。架构行为及性能仍待硬件验证（Pending Hardware Verification）。
 
 **#61 当前范围：**110 个学习单元、25 个可运行示例、20 个实验、22 项可视化、109 组练习／解答、398 个双语发布对／796 条路由、493 条目录记录（121 个练习题库条目、207 个术语、123 条来源、20 个实验、22 项可视化）。EX25/LAB19/LAB20 使待硬件验证主体增至 44。LAB19 已随 H06 发布；上方 #59/#60 计数及暂缓说明为历史记录。R6 冻结，R7 待复核。

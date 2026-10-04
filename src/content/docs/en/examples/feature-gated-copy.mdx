@@ -18,7 +18,7 @@ canonicalRanges:
   - oracle
   - portable
   - specialized
-hardwareGate: 'Native Linux; one CC 7.5+ GPU; 8 GB total and 512 MiB free; specialization requires exact target admission'
+hardwareGate: 'Native Linux x86-64; one CC 7.5+ GPU; 8 GB total and 512 MiB free; CC 11.0/12.1 compile-target coverage only'
 toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
 minimumComputeCapability: '7.5'
 maximumProblemMemoryBytes: 524352
@@ -56,7 +56,7 @@ Exact prerequisite: [H06](/en/architecture/portable-specialization/). Copy 256/4
 
 ## Canonical project
 
-[Fixed source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/00525bab414284b0b35a6fc1ac9ed0ca2776db04/examples/ex25-feature-gated-copy) · [same-revision download](https://github.com/xiangzhang-coding/cuda-learning-site/archive/00525bab414284b0b35a6fc1ac9ed0ca2776db04.zip). Extract `examples/ex25-feature-gated-copy/`. Both locales import the same declared build inputs. Software is original Apache-2.0; this page is CC BY 4.0. CUDA packages are not redistributed.
+[Fixed source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/c6b85ed1b178cedb5302605687d0e6e6b33a36dd/examples/ex25-feature-gated-copy) · [same-revision download](https://github.com/xiangzhang-coding/cuda-learning-site/archive/c6b85ed1b178cedb5302605687d0e6e6b33a36dd.zip). Extract `examples/ex25-feature-gated-copy/`. Both locales import the same declared build inputs. Software is original Apache-2.0; this page is CC BY 4.0. CUDA packages are not redistributed.
 
 ## Explicit dispatch
 
@@ -83,6 +83,8 @@ One 1024 B tile, ordinary loads, a block barrier and ordinary stores. Neighbor-p
 Only thread 0 initializes and arrives on the 8 B barrier. It registers exactly 1024 expected bytes, issues the aligned copy and waits phase zero. A block barrier publishes completion; a final barrier protects lifetime before invalidation. No cluster, tensor map, multicast, TMA store or family-exclusive instruction is used. The same protocol is built under different exact target scopes; suffix choice does not prove performance.
 
 ## Build, inspect and run
+
+**Host-platform gate:** these binaries target x86-64. CC 11.0 Jetson and CC 12.1 GB10/DGX Spark use Arm hosts, so 110f/121f and 120f's 12.1 membership are **compile-target coverage only**. Native Jetson/Arm64-SBSA software, driver, compiler and profiler profiles require separate review. LAB20 runtime currently selects CC 10.0/10.3/12.0; LAB19 selects 9.0. Do not mistake the pure image-membership function for full platform admission.
 
 | Toolkit Lane | C++17 project profiles | Virtual / real code |
 | --- | --- | --- |

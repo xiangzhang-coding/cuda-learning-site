@@ -37,7 +37,7 @@ describe('issues #59/#60 complete architecture publication', () => {
     for (const prefix of ['', 'en/']) {
       const document = parseHTML(await readFile(`dist/${prefix}visuals/architecture-evolution/index.html`, 'utf8')).document;
       const visual = document.querySelector('[data-visual-id="VIS15"]')!;
-      const rows = [...visual.querySelectorAll('tbody tr')];
+      const rows = [...visual.querySelectorAll('.comparison tbody tr')];
       const cells = (i: number) => [...rows[i].querySelectorAll('td')].map(node => node.textContent?.trim());
       expect(cells(1)).toEqual(['64 KiB', '163 KiB', '99 KiB', '163 KiB', '99 KiB', '227 KiB', '227 KiB', '227 KiB', '327 KiB', '227 KiB', '99 KiB', '99 KiB']);
       const yes = prefix ? 'Available' : '具备';

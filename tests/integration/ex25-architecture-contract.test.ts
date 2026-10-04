@@ -21,6 +21,8 @@ describe('EX25 target-specific source and independent Lab evidence', () => {
     expect(project.compatibility.lanes.map((lane: { targets: string[] }) => lane.targets)).toEqual([
       ['portable'], ['portable'], ['portable', '90', '100f', '103f', '110f', '120f', '121f'],
     ]);
+    expect(project.compatibility.runtimeProfile).toMatchObject({ hostArchitecture: 'x86-64',
+      specializedComputeCapabilities: ['9.0', '10.0', '10.3', '12.0'], compileTargetOnlyComputeCapabilities: ['11.0', '12.1'] });
     expect(project.evidence).toMatchObject({ compilation: [], runtime: 'Pending Hardware Verification', recordedObservations: [] });
     const workflow = await readFile('.github/workflows/cuda-compile.yml', 'utf8');
     for (const lane of project.compatibility.lanes) {
