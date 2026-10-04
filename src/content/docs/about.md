@@ -38,7 +38,7 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 ## 当前范围
 
-**2026-10-04 架构增量（#61）：**[H05](/architecture/blackwell-families/) `[H04,M17,L08]` 和 [H06](/architecture/portable-specialization/) `[H01,H02,H04,H05]` 补全架构路径。EX25/LAB19/LAB20 提供目标／回退比较；[VIS15](/visuals/architecture-evolution/)覆盖 Turing 至 Blackwell。当前有 110 个学习单元（Learning Unit）、25 个可运行示例（Runnable Example）、20 个实验（Lab）、22 项可视化讲解（Visual Explainer）、109 组练习（Exercise）、109 组独立解答、398 个双语发布对（Publication Pair）、796 条源路由及 493 条目录记录：121 个练习题库（Practice Bank）条目、207 个术语表（Glossary）词条、123 条来源，加上实验／可视化。44 个待验证主体仍待硬件验证（Pending Hardware Verification）；架构／性能尚未观察。下方 R6 冻结，R7 待复核。
+**2026-10-04 发布增量（#62）：**[新特性观察（Emerging Feature Watch）](/watch/)新增稳定课程（Stable Curriculum）依赖图之外的 W01–W06，分别声明版本与许可门槛。[H05](/architecture/blackwell-families/) `[H04,M17,L08]` 和 [H06](/architecture/portable-specialization/) `[H01,H02,H04,H05]` 补全架构路径。EX25/LAB19/LAB20 提供目标／回退比较；[VIS15](/visuals/architecture-evolution/)覆盖 Turing 至 Blackwell。当前有 110 个学习单元（Learning Unit）、25 个可运行示例（Runnable Example）、20 个实验（Lab）、22 项可视化讲解（Visual Explainer）、109 组练习（Exercise）、109 组独立解答、405 个双语发布对（Publication Pair）、810 条源路由及 494 条目录记录：121 个练习题库（Practice Bank）条目、207 个术语表（Glossary）词条、124 条来源，加上实验／可视化。44 个待验证主体仍待硬件验证（Pending Hardware Verification）；架构／性能尚未观察。下方 R6 冻结，R7 待复核。
 
 本站维护按先修关系组织的稳定课程（Stable Curriculum），并搭配可运行示例（Runnable Example）、实验（Lab）、练习（Exercise）、可视化讲解（Visual Explainer）和术语表（Glossary）。只有完整材料会进入导航。本网站保持静态，不提供账号、进度跟踪、服务端应用、API 或浏览器内 CUDA 执行。
 
