@@ -14,6 +14,15 @@ the site's CUDA 11.8.0 and 12.9.2 lanes. List compiler targets before building;
 an unsupported target fails rather than silently substituting one. The 13.3.1
 profile deliberately excludes documented CC 10.7. No experimental API is used.
 
+Host-platform admission is separate from GPU image compatibility. This project
+selects only x86-64 runtime hosts: specialized runtime CC 9.0/10.0/10.3/12.0.
+Targets 110f and 121f (and 120f's 12.1 image membership) are compile-target coverage
+only. CC 11.0 Jetson and CC 12.1 GB10/Spark use Arm hosts; their native platform
+software, driver, toolchain and profiler profiles are withheld pending separate
+review. Do not execute an x86-64 binary there or treat target substitution as a
+host port. The pure host dispatch test checks GPU image membership, not complete
+platform admission. LAB20 applies this additional gate before execution.
+
 After Lab preflight: `timeout 120s ./build/100f/ex25-copy specialized`.
 Modes: `portable` forces the baseline, `auto` falls back before launch when the
 reviewed target/device set does not match, `specialized` rejects such a mismatch.

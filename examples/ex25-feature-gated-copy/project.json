@@ -26,6 +26,12 @@
     "supportedEnvironment": "Native Linux",
     "capabilityTier": "Baseline GPU Capability Tier with explicit specialization gates",
     "minimumComputeCapability": "7.5",
+    "runtimeProfile": {
+      "hostArchitecture": "x86-64",
+      "specializedComputeCapabilities": ["9.0", "10.0", "10.3", "12.0"],
+      "compileTargetOnlyComputeCapabilities": ["11.0", "12.1"],
+      "withheldReason": "Jetson/Arm64-SBSA native host, platform software, driver and profiler profiles require separate review; x86-64 executables are not native Arm executables."
+    },
     "maximumProblemMemoryBytes": 524352,
     "target": ["sm_75", "compute_75", "sm_90", "compute_90", "sm_100f", "compute_100f", "sm_103f", "compute_103f", "sm_110f", "compute_110f", "sm_120f", "compute_120f", "sm_121f", "compute_121f"],
     "lanes": [
