@@ -75,6 +75,25 @@ describe('R7 full-curriculum release review', () => {
     expect(release.compatibilityRecords.watchPromotions).toEqual([]);
   });
 
+  it.each(['zh-CN', 'en'] as const)('gives each implementation entry its own source rubric and supplies synthetic report analysis in %s', async locale => {
+    const source = await read(`src/content/docs/${locale === 'en' ? 'en/' : ''}practice.mdx`);
+    for (const id of release.practiceFirst100[1].entries) {
+      const section = source.split(`## ${id}`)[1]?.split('\n## ')[0];
+      expect(section, id).toBeDefined();
+      expect(section, id).toContain(locale === 'en' ? 'R7 implementation requirement' : 'R7 实现要求');
+      expect(section, id).toContain('CUDA');
+      expect(section, id).toMatch(locale === 'en' ? /Acceptance|acceptance/ : /验收/);
+      expect(section, id).toMatch(locale === 'en' ? /solution/i : /参考解答/);
+    }
+    for (const id of ['PB-R3-002', 'PB-R3-003']) {
+      const section = source.split(`## ${id}`)[1]?.split('\n## ')[0];
+      expect(section, id).toContain(locale === 'en' ? 'Required R7 report analysis' : 'R7 必做报告分析');
+      expect(section, id).toContain(locale === 'en' ? 'synthetic' : '合成');
+      expect(section, id).toContain(locale === 'en' ? 'report solution' : '报告参考解答');
+    }
+    expect(source.split('\n')[2]).toContain('121');
+  });
+
   it.each(['zh-CN', 'en'] as const)('publishes the real first-100 order, local anchors and release record in %s', async locale => {
     const prefix = locale === 'en' ? 'en/' : '';
     const { document } = parseHTML(await read(`dist/${prefix}practice/index.html`));

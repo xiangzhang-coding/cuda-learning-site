@@ -1,6 +1,6 @@
 ---
 title: 练习题库
-description: 当前已发布的 119 个跨单元原创练习，包含先修链接、分层提示和参考解答。
+description: 121 道跨单元原创练习，包含分类的前 100 题学习顺序、先修链接、分层提示和参考解答。
 pairId: practice-bank
 counterpart: /en/practice/
 factCheckDate: '2026-10-04'
@@ -673,6 +673,8 @@ R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集�
 
 ## PB-R1-001：修复生命周期、构建与错误边界
 
+**R7 实现要求 — 2026-10-04：** 提交实现下方生命周期修复的原创 CUDA C++ 主机与内核源码，不能只交图。验收要求检查分配／复制／启动／完成调用，在部分失败时清理资源，并提供独立结果检查器。给出空输入、普通输入和失败路径测试用例，不虚构执行。下方参考解答就是源码审查标准：资源在最后使用者完成后释放，即时与延迟错误分别处理。源码交付无需 GPU，不授予构建或运行证据。
+
 - **ID 与双语发布对：** PB-R1-001；位于 `practice-bank` Publication Pair。
 - **类型与难度：** 调试与正确性；中级。
 - **直接先修条件：** [O04：面向 CUDA 学习者的 C++17 复习](/start/cpp17-for-cuda/)。
@@ -915,6 +917,8 @@ R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集�
 <span id="pb-r1-007" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R1-007：修复过早展平的三维 bounds 缺陷
+
+**R7 实现要求 — 2026-10-04：** 提交修复后的 CUDA C++ 索引内核与启动代码。验收要求先独立检查 x／y／z 再展平，每个合法单元只有一个写者，分配与索引计算可表示。测试计划包括非立方尺寸与不完整块。逐次访问按参考解答的轴边界及所有权证明审查；只检查展平索引不合格。不要求或声称执行。
 
 - **ID 与双语发布对：** PB-R1-007；位于 `practice-bank` Publication Pair。
 - **类型与难度：** 调试与多维正确性；中级。
@@ -1259,6 +1263,8 @@ output[index] = input[index];
 
 ## PB-R1-015：修复 edge tile early return 与缺失的 reuse barrier
 
+**R7 实现要求 — 2026-10-04：** 编写 CUDA C++ 共享分块内核，保护加载／存储并统一执行发布／复用屏障。验收要求适当补零或单位元，边缘线程参与到最后一个必需屏障。测试包含小于一个分块的矩阵及刚超过分块的尺寸。用参考解答的写入—发布—读取—释放阶段审查源码；必需屏障前提前返回不合格。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R1-015；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Shared-memory 正确性调试；中级。
 - **直接先修条件：** [M03：共享内存分块](/memory/shared-memory-tiling/)。
@@ -1409,6 +1415,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R1-018：修复不安全的 warp collective
 
+**R7 实现要求 — 2026-10-04：** 提交显式处理参与集合与合法源通道的 CUDA C++ 集合操作。验收包含完整线程束、部分线程束、稀疏参与者测试计划，明确所需伙伴不存在时的行为。按参考解答的掩码与源通道证明审查；掩码不能创造伙伴或同步非参与者。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R1-018；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Warp correctness debugging；中级。
 - **直接先修条件：** [M06：分支发散、重汇合与线程束安全推理](/memory/warp-divergence-reconvergence/)。
@@ -1448,6 +1456,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r1-019" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R1-019：修复两条 stream 的 partial order 与 lifetime
+
+**R7 实现要求 — 2026-10-04：** 编写两流依赖图的 CUDA C++ 主机编排及最小生产者／消费者内核。验收要求生产后记录事件、消费流等待，以及分配／事件存活至最终完成。测试包含重复复用与注入 API 失败。正确性由参考解答的依赖边决定，不能靠主机入队顺序。不要求或声称执行。
 
 - **ID 与双语发布对：** PB-R1-019；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Stream-order 与 lifetime correctness debugging；中级。
@@ -1823,6 +1833,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-004：修复 group participant 与 cooperative-launch 缺陷
 
+**R7 实现要求 — 2026-10-04：** 提交正确构造／参与线程组的 CUDA C++ 与主机协作启动准入检查。不能满足所需网格同步时，提供显式多内核替代，不能在普通块间自旋。验收包含部分线程组与不支持协作启动的情况。按参考解答的组成员和启动义务审查。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R2-004；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Cooperative-group correctness debugging；高级。
 - **直接先修条件：** [M12：Cooperative Groups 与可组合同步](/memory/cooperative-groups/)。
@@ -1864,6 +1876,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r2-005" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-005：审查 staged async-copy participant 与证据
+
+**R7 实现要求 — 2026-10-04：** 编写有界分阶段复制的 CUDA C++，为不支持的尺寸／对齐／能力提供显式同步回退。验收要求 acquire／commit／wait／release 所有权、使用前向读者发布，以及最后消费者结束后复用。测试计划包括尾部和未对齐输入。参考解答的阶段账本是源码标准，不能证明重叠或生成的指令。不要求或声称执行。
 
 - **ID 与双语发布对：** PB-R2-005；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Pipeline contract and evidence review；高级。
@@ -2078,6 +2092,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-010：修复 separate-compilation device-link graph
 
+**R7 实现要求 — 2026-10-04：** 提交两个 CUDA 翻译单元以及修复依赖图的精确编译／设备链接／主机链接命令。验收要求设备函数声明、唯一实现、一致目标／方言选项，以及参与最终设备链接。提供故意缺失定义的负向构建用例。参考解答说明各阶段解析的符号；只列命令而没有源码不合格。实际构建可选，证据另行记录。
+
 - **ID 与双语发布对：** PB-R2-010；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Device-link correctness debugging；高级。
 - **直接先修条件：** [M18：分离编译与设备链接](/toolchain/separate-compilation-device-linking/)。
@@ -2164,6 +2180,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-012：修复逐元素 map 的所有权与数据移动账本
 
+**R7 实现要求 — 2026-10-04：** 除下方账本外，提交边界安全的 CUDA C++ 二元 map 内核及检查错误的主机启动。验收要求唯一输出所有者、显式禁止别名的契约和零长度启动策略。包含 n=0、n=1、非块大小整数倍的测试；预期值来自独立 CPU 变换。参考解答的一次写入／两次读取映射是源码标准。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R2-012；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Ownership 与 memory-movement contract review；中级。
 - **直接先修条件：** [A01：逐元素映射与一元素一所有者](/algorithms/elementwise-map/)。
@@ -2207,6 +2225,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-013：修复 reduction stages、barriers 与 operation order
 
+**R7 实现要求 — 2026-10-04：** 实现修复后的 CUDA C++ 块归约及遍历部分结果数组的主机循环。验收要求尾部填单位元、统一屏障、全局阶段间使用内核边界。测试包含空、单元素、多块非二次幂输入；运行前声明浮点容差。用参考解答的收缩阶段图与操作数树审查源码，不要求逐位等于串行折叠。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R2-013；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Parallel-stage correctness debugging；高级。
 - **直接先修条件：** [A02：多阶段归约、屏障与运算顺序](/algorithms/multi-stage-reduction/)。
@@ -2249,6 +2269,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r2-014" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-014：修复 scan dependency、block sum 与 offset propagation
+
+**R7 实现要求 — 2026-10-04：** 提交 CUDA C++ 局部扫描、块总和扫描、偏移传播源码。验收要求读取稳定前一阶段、正确转换包含／不包含扫描并保持操作数顺序。测试计划包括 [3,1,4,2]、不完整块及顺序敏感的结合运算。源码按参考解答的不包含块偏移和内核阶段边界审查；普通网格内一次屏障不合法。不要求或声称执行。
 
 - **ID 与双语发布对：** PB-R2-014；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Prefix-dependency and hierarchy debugging；高级。
@@ -2379,6 +2401,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-017：证明矩形转置的 tile 与 padding 合同
 
+**R7 实现要求 — 2026-10-04：** 编写 CUDA C++ 矩形转置内核，分别保护源与目标坐标。验收包含统一暂存屏障、声明共享步长／填充和合法输出所有权。测试包含 1×N、M×1 及两个维度均非分块整数倍的情况。参考解答交换后的坐标／步长等式是审查标准；填充本身不是性能结果。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R2-017；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Transpose correctness debugging；高级。
 - **直接先修条件：** [A05：矩阵转置、合并访问与共享内存布局](/algorithms/matrix-transpose-layout/)。
@@ -2421,6 +2445,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r2-018" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-018：修复 stencil boundary、halo 与 barrier ledger
+
+**R7 实现要求 — 2026-10-04：** 提交显式加载 halo 并遵守题目边界规则的 CUDA C++ stencil。验收要求所有被读取的共享位置已初始化，所有必要线程到达发布／复用屏障。测试包含短于 stencil 直径的输入和末尾不完整分块。按参考解答的 halo／所有者账本及独立标量边界实现审查源码。不要求或声称执行。
 
 - **ID 与双语发布对：** PB-R2-018；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Stencil correctness debugging；高级。
@@ -2465,6 +2491,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-019：审查 direct convolution 与 production-library 决策
 
+**R7 实现要求 — 2026-10-04：** 用原创 CUDA C++ 实现题目中有界直接卷积，显式声明步长、填充、滤波器索引约定。验收要求唯一输出所有者及使用同一卷积／互相关定义的 CPU 参考。测试包含边缘输出和能区分反转约定的非对称滤波器。按参考解答的定义域与地址推导审查；库选择讨论不能替代源码交付。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R2-019；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Convolution/library evidence review；高级。
 - **直接先修条件：** [A07：Direct 2D Convolution、邻域复用与布局合同](/algorithms/convolution-reuse-layout/)。
@@ -2508,6 +2536,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R2-020：证明 tiled GEMM 的 partial-tile 与数值合同
 
+**R7 实现要求 — 2026-10-04：** 提交 CUDA C++ 分块 GEMM，包含完整 K 循环、带谓词且补零的加载、受保护的输出存储。验收要求统一屏障，每个输出只应用一次声明的数值等式。测试包括 M／N／K 尾部；契约含 beta 时使用非零初始输出。按参考解答的所有权、K 覆盖及容差规则审查；背诵分块尺寸不合格。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R2-020；位于 `practice-bank` Publication Pair。
 - **类型与难度：** GEMM correctness/debugging；高级。
 - **直接先修条件：** [A08：从正确 Naive GEMM 到 Shared-Memory Tiling](/algorithms/tiled-gemm-correctness/)。
@@ -2541,6 +2571,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r2-021" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-021：组合 stable selection、compaction 与 bounded-key sorting
+
+**R7 实现要求 — 2026-10-04：** 编写 CUDA C++ 谓词、不包含前缀、稳定散射及有界键轮次源码，显式划分阶段边界。验收要求稳定目标位置、无写冲突，拒绝范围外键。测试包含全假／全真谓词和保留原始位置的重复等值键。参考解答的前缀／秩等式是审查标准；原子预留任意输出位置不能证明稳定性。不要求或声称执行。
 
 - **ID 与双语发布对：** PB-R2-021；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Concepts/implementation decision；高级。
@@ -2621,6 +2653,22 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R3-002：从应用症状选择 timeline-first 证据
 
+**R7 必做报告分析 — 复核于 2026-10-04。** 修复下方真实采集计划前，先分析这份原创的 **Nsight Systems 风格合成报告节选**。它是构造的教学材料，不是导出的 `.nsys-rep`、环境清单或已观察 GPU 结果。在该材料中，进程 P0／设备 D0／流 S0 的一次请求使用共同毫秒时间原点：
+
+| 合成区间 | 开始（ms） | 结束（ms） |
+| --- | --- | --- |
+| CPU 请求提交 | 0 | 2 |
+| S0 上 H2D | 2 | 6 |
+| S0 上内核 K，第 1 次出现 | 6 | 7 |
+| S0 上 D2H | 7 | 11 |
+| CPU 完成等待 | 2 | 11 |
+
+**分析任务与验收：** 计算请求跨度、设备区间并集、复制总时长及内核时长。判断该材料是否显示复制／内核重叠。说明为什么把 CPU 等待再加到设备区间会重复计时，并指出至少两个阻止真实瓶颈或带宽结论的缺失坐标。预期证据必须包括上述解释；只交采集计划不合格。
+
+<details><summary>报告提示</summary>即使 S0 上的工作串行，不同轨道的记账区间仍可能重叠。求复制与内核区间的交集，不要把轨道宽度相加。</details>
+
+<details><summary>合成报告参考解答</summary>请求跨度为 11 ms，设备并集为 9 ms，复制为 8 ms，内核为 1 ms。复制／内核交集时长为零，该材料没有显示此类重叠。CPU 等待的 9 ms 覆盖同一设备工作，不能重复相加。最大的可见小计不能证明因果瓶颈或预测加速。缺少字节数／工作负载、真实版本／硬件、正确性及原始报告保管链，不能形成真实带宽或性能结论。后续真实采集计划的观察区间仍保持空白。</details>
+
 - **ID 与双语发布对：** PB-R3-002；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
 - **直接先修条件：** [Q07：先用 Nsight Systems 阅读应用时间线](/correctness/timeline-first-nsight-systems/)。
@@ -2665,6 +2713,23 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r3-003" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R3-003：为 selected kernel 设计最小 metric/replay plan
+
+**R7 必做报告分析 — 复核于 2026-10-04。** 修复下方真实采集计划前，先分析这份原创的 **Nsight Compute 风格合成摘要**。这些行是构造的报告输入，不是查询到的指标名称、`.ncu-rep` 捕获或运行证据。假定同一个教学工作负载及内核名称，但来自不同分析器运行：
+
+| 合成字段 | 报告 A | 报告 B |
+| --- | --- | --- |
+| 匹配内核出现次数 | 3 | 4 |
+| 时长，微秒 | 200 | 160 |
+| 实际活跃线程束／最大支持线程束 | 40% | 25% |
+| 计数器采集状态 | 允许 | 拒绝 |
+| 报告的 DRAM 字节字段 | 4096 | 0（导出器的拒绝哨兵值） |
+| 重放轮次 | 2 | 未记录 |
+
+**分析任务与验收：** 计算名义时长比，再判断它是否能作为加速比。解释占用率与 DRAM 行，不能把权限拒绝视为零流量。指出表内全部比较阻碍，写出有边界的下一步采集请求。预期证据必须包含带注释的报告比较；只交未来查询计划不合格。
+
+<details><summary>报告提示</summary>运算前先比较出现次数、权限和重放坐标。填了数字的单元格也可能表示没有观察。</details>
+
+<details><summary>合成报告参考解答</summary>200/160 名义上为 1.25，但不是合格加速比：第 3／4 次出现不同，B 缺少权限和重放披露，也没有正确性合格且未被分析器插桩的对照。占用率下降 15 个百分点；这不能解释时长，也不证明延迟隐藏变差。B 的零表示数据不可用，不是零 DRAM 流量。重新建立相同出现次数／工作负载、授权计数器、查询定义及重放／保管记录，再只采集声明问题需要的请求形态证据。下方计划中的真实指标名称和观察仍保持未填写。</details>
 
 - **ID 与双语发布对：** PB-R3-003；位于 `practice-bank` Publication Pair。
 - **类型与难度：** Evidence review；高级。
@@ -3456,6 +3521,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 
 ## PB-R4-007：修复 GEMM 子矩阵的地址、标量与完成合同
 
+**R7 实现要求 — 2026-10-04：** 提交修复后的 CUDA C++ cuBLAS 主机调用，包含子矩阵偏移、主维度、指针模式、流、状态和复用前完成。验收使用题目带填充的父矩阵与非零 beta，并以 CPU 参考只计算逻辑子矩阵。按参考解答的布局／标量／生命周期契约审查；等式正确但物理步长错误不合格。不要求或声称执行。
+
 - **ID 与双语发布对：** PB-R4-007；属于 `practice-bank` 双语发布对（Publication Pair）。
 - **类型与难度：** 正确性与调试；进阶。
 - **直接先修：** [L06](/libraries/cublas-gemm/)。
@@ -3610,6 +3677,8 @@ Iteration zero 中 32 个 lane 都 load 合法 input；iteration one 中 13 个 
 <span id="pb-r4-010" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R4-010：重建非整齐 GEMM 的层级、布局与阶段复用证明
+
+**R7 实现要求 — 2026-10-04：** 除 CUTLASS 阅读练习外，为指定的带填充 M=130,N=70,K=33 等式实现原创标量 CUDA C++ 教学内核。这项源码任务不实例化 CUTLASS，也不承诺 MMA 指令。验收要求九个输出分块、每块内部处理三个 K 切片、对声明的 FP16 输入进行 FP32 累加／收尾、边界安全暂存与安全双槽复用。提供右下 2×6 分块和最后一个 K 元素的 CPU 参考／测试计划。参考解答的偏移、发布／复用顺序及单次收尾是源码标准。必须交源码；实际编译和执行可选，证据分别记录。
 
 - **ID 与双语发布对：** PB-R4-010；属于 `practice-bank` 双语发布对。
 - **类型与难度：** 概念与实现；进阶。

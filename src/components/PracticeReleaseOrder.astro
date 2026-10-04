@@ -7,16 +7,20 @@ import type { IndexLocale } from '../resource-indexes/resource-index-model';
 interface Props { locale: IndexLocale }
 const { locale } = Astro.props;
 const english = locale === 'en';
-const labels = [
-  ['核心心智模型', 'Core mental models'], ['CUDA C++ 实现', 'CUDA C++ implementation'],
-  ['调试与正确性', 'Debugging and correctness'], ['内存与性能', 'Memory and performance'],
-  ['Nsight 报告分析', 'Nsight report analysis'], ['库与算法选择', 'Libraries and algorithm choice'],
-  ['PyTorch 与 Triton', 'PyTorch and Triton'], ['多 GPU 与 NCCL', 'Multi-GPU and NCCL'],
-];
+const labels: Record<string, Record<IndexLocale, string>> = {
+  'core-mental-models': { 'zh-CN': '核心心智模型', en: 'Core mental models' },
+  'cuda-cpp-implementation': { 'zh-CN': 'CUDA C++ 实现', en: 'CUDA C++ implementation' },
+  'debugging-correctness': { 'zh-CN': '调试与正确性', en: 'Debugging and correctness' },
+  'memory-performance': { 'zh-CN': '内存与性能', en: 'Memory and performance' },
+  'nsight-report-analysis': { 'zh-CN': 'Nsight 报告分析', en: 'Nsight report analysis' },
+  'libraries-algorithm-choice': { 'zh-CN': '库与算法选择', en: 'Libraries and algorithm choice' },
+  'pytorch-triton': { 'zh-CN': 'PyTorch 与 Triton', en: 'PyTorch and Triton' },
+  'multi-gpu-nccl': { 'zh-CN': '多 GPU 与 NCCL', en: 'Multi-GPU and NCCL' },
+};
 const records = new Map(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice').map(record => [record.planningId, record]));
 const groups = release.practiceFirst100.map((group, index) => ({
   ...group,
-  label: labels[index][english ? 1 : 0],
+  label: labels[group.category][locale],
   start: 1 + release.practiceFirst100.slice(0, index).reduce((sum, previous) => sum + previous.entries.length, 0),
   records: group.entries.map(id => {
     const record = records.get(id);

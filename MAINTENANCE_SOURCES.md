@@ -64,7 +64,13 @@ No source, binary, owner sample, figure, question or report is imported by this
 review. Existing exact license/notice ledgers govern original and linked works;
 all new software is Apache-2.0 and original prose CC BY 4.0. The eight first-100
 categories reference existing original questions once each, not duplicate new
-entries. The implementation path adds an explicit source-delivery requirement.
+entries. The implementation path adds a per-entry source-delivery requirement,
+acceptance cases and source-review rubric to all 18 selected tasks. PB-R3-002/003
+now additionally require interpretation of original synthetic Systems/Compute-style
+report tables (interval union/overlap; selection, permission and replay comparison),
+with hints and reviewed solutions in both locales. These constructed tables are
+not captured reports, copied owner material or real runtime observations; the
+real collection plans retain unfilled observed fields and their original source dates.
 Evidence stays at EX02/EX10/LAB02 Compile-Checked, EX10 Runtime-Not-Applicable,
 44 Pending Hardware Verification subjects and zero observed GPU results.
 

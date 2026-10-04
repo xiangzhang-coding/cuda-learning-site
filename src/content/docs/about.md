@@ -38,7 +38,7 @@ CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程
 
 ## 当前范围
 
-**2026-10-04（UTC）R7 已完成聚合静态复核。** 当前完整稳定课程有 110 个学习单元、25 个示例、20 个实验、22 项可视化讲解、109 组练习及独立解答，共 405 个双语发布对／810 条路由；494 条目录记录包括 121 道原创题、207 个词条与 124 条来源。[前 100 题](/practice/#r7-first-100)按八类独立计数。W01–W06 保持独立，44 个示例／实验仍待硬件验证。参见[全课程复核](/sources-and-versions/#r7-full-curriculum-review)与 [issue #63 动态验收](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63)。
+**2026-10-04（UTC）R7 已完成聚合静态复核。** 当前完整稳定课程（Stable Curriculum）有 110 个学习单元（Learning Unit）、25 个可运行示例（Runnable Example）、20 个实验（Lab）、22 项可视化讲解（Visual Explainer）、109 组练习（Exercise）及独立解答，共 405 个双语发布对（Publication Pair）／810 条路由；494 条目录记录包括 121 道原创题、207 个词条与 124 条来源。[前 100 题](/practice/#r7-first-100)按八类独立计数。W01–W06 保持独立，44 个示例／实验仍待硬件验证（Pending Hardware Verification）。参见[全课程复核](/sources-and-versions/#r7-full-curriculum-review)与 [issue #63 动态验收](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63)。
 
 ### 历史范围与证据记录
 
