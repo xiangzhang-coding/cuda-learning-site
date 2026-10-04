@@ -1045,6 +1045,26 @@ NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[
 
 **#60 当前增量：**108 个学习单元、24 个可运行示例、18 个实验、22 项可视化讲解、107 组练习及 107 组独立解答；389 个双语发布对／778 条源路由、487 条目录记录（119 个练习题库条目、207 个词条、121 条来源、18 个实验、22 项可视化）。R6 冻结、R7 待复核；同样的 41 个示例／实验主体待硬件验证，H03／H04／VIS15 不增加 GPU 证据。下方 #59 统计为历史记录。
 
+<span id="src-cuda-107" class="resource-target"></span>
+
+### SRC-CUDA-107 — Blackwell 家族与目标范围
+
+关联：[H05](/architecture/blackwell-families/)、[VIS15](/visuals/architecture-evolution/)、[LAB20](/labs/blackwell-portable-comparison/)。核对／访问日期 **2026-10-04**。当前 Context7 `/websites/nvidia_cuda` 检索与 [Programming Guide **13.4.2** §5.1、表 28–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html)、[Blackwell Tuning Guide **13.4** §1.4](https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html)、精确 [Toolkit **13.3.1** NVCC 归档 §5.2/5.5](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html#gpu-feature-list)交叉核对。归档短路径 `/nvcc/` 返回 404，上述 compiler-driver 路径可用。
+
+当前家族集合包含 10.7：100f 服务 10.0/10.3/10.7，103f 服务 10.3/10.7，107f 服务 10.7；110f 服务 11.0；120f 服务 12.0/12.1；121f 服务 12.1。`a` 仍仅限精确 CC。选定的 13.3.1 归档列出 100/103/110/120/121，没有 107，因此 EX25 排除 10.7 特化。VIS15 的每块内存和原生 FP64 判断采用当前能力表；调优指南的每 SM 摘要存在差异时不替代该表。10.0/10.7 具有原生 FP64 Tensor Core 输入，10.3/11.0/12.x 没有。对权利方事实进行转述，形成原创教学对照，不复制表格。
+
+<span id="src-cuda-108" class="resource-target"></span>
+
+### SRC-CUDA-108 — 可移植回退与批量拷贝契约
+
+关联：[H06](/architecture/portable-specialization/)、[EX25](/examples/feature-gated-copy/)、[LAB19](/labs/hopper-portable-comparison/)、[LAB20](/labs/blackwell-portable-comparison/)。核对／访问日期 **2026-10-04**。Context7 的 bulk-copy/mbarrier 检索与精确 [Toolkit 13.3.1 PTX **9.3** cp.async.bulk §9.7.9.26.4.1](https://docs.nvidia.com/cuda/archive/13.3.1/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk)、mbarrier 初始化／到达／等待／失效及异步代理栅栏章节、[NVCC 目标及分离编译契约](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html)核对。
+
+所选指令要求 sm_90+、源／目的地址 16 B 对齐、字节数为 16 的倍数。CTA 目的空间写法从 PTX 8.6 引入。EX25 使用不带可选语义限定的 bulk-copy 形式，不使用新语义限定、多播或 TMA 存储。单提交者登记一次到达及 1024 事务字节；阶段等待加块级发布先于消费，最终块同步保护失效操作。完整配置固定为 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17；11.8、12.9 仅为项目 portable 配置。各构建目标独立检查，不外推运行或其他目标证据。性能分析条件延续 [Nsight Compute 缓存／重放说明](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#cache-control)及[获准计数器访问](https://developer.nvidia.com/ERR_NVGPUCTRPERM)；实验独立选择 2026.2.1.5，不混同来源文档标签。
+
+**SRC-CUDA-107/108 权利说明：**NVIDIA 文档为受其 Notices 约束的专有参考资料，不重新许可。未复制或改编权利方源码／示例／表格／图片。原创讲解／账本／模板采用 CC BY 4.0，原创 EX25 和网站／测试代码采用 Apache-2.0。不新增依赖或第三方资产。架构行为及性能仍待硬件验证（Pending Hardware Verification）。
+
+**#61 当前范围：**110 个学习单元、25 个可运行示例、20 个实验、22 项可视化、109 组练习／解答、398 个双语发布对／796 条路由、493 条目录记录（121 个练习题库条目、207 个术语、123 条来源、20 个实验、22 项可视化）。EX25/LAB19/LAB20 使待硬件验证主体增至 44。LAB19 已随 H06 发布；上方 #59/#60 计数及暂缓说明为历史记录。R6 冻结，R7 待复核。
+
 <span id="src-cuda-103" class="resource-target"></span>
 
 ### SRC-CUDA-103 — Turing 调度、目标与版本边界

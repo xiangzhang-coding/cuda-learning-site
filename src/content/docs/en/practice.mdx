@@ -460,6 +460,44 @@ The **2026-09-10 R4 aggregate static review** qualifies eight library-and-algori
 
 **Reviewed solution:** Initialize and publish each local transaction barrier, bind/account that block's 1024 B load once and wait for both its 256 arrivals and the bytes before reading. Keep all participants until readers finish and the local slot can be reused. No cross-block data is used here, so the cluster is unnecessary for this algorithm; removing it does not remove the TMA wait. An ordinary-copy fallback uses per-block loads/stores with publication/reuse barriers and the same exact CPU output comparison. Successful launch does not prove completed transfers, correct outputs, emitted instructions or speed. Counter permission, retained reports and a qualifying environment remain separate. **Source basis:** original scope-confusion fixture and [SRC-CUDA-106](/en/sources-and-versions/#src-cuda-106). **Source date:** 2026-09-22. Execution remains Pending Hardware Verification; see [H04 solutions](/en/architecture/hopper-clusters-tma/solutions/).
 
+<span id="pb-r7-005" class="resource-target"></span>
+
+## PB-R7-005: Family scope cannot be extrapolated across major capabilities
+
+**ID:** PB-R7-005 · original Publication Pair.
+- **Direct prerequisite:** [H05](/en/architecture/blackwell-families/), exactly `[H05]`.
+- **Related Learning Units and resources:** [H05](/en/architecture/blackwell-families/).
+- **Hardware gate:** none; paper reasoning.
+- **Last reviewed:** 2026-10-04.
+
+**Difficulty:** advanced. **Version:** Programming Guide 13.4.2; Toolkit 13.3.1.
+
+**Prompt:** A package contains only `compute_103f` PTX. Its author marks CC 10.0, 10.7 and 12.1 as supported because each product is called Blackwell. **Constraints:** use documented directional sets and separately apply EX25's profile; no observed runs. **Expected evidence:** target/device ledger. **Acceptance criteria:** classify all three devices, explain the missing ordinary fallback and PTX-driver gate, and distinguish documentation from project support.
+
+<details><summary>Hint 1</summary><p>The family target's minimum member matters; product names are not membership tests.</p></details>
+<details><summary>Hint 2</summary><p>10.7 can be documented-compatible yet outside a project's reviewed build/runtime profile.</p></details>
+
+**Reviewed solution:** 103f excludes 10.0 and 12.1; the current documented set includes 10.7, but EX25's 13.3.1 specialization profile excludes it. Supply separately built ordinary code with a compatible cubin or driver-readable ordinary PTX. Do not label an unbuilt or unrun target verified. **Source basis:** original packaging scenario and [SRC-CUDA-107](/en/sources-and-versions/#src-cuda-107). **Source date:** 2026-10-04. Runtime remains Pending Hardware Verification; see [H05 solutions](/en/architecture/blackwell-families/solutions/).
+
+<span id="pb-r7-006" class="resource-target"></span>
+
+## PB-R7-006: Successful fallback cannot rewrite path identity
+
+**ID:** PB-R7-006 · original Publication Pair.
+- **Direct prerequisite:** [H06](/en/architecture/portable-specialization/), exactly `[H06]`.
+- **Related Learning Units and resources:** [H06](/en/architecture/portable-specialization/).
+- **Hardware gate:** none; paper reasoning.
+- **Last reviewed:** 2026-10-04.
+
+**Difficulty:** advanced. **Version:** CUDA 13.3.1; EX25 target contract.
+
+**Prompt:** A 100f executable on CC 12.1 runs `auto`, correctly selects ordinary code, and a report records “Blackwell specialization faster than portable.” It compares a ten-launch batch against a hundred-launch batch and supplies no output/guard checks. **Constraints:** preserve EX25's exact integer workload and record each path separately. **Expected evidence:** corrected decision and measurement records. **Acceptance criteria:** reject the claimed path identity and comparison, define a 120f or 121f build gate, correctness checks, equal event intervals and missing-evidence fields.
+
+<details><summary>Hint 1</summary><p>A correct fallback is evidence about the selected baseline, not the unavailable specialization.</p></details>
+<details><summary>Hint 2</summary><p>Match complete operations and launch counts before interpreting time; never fill unobserved fields.</p></details>
+
+**Reviewed solution:** Retain the 100f/12.1 run as an ordinary-path record only. Build and inspect the explicitly selected 120f or 121f target, verify every value/guard independently, and compare on the same GPU using five warmups and ten 100-launch event samples. Record raw batches and actual path identity; missing correctness or profiler evidence blocks the corresponding conclusion. **Source basis:** original mislabeling fixture and [SRC-CUDA-108](/en/sources-and-versions/#src-cuda-108). **Source date:** 2026-10-04. Performance remains Pending Hardware Verification; see [H06 solutions](/en/architecture/portable-specialization/solutions/).
+
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R0-001: Repair an Evidence Status record

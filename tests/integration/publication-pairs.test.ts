@@ -48,6 +48,17 @@ type PublicationPair = {
 
 const publicationPairFixtures: readonly PublicationPair[] = [
   ...[
+    { id: 'H05', slug: 'architecture/blackwell-families', prerequisites: 'H04,M17,L08' },
+    { id: 'H06', slug: 'architecture/portable-specialization', prerequisites: 'H01,H02,H04,H05' },
+  ].flatMap(({ id, slug, prerequisites }) => [
+    { pairId: id.toLowerCase(), unitId: id, resourceKind: 'learning-unit', prerequisites, factCheckDate: '2026-10-04', hardwareGate: 'none', zh: `/${slug}/`, en: `/en/${slug}/` },
+    { pairId: `${id.toLowerCase()}-exercises`, unitId: `${id}-EXERCISES`, resourceKind: 'exercise-set', prerequisites: id, factCheckDate: '2026-10-04', hardwareGate: 'none', zh: `/${slug}/exercises/`, en: `/en/${slug}/exercises/` },
+    { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`, factCheckDate: '2026-10-04', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
+  ]),
+  { pairId: 'ex25', unitId: 'EX25', resourceKind: 'runnable-example', prerequisites: 'H06', factCheckDate: '2026-10-04', canonicalExample: 'EX25', canonicalRanges: 'dispatch,oracle,portable,specialized', evidenceRuntime: 'Pending Hardware Verification', zh: '/examples/feature-gated-copy/', en: '/en/examples/feature-gated-copy/' },
+  { pairId: 'lab19', unitId: 'LAB19', resourceKind: 'lab', prerequisites: 'H04,H06', factCheckDate: '2026-10-04', evidenceRuntime: 'Pending Hardware Verification', zh: '/labs/hopper-portable-comparison/', en: '/en/labs/hopper-portable-comparison/' },
+  { pairId: 'lab20', unitId: 'LAB20', resourceKind: 'lab', prerequisites: 'H05,H06', factCheckDate: '2026-10-04', evidenceRuntime: 'Pending Hardware Verification', zh: '/labs/blackwell-portable-comparison/', en: '/en/labs/blackwell-portable-comparison/' },
+  ...[
     { id: 'H01', slug: 'architecture/turing-warp-safety', prerequisites: 'F06,M06' },
     { id: 'H02', slug: 'architecture/ampere-pipelines-tensor-cores', prerequisites: 'H01,M13,L08' },
     { id: 'H03', slug: 'architecture/ada-working-sets', prerequisites: 'H02,M02,Q10' },
@@ -57,7 +68,7 @@ const publicationPairFixtures: readonly PublicationPair[] = [
     { pairId: `${id.toLowerCase()}-exercises`, unitId: `${id}-EXERCISES`, resourceKind: 'exercise-set', prerequisites: id, factCheckDate: '2026-09-22', hardwareGate: 'none', zh: `/${slug}/exercises/`, en: `/en/${slug}/exercises/` },
     { pairId: `${id.toLowerCase()}-solutions`, unitId: `${id}-SOLUTIONS`, resourceKind: 'solution-set', prerequisites: `${id}-EXERCISES`, factCheckDate: '2026-09-22', hardwareGate: 'none', zh: `/${slug}/solutions/`, en: `/en/${slug}/solutions/` },
   ]),
-  { pairId: 'vis15', unitId: 'VIS15', resourceKind: 'visual-explainer', prerequisites: 'H01,H02,H03,H04', factCheckDate: '2026-09-22', hardwareGate: 'none', zh: '/visuals/architecture-evolution/', en: '/en/visuals/architecture-evolution/' },
+  { pairId: 'vis15', unitId: 'VIS15', resourceKind: 'visual-explainer', prerequisites: 'H01,H02,H03,H04,H05,H06', factCheckDate: '2026-10-04', hardwareGate: 'none', zh: '/visuals/architecture-evolution/', en: '/en/visuals/architecture-evolution/' },
   { pairId: 'g09', unitId: 'G09', resourceKind: 'learning-unit', prerequisites: 'G03,G04,Q07', factCheckDate: '2026-09-21', hardwareGate: 'none', zh: '/multi-gpu/multi-node-transport-failures/', en: '/en/multi-gpu/multi-node-transport-failures/' },
   { pairId: 'g09-exercises', unitId: 'G09-EXERCISES', resourceKind: 'exercise-set', prerequisites: 'G09', factCheckDate: '2026-09-21', hardwareGate: 'none', zh: '/multi-gpu/multi-node-transport-failures/exercises/', en: '/en/multi-gpu/multi-node-transport-failures/exercises/' },
   { pairId: 'g09-solutions', unitId: 'G09-SOLUTIONS', resourceKind: 'solution-set', prerequisites: 'G09-EXERCISES', factCheckDate: '2026-09-21', hardwareGate: 'none', zh: '/multi-gpu/multi-node-transport-failures/solutions/', en: '/en/multi-gpu/multi-node-transport-failures/solutions/' },
@@ -4335,14 +4346,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(389);
-    expect(sourceRoutes.size).toBe(778);
+    expect(publicationPairs).toHaveLength(398);
+    expect(sourceRoutes.size).toBe(796);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['EX25', 'LAB19']) {
+    for (const absentUnitId of ['W01', 'LAB21']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

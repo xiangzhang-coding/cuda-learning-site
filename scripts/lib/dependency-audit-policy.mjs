@@ -4,7 +4,7 @@ export const CACHE_ADVISORY = 'https://github.com/advisories/GHSA-ch52-4w7c-c8xp
 export const CACHE_EXCEPTION_EXPIRES = '2026-10-17T00:00:00Z';
 // See DEPENDENCY_REVIEW.md. Any config/caller change requires a new reachability review.
 export const REVIEWED_CACHE_BOUNDARY_FILES = {
-  'astro.config.mjs': '1a9ee606c1c6e56987910ef2f5d8cd70c255bfb1b9b87925eb237f6371914551',
+  'astro.config.mjs': 'a25e0878706a8e3dffe800c9b9c20161597e450f9f6b79f40afaddd70213b656',
   'wrangler.jsonc': 'e3f1d938b268baf8d79178175289999b7f850ef539251fde95d106b4063a8655',
   'package-lock.json': 'ad5da3bb6e55d6d1e9fa66ab0a40fcf2c3e28fcff0bba7301303d4cd31fb661a',
   'node_modules/astro/dist/assets/build/remote.js': 'f373fa76e3112446db327c79b34e2bbb1ef1dcad41affb60788adf30edc9588e',

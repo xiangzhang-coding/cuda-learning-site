@@ -19,17 +19,19 @@ describe('R6 aggregate release review', () => {
   it('freezes all prior scope and G01-G09 with closed public dependencies and real catalog counts', () => {
     expect(release).toMatchObject({ releaseId: 'R6', schemaVersion: 7, reviewDate: '2026-09-22' });
     expect(current.releaseReview).toEqual({ latestCompleted: 'R6', next: 'R7', status: 'pending' });
-    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'H01', 'H02', 'H03', 'H04']);
+    expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
     expect(current.scope.visualExplainers).toEqual([...release.scope.visualExplainers, 'VIS15'].sort());
     expect(current.compatibility).toEqual(release.compatibility);
     expect(current.evidence).toEqual({ ...release.evidence,
+      noCompileCheckedClaim: ['EX25', 'LAB19', 'LAB20', ...release.evidence.noCompileCheckedClaim],
+      pendingHardwareVerification: ['EX25', 'LAB19', 'LAB20', ...release.evidence.pendingHardwareVerification],
       evidenceNeutralVisualExplainers: [...release.evidence.evidenceNeutralVisualExplainers, 'VIS15'].sort() });
     expect(release.scope.learningUnits).toEqual([...r5.scope.learningUnits, ...ids]);
     expect(release.scope).toMatchObject({ publicationPairs: 376, sourceRoutes: 752,
       exerciseSetPublicationPairs: 103, solutionSetPublicationPairs: 103, practiceBankEntries: 115,
       sourceRecords: 117, glossaryTerms: 207 });
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(487);
-    expect(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice')).toHaveLength(119);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(493);
+    expect(RESOURCE_INDEX_RECORDS.filter(record => record.group === 'practice')).toHaveLength(121);
     const completed = new Set<string>();
     const visit = (id: string, visiting = new Set<string>()) => {
       expect(visiting.has(id), `dependency cycle at ${id}`).toBe(false);
@@ -41,7 +43,7 @@ describe('R6 aggregate release review', () => {
     for (const id of [...release.scope.learningUnits, ...release.scope.runnableExamples,
       ...release.scope.labs, ...release.scope.visualExplainers]) visit(id);
     for (const record of RESOURCE_INDEX_RECORDS) for (const id of record.prerequisites) visit(id);
-    for (const id of ['D01', 'EX25', 'LAB19', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
+    for (const id of ['D01', 'W01', 'LAB21', 'T09']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
     expect(r5.scope.learningUnits).toHaveLength(95);
     expect(r5.scope.practiceBankEntries).toBe(102);
   });

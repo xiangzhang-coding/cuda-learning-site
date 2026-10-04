@@ -1,0 +1,112 @@
+---
+title: 'EX25：功能门槛控制的架构路径'
+description: 从同一规范项目构建普通与批量拷贝路径，独立验证每个值。
+pairId: ex25
+counterpart: /en/examples/feature-gated-copy/
+factCheckDate: '2026-10-04'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, dispatch, oracle, portable, specialized, build, evidence, sources]
+resourceKind: runnable-example
+unitId: EX25
+prerequisites: [H06]
+relatedUnits: [LAB19, LAB20]
+exampleIds: [EX25]
+canonicalExample: EX25
+canonicalRanges:
+  - dispatch
+  - oracle
+  - portable
+  - specialized
+hardwareGate: 'Native Linux; one CC 7.5+ GPU; 8 GB total and 512 MiB free; specialization requires exact target admission'
+toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 524352
+gpuCount: 1
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Each admitted path should exactly reproduce all inputs and preserve every guard after checked completion.']
+  recordedObservations: []
+sources:
+  - { title: 'PTX bulk copy and mbarrier', url: 'https://docs.nvidia.com/cuda/archive/13.3.1/parallel-thread-execution/index.html', version: '9.3', platform: 'Toolkit 13.3.1; selected targets', accessDate: '2026-10-04' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex25 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-10-04' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,dispatch,oracle,portable,specialized,build,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX25 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: H06 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX25 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'dispatch,oracle,portable,specialized' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '1 declared expectation' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import CanonicalCode from '../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/en/examples/feature-gated-copy/" lang="en">Read the English counterpart</a>
+
+## 目标与先修
+
+精确先修：[H06](/architecture/portable-specialization/)。经共享 tile 拷贝 256/4096/65536 个 int32，每块 128 线程，每 tile 256 个值。比较显式普通基线与目标准入后的批量拷贝加载／消费流水线。仅一个阶段，不声称重叠，也不改变精度。
+
+## 规范项目
+
+[固定源码树](https://github.com/xiangzhang-coding/cuda-learning-site/tree/00525bab414284b0b35a6fc1ac9ed0ca2776db04/examples/ex25-feature-gated-copy) · [同版本下载](https://github.com/xiangzhang-coding/cuda-learning-site/archive/00525bab414284b0b35a6fc1ac9ed0ca2776db04.zip)。提取 `examples/ex25-feature-gated-copy/`。本可运行示例（Runnable Example）的两个语言版本导入同一组声明构建输入。原创软件采用 Apache-2.0，页面采用 CC BY 4.0；不重新分发 CUDA 包。
+
+## 显式分派
+
+<CanonicalCode exampleId="EX25" range="dispatch" />
+
+`portable` 强制基线；`auto` 仅在准入时选择特化；`specialized` 在启动前拒绝不支持设备。获准的特化执行总先检查可移植路径。非法模式失败。文档记载 10.7，但它不属于此构建配置。查询运行时设备 0、驱动／运行时版本与内存；要求总显存至少 8 GB、可用 512 MiB。CUDA 错误使进程终止，不静默换路径。
+
+## 独立整数 oracle
+
+<CanonicalCode exampleId="EX25" range="oracle" />
+
+三种输入覆盖随索引变化的有符号值、零和交替 ±100000。输出保护值不属于任何输入模式。流完成后检查全部结果和八个保护元素，计时后再检查一次。主机变异测试逐位置验证拒绝行为，不执行 CUDA。两个带保护区数组最多 **524352 B**，每个载荷从对齐分配起点偏移 16 B。
+
+## 可移植共享内存基线
+
+<CanonicalCode exampleId="EX25" range="portable" />
+
+一个 1024 B tile、普通加载、块屏障和普通存储。邻位轮换所有权使线程消费其他线程的共享元素。全部规模为完整 tile，不允许未经检查的尾部。基线独立编译为普通 75 PTX/cubin，特化构建还加入匹配数值目标的 cubin。
+
+## 功能门槛控制的批量拷贝
+
+<CanonicalCode exampleId="EX25" range="specialized" />
+
+只有线程 0 初始化并到达 8 B 屏障，精确登记 1024 预期字节、提交对齐拷贝并等待第零阶段。块屏障发布完成，最终屏障在失效前保护生命周期。不使用集群、张量映射、多播、TMA 存储或家族独有指令。同一协议按不同精确目标范围构建，后缀选择不能证明性能。
+
+## 构建、检查与运行
+
+| 工具包通道（Toolkit Lane） | C++17 项目配置 | 虚拟／真实代码 |
+| --- | --- | --- |
+| 11.8.0 / NVCC 11.8.89 / Ubuntu 22.04 x86-64 | portable | compute_75 / sm_75 加 compute_75 PTX |
+| 12.9.2 / NVCC 12.9.86 / Ubuntu 24.04 x86-64 | portable | compute_75 / sm_75 加 compute_75 PTX |
+| 13.3.1 / NVCC 13.3.73 / GCC 13.3.0 / Ubuntu 24.04 x86-64 | portable, 90, 100f, 103f, 110f, 120f, 121f | 特化使用精确 compute_X / sm_X 对及 compute_X PTX；基线另含匹配数值 cubin |
+
+项目清单固定容器摘要。在独立目录运行：
+
+```sh
+make host-test
+bash scripts/compile-check.sh 90
+timeout 120s ./build/90/ex25-copy portable
+timeout 120s ./build/90/ex25-copy specialized
+```
+
+[LAB20](/labs/blackwell-portable-comparison/)将 90 换成所选 Blackwell 目标；[LAB19](/labs/hopper-portable-comparison/)要求 CC 9.0。编译检查完成预处理、编译、链接、检查，不执行设备程序。`cuobjdump` PTX 输出应保留带后缀目标及 bulk-copy 指令；仅看 ELF 文件名可能看不到后缀。保留实际输出，不只记录命令退出码。
+
+程序输出路径／规模／输入模式的正确性字段，五次预热后输出十个各含 100 次启动的原始批次时间。event 区间排除传输与初始化。记录退出状态，单独运行获准性能分析，并遵循实验的环境清单（Environment Manifest）／记录协议。预期字段名不是已记录 GPU 输出。
+
+## 独立证据
+
+编译证据为空。未来任何**编译已检查（Compile-Checked）**记录均限定工具包通道、目标、方言与源码版本。运行仍**待硬件验证（Pending Hardware Verification）**，没有已记录观察或速度对照。原生 Linux 是唯一受支持环境（Supported Environment）。主机测试、构建门槛和网站检查不能提供合格 GPU 结果。
+
+## 来源与权利
+
+核对日期 **2026-10-04**：[SRC-CUDA-108](/sources-and-versions/#src-cuda-108)、精确 [PTX 9.3 归档](https://docs.nvidia.com/cuda/archive/13.3.1/parallel-thread-execution/index.html)和 [NVCC 归档](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html)。代码、测试与协议均原创，没有复制或改编权利方示例；权利方文档保留专有声明。

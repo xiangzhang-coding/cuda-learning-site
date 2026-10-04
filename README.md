@@ -1,6 +1,19 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## Current architecture increment — issue #60, 2026-09-22
+## Current architecture increment — issue #61, 2026-10-04
+
+H05 `[H04,M17,L08]` and H06 `[H01,H02,H04,H05]` complete the architecture path
+with separate Exercises/solutions. EX25 supplies canonical portable and exact-target
+bulk-copy paths; LAB19 `[H04,H06]` and LAB20 `[H05,H06]` provide execution protocols.
+VIS15 now covers twelve Turing-through-Blackwell states with family/precision filters.
+Current scope: 110 Learning Units, 25 Runnable Examples, 20 Labs, 22 visuals,
+109 Exercise/solution sets, 398 Publication Pairs / 796 routes and 493 catalog
+records (121 Practice Bank entries, 207 terms, 123 sources, 20 Labs, 22 visuals).
+EX25 compilation is target-specific with no retained claim; EX25/LAB19/LAB20 remain
+Pending Hardware Verification, bringing pending subjects to 44. No runtime or
+performance comparison is recorded. R6 is frozen; R7 aggregate review remains pending.
+
+## Historical architecture increment — issue #60, 2026-09-22
 
 H01–H04 publish complete bilingual Learning Units, Exercises and separate solutions;
 VIS15 compares Turing 7.5, Ampere 8.0/8.6/8.7, Ada 8.9 and Hopper 9.0 contracts with

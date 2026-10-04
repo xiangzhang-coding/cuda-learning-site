@@ -29,14 +29,14 @@ describe('issue #42 CUDA Python publication contract', () => {
     const [current, r4] = await Promise.all(['current-publication', 'r4-release'].map(async (name) =>
       JSON.parse(await readFile(path.join(root, `src/${name}-manifest.json`), 'utf8'))));
     expect(current).toMatchObject({
-      reviewDate: '2026-09-22',
+      reviewDate: '2026-10-04',
       releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
-      scope: { publicationPairs: 389, sourceRoutes: 778, exerciseSetPublicationPairs: 107,
-        solutionSetPublicationPairs: 107, practiceBankEntries: 119, sourceRecords: 121 },
+      scope: { publicationPairs: 398, sourceRoutes: 796, exerciseSetPublicationPairs: 109,
+        solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 123 },
     });
-    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04']);
-    expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23', 'EX24']);
-    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18']);
+    expect(current.scope.learningUnits).toEqual([...r4.scope.learningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
+    expect(current.scope.runnableExamples).toEqual([...r4.scope.runnableExamples, 'EX21', 'EX22', 'EX23', 'EX24', 'EX25']);
+    expect(current.scope.labs).toEqual([...r4.scope.labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18', 'LAB19', 'LAB20']);
     expect(current.scope.visualExplainers).toEqual([...r4.scope.visualExplainers, 'VIS15', 'VIS16', 'VIS17'].sort());
     for (const field of ['nsightReportAnalysisPracticeEntries', 'libraryAlgorithmChoicePracticeEntries']) {
       expect(current.scope[field], field).toEqual(r4.scope[field]);
@@ -55,9 +55,9 @@ describe('issue #42 CUDA Python publication contract', () => {
     expect(current.evidence).toEqual({
       ...r4.evidence,
       r6EvidenceNeutralLearningUnits: ['G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09'],
-      noCompileCheckedClaim: ['LAB18', 'EX24', 'LAB17', ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
+      noCompileCheckedClaim: ['EX25', 'LAB19', 'LAB20', 'LAB18', 'EX24', 'LAB17', ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
         ...r4.evidence.noCompileCheckedClaim.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
-      pendingHardwareVerification: ['LAB18', 'EX24', 'LAB17', ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
+      pendingHardwareVerification: ['EX25', 'LAB19', 'LAB20', 'LAB18', 'EX24', 'LAB17', ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('EX')), 'EX21', 'EX22', 'EX23',
         ...r4.evidence.pendingHardwareVerification.filter((id: string) => id.startsWith('LAB')), 'LAB13', 'LAB14', 'LAB15', 'LAB16'],
       r5EvidenceNeutralLearningUnits: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'],
       evidenceNeutralVisualExplainers: [...r4.evidence.evidenceNeutralVisualExplainers, 'VIS15', 'VIS16', 'VIS17'].sort(),
@@ -175,7 +175,7 @@ describe('issue #42 CUDA Python publication contract', () => {
   });
 
   it('static: gives each Python Practice Bank entry and source record a published prerequisite destination', async () => {
-    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-09-22T12:00:00Z') })).not.toThrow();
+    expect(() => validateResourceCatalog(RESOURCE_INDEX_RECORDS, { asOf: new Date('2026-10-04T12:00:00Z') })).not.toThrow();
     const practice = RESOURCE_INDEX_RECORDS.filter(({ planningId }) => /^PB-R5-00[1-3]$/.test(planningId));
     expect(practice.map(({ planningId }) => planningId)).toEqual(['PB-R5-001', 'PB-R5-002', 'PB-R5-003']);
     for (const [index, record] of practice.entries()) {

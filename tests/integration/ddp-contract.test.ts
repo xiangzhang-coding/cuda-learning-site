@@ -68,7 +68,7 @@ describe('issue #55 DDP publication contract', () => {
     }
     expect(current.scope.learningUnits).toContain('G07');
     expect(current.evidence.runtimeVerified).toEqual([]);
-    expect(current.evidence.pendingHardwareVerification).toHaveLength(41);
+    expect(current.evidence.pendingHardwareVerification).toHaveLength(44);
   });
 
   it('keeps the exact NCCL rights separate from the newer EX24 source', async () => {

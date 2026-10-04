@@ -1,0 +1,112 @@
+---
+title: 'EX25: Feature-gated Architecture Paths'
+description: Build ordinary and bulk-copy paths from one canonical project and verify every value independently.
+pairId: ex25
+counterpart: /examples/feature-gated-copy/
+factCheckDate: '2026-10-04'
+license: CC-BY-4.0
+provenance: original
+structure: [purpose, project, dispatch, oracle, portable, specialized, build, evidence, sources]
+resourceKind: runnable-example
+unitId: EX25
+prerequisites: [H06]
+relatedUnits: [LAB19, LAB20]
+exampleIds: [EX25]
+canonicalExample: EX25
+canonicalRanges:
+  - dispatch
+  - oracle
+  - portable
+  - specialized
+hardwareGate: 'Native Linux; one CC 7.5+ GPU; 8 GB total and 512 MiB free; specialization requires exact target admission'
+toolkitLanes: [cuda-11.8, cuda-12.9, cuda-13.3]
+minimumComputeCapability: '7.5'
+maximumProblemMemoryBytes: 524352
+gpuCount: 1
+evidence:
+  compilation: []
+  runtime: [Pending Hardware Verification]
+  expectedObservations: ['Each admitted path should exactly reproduce all inputs and preserve every guard after checked completion.']
+  recordedObservations: []
+sources:
+  - { title: 'PTX bulk copy and mbarrier', url: 'https://docs.nvidia.com/cuda/archive/13.3.1/parallel-thread-execution/index.html', version: '9.3', platform: 'Toolkit 13.3.1; selected targets', accessDate: '2026-10-04' }
+head:
+  - { tag: meta, attrs: { name: 'cuda:pair-id', content: ex25 } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-10-04' } }
+  - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
+  - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,project,dispatch,oracle,portable,specialized,build,evidence,sources' } }
+  - { tag: meta, attrs: { name: 'cuda:resource-kind', content: runnable-example } }
+  - { tag: meta, attrs: { name: 'cuda:unit-id', content: EX25 } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: H06 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-example', content: EX25 } }
+  - { tag: meta, attrs: { name: 'cuda:canonical-ranges', content: 'dispatch,oracle,portable,specialized' } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
+  - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: 'Pending Hardware Verification' } }
+  - { tag: meta, attrs: { name: 'cuda:expected-observations', content: '1 declared expectation' } }
+  - { tag: meta, attrs: { name: 'cuda:recorded-observations', content: none } }
+---
+
+import CanonicalCode from '../../../../components/CanonicalCode.astro';
+
+<a class="locale-pair" data-locale-counterpart href="/examples/feature-gated-copy/" lang="zh-CN">阅读中文对应页</a>
+
+## Purpose and prerequisite
+
+Exact prerequisite: [H06](/en/architecture/portable-specialization/). Copy 256/4096/65536 int32 values through shared tiles with 128 threads/block and 256 values/tile. Compare the explicit ordinary baseline with a target-admitted bulk-copy load/consume pipeline. This is one stage, with no overlap claim or precision change.
+
+## Canonical project
+
+[Fixed source tree](https://github.com/xiangzhang-coding/cuda-learning-site/tree/00525bab414284b0b35a6fc1ac9ed0ca2776db04/examples/ex25-feature-gated-copy) · [same-revision download](https://github.com/xiangzhang-coding/cuda-learning-site/archive/00525bab414284b0b35a6fc1ac9ed0ca2776db04.zip). Extract `examples/ex25-feature-gated-copy/`. Both locales import the same declared build inputs. Software is original Apache-2.0; this page is CC BY 4.0. CUDA packages are not redistributed.
+
+## Explicit dispatch
+
+<CanonicalCode exampleId="EX25" range="dispatch" />
+
+`portable` forces the baseline; `auto` selects specialization only when admitted; `specialized` rejects unsupported devices before launch. An admitted specialized run always checks the portable path first. Invalid modes fail. CC 10.7 is documented but outside this build profile. Runtime device 0, driver/runtime versions and memory are queried; at least 8 GB total and 512 MiB free are required. CUDA errors terminate instead of silently changing path.
+
+## Independent integer oracle
+
+<CanonicalCode exampleId="EX25" range="oracle" />
+
+Three patterns exercise signed index-varying values, zero and alternating ±100000. Output guards use a value outside all patterns. Check every result and all eight guards after stream completion and again after timing. Host mutation tests verify rejection at every position; they never execute CUDA. Two guarded arrays use at most **524352 B**; each payload starts at a 16 B offset from its aligned allocation.
+
+## Portable shared-memory baseline
+
+<CanonicalCode exampleId="EX25" range="portable" />
+
+One 1024 B tile, ordinary loads, a block barrier and ordinary stores. Neighbor-permuted ownership makes each thread consume another thread's shared element. All counts are whole tiles; no unchecked tail is allowed. The baseline is compiled separately for ordinary 75 PTX/cubin and, in specialized builds, a matching numeric target cubin.
+
+## Feature-gated bulk-copy path
+
+<CanonicalCode exampleId="EX25" range="specialized" />
+
+Only thread 0 initializes and arrives on the 8 B barrier. It registers exactly 1024 expected bytes, issues the aligned copy and waits phase zero. A block barrier publishes completion; a final barrier protects lifetime before invalidation. No cluster, tensor map, multicast, TMA store or family-exclusive instruction is used. The same protocol is built under different exact target scopes; suffix choice does not prove performance.
+
+## Build, inspect and run
+
+| Toolkit Lane | C++17 project profiles | Virtual / real code |
+| --- | --- | --- |
+| 11.8.0 / NVCC 11.8.89 / Ubuntu 22.04 x86-64 | portable | compute_75 / sm_75 plus compute_75 PTX |
+| 12.9.2 / NVCC 12.9.86 / Ubuntu 24.04 x86-64 | portable | compute_75 / sm_75 plus compute_75 PTX |
+| 13.3.1 / NVCC 13.3.73 / GCC 13.3.0 / Ubuntu 24.04 x86-64 | portable, 90, 100f, 103f, 110f, 120f, 121f | specialization uses the exact compute_X / sm_X pair plus compute_X PTX; baseline also includes the matching numeric cubin |
+
+The project manifest pins container digests. From the standalone directory:
+
+```sh
+make host-test
+bash scripts/compile-check.sh 90
+timeout 120s ./build/90/ex25-copy portable
+timeout 120s ./build/90/ex25-copy specialized
+```
+
+Use the selected Blackwell target instead of 90 for [LAB20](/en/labs/blackwell-portable-comparison/); [LAB19](/en/labs/hopper-portable-comparison/) requires CC 9.0. Compile checks preprocess, compile, link and inspect without running the device executable. `cuobjdump` PTX output should retain the suffixed target and bulk-copy instruction; ELF filenames alone may omit the suffix. Preserve actual output, not just a command exit status.
+
+The executable emits path/count/pattern correctness fields and ten raw 100-launch batch timings after five warmups. Event intervals exclude transfers and initialization. Capture exit status, use a separate authorized profiler pass and follow the Labs' Environment Manifest/record protocol. Expected field names are not recorded GPU output.
+
+## Independent evidence
+
+Compilation evidence is empty; any future **Compile-Checked** record is specific to a Toolkit Lane, target, dialect and source revision. Runtime remains **Pending Hardware Verification**, with no recorded observations or speed comparison. Native Linux is the only Supported Environment. A host test, compile gate or website check supplies no qualifying GPU result.
+
+## Sources and rights
+
+Checked **2026-10-04**: [SRC-CUDA-108](/en/sources-and-versions/#src-cuda-108), exact [PTX 9.3 archive](https://docs.nvidia.com/cuda/archive/13.3.1/parallel-thread-execution/index.html) and [NVCC archive](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html). Code, tests and protocol are original, not copied/adapted owner samples. Owner documents retain their proprietary notices.
