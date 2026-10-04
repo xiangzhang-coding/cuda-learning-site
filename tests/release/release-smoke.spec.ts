@@ -142,16 +142,16 @@ const learningUnits = [
   'Q06', 'Q07', 'Q08', 'Q09', 'Q10', 'Q11', 'Q12', 'Q13',
 ] as const;
 const r4LearningUnits = [...learningUnits, 'L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13'] as const;
-const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04'] as const;
+const currentLearningUnits = [...r4LearningUnits, 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06'] as const;
 const runnableExampleIds = [
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09', 'EX10',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16',
 ] as const;
 const r4RunnableExampleIds = [...runnableExampleIds, 'EX17', 'EX18', 'EX19', 'EX20'] as const;
-const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23', 'EX24'] as const;
+const currentRunnableExampleIds = [...r4RunnableExampleIds, 'EX21', 'EX22', 'EX23', 'EX24', 'EX25'] as const;
 const r3Labs = ['LAB01', 'LAB02', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10'] as const;
 const r4Labs = [...r3Labs, 'LAB11', 'LAB12'] as const;
-const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18'] as const;
+const currentLabs = [...r4Labs, 'LAB13', 'LAB14', 'LAB15', 'LAB16', 'LAB17', 'LAB18', 'LAB19', 'LAB20'] as const;
 const historicalVisualExplainers = [
   'VIS01', 'VIS02', 'VIS03', 'VIS04', 'VIS05', 'VIS06', 'VIS07', 'VIS08',
   'VIS09', 'VIS10', 'VIS11', 'VIS12', 'VIS13', 'VIS14', 'VIS18', 'VIS19', 'VIS20', 'VIS21', 'VIS22',
@@ -185,25 +185,28 @@ const currentProfilerReportPlans = [
   '/assets/profiler-report-fixtures/q13-nsight-compute.expected.json',
 ] as const;
 const currentNoCompileCheckedClaim = [
+  'EX25', 'LAB19', 'LAB20',
   'LAB18', 'EX24', 'LAB17',
   'EX01', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
   'LAB01', 'LAB03', 'LAB04', 'LAB05', 'LAB06', 'LAB07', 'LAB08', 'LAB09', 'LAB10', 'LAB11', 'LAB12', 'LAB13', 'LAB14', 'LAB15', 'LAB16',
 ] as const;
 const currentPendingHardwareVerification = [
+  'EX25', 'LAB19', 'LAB20',
   'LAB18', 'EX24', 'LAB17',
   'EX01', 'EX02', 'EX03', 'EX04', 'EX05', 'EX06', 'EX07', 'EX08', 'EX09',
   'EX11', 'EX12', 'EX13', 'EX14', 'EX15', 'EX16', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'EX22', 'EX23',
-  ...currentLabs.filter(id => id !== 'LAB17' && id !== 'LAB18'),
+  ...currentLabs.filter(id => !['LAB17', 'LAB18', 'LAB19', 'LAB20'].includes(id)),
 ] as const;
 const currentCatalogCounts = [
-  { suffix: 'labs/', count: 18 },
-  { suffix: 'practice/', count: 119 },
+  { suffix: 'labs/', count: 20 },
+  { suffix: 'practice/', count: 121 },
   { suffix: 'visuals/', count: 22 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 121 },
+  { suffix: 'sources-and-versions/', count: 123 },
 ] as const;
 const exampleRouteSlugs = [
+  'feature-gated-copy',
   'nccl-all-reduce',
   'triton-vector-add',
   'adjacent-energy',
@@ -408,7 +411,7 @@ test('serves the exact R6 release and current publication with production canoni
   expect(publication).toMatchObject({
     schemaVersion: 1,
     publicationId: 'current',
-    reviewDate: '2026-09-22',
+    reviewDate: '2026-10-04',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -542,21 +545,21 @@ test('serves the exact R6 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 389,
-    sourceRoutes: 778,
-    exerciseSetPublicationPairs: 107,
-    solutionSetPublicationPairs: 107,
+    publicationPairs: 398,
+    sourceRoutes: 796,
+    exerciseSetPublicationPairs: 109,
+    solutionSetPublicationPairs: 109,
     learningUnits: currentLearningUnits,
     runnableExamples: currentRunnableExampleIds,
     labs: currentLabs,
     visualExplainers: currentVisualExplainers,
-    practiceBankEntries: 119,
+    practiceBankEntries: 121,
     nsightReportAnalysisPracticeEntries: nsightReportAnalysisPracticeIds,
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds,
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     multiGpuAndNcclPracticeEntries: Array.from({ length: 13 }, (_, index) => `PB-R6-${String(index + 1).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 121,
+    sourceRecords: 123,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -689,8 +692,8 @@ test('serves the exact R6 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '389 Publication Pairs' : '389 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '778 source routes' : '778 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '398 Publication Pairs' : '398 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '796 source routes' : '796 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -724,7 +727,7 @@ test('serves the exact R6 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(487);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(493);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -735,7 +738,7 @@ test('serves the exact R6 release and current publication with production canoni
   for (const route of localizedRoutes('labs/')) {
     await page.goto(route);
     const labCards = page.locator('[data-resource-card]');
-    await expect(labCards).toHaveCount(18);
+    await expect(labCards).toHaveCount(20);
     expect(await labCards.evaluateAll((cards) => cards.map((card) => card.getAttribute('data-resource-id')))).toEqual([
       'LAB01',
       'LAB02',
@@ -755,6 +758,8 @@ test('serves the exact R6 release and current publication with production canoni
       'LAB16',
       'LAB17',
       'LAB18',
+      'LAB19',
+      'LAB20',
     ]);
   }
 
@@ -1096,13 +1101,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(778);
-    expect(new Set(routes).size).toBe(778);
+    expect(routes).toHaveLength(796);
+    expect(new Set(routes).size).toBe(796);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
-    expect(routeBatches).toHaveLength(66);
+    expect(routeBatches).toHaveLength(68);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(389);
+      expect(localized).toHaveLength(398);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }
