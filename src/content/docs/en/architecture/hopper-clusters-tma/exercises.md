@@ -33,7 +33,7 @@ head:
 
 ## Prerequisites and deliverables
 
-Exact prerequisite: [H04](/en/architecture/hopper-clusters-tma/). Submit two corrected ledgers and explicit portable fallbacks. Original paper Exercises require no GPU. Reviewed **2026-09-22**, [SRC-CUDA-106](/en/sources-and-versions/#src-cuda-106). Execution remains **Pending Hardware Verification**; LAB19 remains unpublished pending H06.
+Exact prerequisite: [H04](/en/architecture/hopper-clusters-tma/). Submit two corrected ledgers and explicit portable fallbacks. Original paper Exercises require no GPU. Reviewed **2026-09-22**, [SRC-CUDA-106](/en/sources-and-versions/#src-cuda-106). Execution remains **Pending Hardware Verification**. Publication update 2026-10-04: [LAB19](/en/labs/hopper-portable-comparison/) now follows H06.
 
 ## Exercise 1: the pointer outlives its owner
 

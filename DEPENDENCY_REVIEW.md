@@ -58,10 +58,18 @@ The checked files are:
 
 | Reviewed file | SHA-256 |
 | --- | --- |
-| `astro.config.mjs` | `1a9ee606c1c6e56987910ef2f5d8cd70c255bfb1b9b87925eb237f6371914551` |
+| `astro.config.mjs` | `a25e0878706a8e3dffe800c9b9c20161597e450f9f6b79f40afaddd70213b656` |
 | `wrangler.jsonc` | `e3f1d938b268baf8d79178175289999b7f850ef539251fde95d106b4063a8655` |
 | `package-lock.json` | `ad5da3bb6e55d6d1e9fa66ab0a40fcf2c3e28fcff0bba7301303d4cd31fb661a` |
 | Installed `astro/dist/assets/build/remote.js` | `f373fa76e3112446db327c79b34e2bbb1ef1dcad41affb60788adf30edc9588e` |
+
+**2026-10-04, #61 boundary re-review:** the config diff adds five static navigation
+slugs only. Rechecked the advisory (still no first patched version), installed
+Astro 7.2.8 `remote.js` caller, assets-only Wrangler configuration and absence of
+Astro Image/Picture consumers in source. Requests remain build-owned and no visitor
+response cache is deployed. The config digest above is refreshed for that reviewed
+navigation change; the advisory scope, locked versions and 2026-10-17 expiry remain
+unchanged. No claim that the vulnerable dependency is fixed is made.
 
 Remove the exception as soon as a reviewed fixed dependency becomes available.
 Do not refresh the expiry or hashes mechanically: recheck the advisory, exact

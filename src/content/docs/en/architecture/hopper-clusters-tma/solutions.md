@@ -59,4 +59,4 @@ Read-completion is not global-destination completion. If the issuer must consume
 
 ## Evidence and licensing
 
-Execution, copy behavior and performance remain **Pending Hardware Verification**. Exact build/target artifacts, an Environment Manifest, a qualifying Reference Environment, correctness/completion and retained profiling reports are needed for future claims. Counter-permission failure leaves counter evidence absent. LAB19 stays hidden pending H06. Original CC BY 4.0; owner references retain their notices.
+Execution, copy behavior and performance remain **Pending Hardware Verification**. Exact build/target artifacts, an Environment Manifest, a qualifying Reference Environment, correctness/completion and retained profiling reports are needed for future claims. Counter-permission failure leaves counter evidence absent. Publication update 2026-10-04: [LAB19](/en/labs/hopper-portable-comparison/) now follows H06. Original CC BY 4.0; owner references retain their notices.

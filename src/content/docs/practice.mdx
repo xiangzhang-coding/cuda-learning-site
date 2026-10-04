@@ -460,6 +460,44 @@ R3 发布合同把以下 10 个条目明确列为 Nsight report-analysis 子集�
 
 **参考解答：**初始化并发布各本地事务屏障，只为该块的 1024 B 加载绑定／计数一次；读取前同时等待其 256 次到达与字节完成。保留全部参与者，直到读取者完成、本地槽可复用。本算法没有跨块数据，集群其实不必要；去掉集群也不能去掉 TMA 等待。普通拷贝回退使用逐块加载／存储及发布／复用屏障，保持相同精确 CPU 输出比较。启动成功不证明传输完成、输出正确、所选指令或速度。计数器权限、保留报告和合格环境仍需独立满足。**来源依据：**原创作用域混淆题设与 [SRC-CUDA-106](/sources-and-versions/#src-cuda-106)。**来源日期：**2026-09-22。执行仍待硬件验证（Pending Hardware Verification）；见 [H04 解答](/architecture/hopper-clusters-tma/solutions/)。
 
+<span id="pb-r7-005" class="resource-target"></span>
+
+## PB-R7-005：家族范围不能跨主能力外推
+
+**ID：**PB-R7-005 · 原创双语发布对（Publication Pair）。
+- **直接先修：**[H05](/architecture/blackwell-families/)，精确 `[H05]`。
+- **相关学习单元与资源：** [H05](/architecture/blackwell-families/)。
+- **硬件门槛：**无，纸面推理。
+- **最后复核：** 2026-10-04。
+
+**难度：**进阶。**版本：**Programming Guide 13.4.2；Toolkit 13.3.1。
+
+**题目：**某软件包只有 `compute_103f` PTX，作者因为产品都叫 Blackwell，就把 CC 10.0、10.7、12.1 都标为支持。**约束：**使用文档中的有方向集合，另行应用 EX25 配置；没有执行观察。**预期证据：**目标／设备账本。**验收条件：**分类三个设备，解释普通回退缺失及 PTX／驱动门槛，区分文档支持与项目支持。
+
+<details><summary>提示 1</summary><p>家族目标的最小成员有意义；产品名称不是成员资格测试。</p></details>
+<details><summary>提示 2</summary><p>10.7 可以在文档上兼容，但仍不属于项目已核对的构建／运行配置。</p></details>
+
+**参考解答：**103f 排除 10.0 和 12.1；当前文档集合包含 10.7，但 EX25 的 13.3.1 特化配置排除它。提供独立构建的普通代码及兼容 cubin 或驱动可读的普通 PTX。不能把未构建／未运行目标标为已验证。**来源依据：**原创打包情境与 [SRC-CUDA-107](/sources-and-versions/#src-cuda-107)。**来源日期：**2026-10-04。运行仍待硬件验证（Pending Hardware Verification）；见 [H05 解答](/architecture/blackwell-families/solutions/)。
+
+<span id="pb-r7-006" class="resource-target"></span>
+
+## PB-R7-006：回退成功不能改写路径身份
+
+**ID：**PB-R7-006 · 原创双语发布对。
+- **直接先修：**[H06](/architecture/portable-specialization/)，精确 `[H06]`。
+- **相关学习单元与资源：** [H06](/architecture/portable-specialization/)。
+- **硬件门槛：**无，纸面推理。
+- **最后复核：** 2026-10-04。
+
+**难度：**进阶。**版本：**CUDA 13.3.1；EX25 目标契约。
+
+**题目：**100f 程序在 CC 12.1 上以 `auto` 正确选择普通代码，报告却写“Blackwell 特化快于可移植路径”。它比较十次启动与一百次启动的批次，没有输出／保护区检查。**约束：**保留 EX25 精确整数负载，分开记录路径。**预期证据：**修正决策和测量记录。**验收条件：**拒绝虚假路径身份及比较，定义 120f 或 121f 构建门槛、正确性检查、等价 event 区间与缺失证据字段。
+
+<details><summary>提示 1</summary><p>正确回退只涉及实际选择的基线，不证明不可用的特化。</p></details>
+<details><summary>提示 2</summary><p>解释时间前先匹配完整操作与启动次数，不填写未观察字段。</p></details>
+
+**参考解答：**100f/12.1 运行只保留为普通路径记录。明确选择 120f 或 121f，构建并检查目标，独立验证每个值／保护区，再在同一 GPU 上比较五次预热及十个各含 100 次启动的 event 样本。记录原始批次和实际路径；正确性或 profiler 证据缺失就阻断相应结论。**来源依据：**原创误标情境与 [SRC-CUDA-108](/sources-and-versions/#src-cuda-108)。**来源日期：**2026-10-04。性能仍待硬件验证；见 [H06 解答](/architecture/portable-specialization/solutions/)。
+
 <span id="pb-r0-001" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R0-001：修复证据状态（Evidence Status）记录

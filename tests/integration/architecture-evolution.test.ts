@@ -8,7 +8,7 @@ import { RESOURCE_INDEX_RECORDS } from '../../src/resource-indexes/resource-inde
 import current from '../../src/current-publication-manifest.json';
 import r6 from '../../src/r6-release-manifest.json';
 
-const ids = [...['H01', 'H02', 'H03', 'H04'].flatMap(id => [id, `${id}-EXERCISES`, `${id}-SOLUTIONS`]), 'VIS15'];
+const ids = [...['H01', 'H02', 'H03', 'H04', 'H05', 'H06'].flatMap(id => [id, `${id}-EXERCISES`, `${id}-SOLUTIONS`]), 'VIS15'];
 const empty = { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] };
 describe('issues #59/#60 complete architecture publication', () => {
   it.each(ids)('%s has aligned source, structure, prerequisites, locale and evidence contracts', async id => {
@@ -19,7 +19,7 @@ describe('issues #59/#60 complete architecture publication', () => {
       const { frontmatter: data } = parseFrontmatter(raw);
       const document = parseHTML(await readFile(`dist${route}index.html`, 'utf8')).document;
       expect(data).toMatchObject({ unitId: id, prerequisites: destination.prerequisites, evidence: empty,
-        factCheckDate: '2026-09-22', license: 'CC-BY-4.0', provenance: 'original', hardwareGate: 'none' });
+        factCheckDate: /^(H05|H06|VIS15)/.test(id) ? '2026-10-04' : '2026-09-22', license: 'CC-BY-4.0', provenance: 'original', hardwareGate: 'none' });
       expect(document.querySelector('[data-locale-counterpart]')?.getAttribute('href')).toBe(data.counterpart);
       expect(document.querySelectorAll('main h2')).toHaveLength(data.structure.length);
       for (const edge of data.prerequisites) expect(document.querySelector(`main a[href="${PUBLISHED_DESTINATIONS[edge].href[locale]}"]`)).not.toBeNull();
@@ -37,20 +37,22 @@ describe('issues #59/#60 complete architecture publication', () => {
     for (const prefix of ['', 'en/']) {
       const document = parseHTML(await readFile(`dist/${prefix}visuals/architecture-evolution/index.html`, 'utf8')).document;
       const visual = document.querySelector('[data-visual-id="VIS15"]')!;
-      const rows = [...visual.querySelectorAll('tbody tr')];
+      const rows = [...visual.querySelectorAll('.comparison tbody tr')];
       const cells = (i: number) => [...rows[i].querySelectorAll('td')].map(node => node.textContent?.trim());
-      expect(cells(1)).toEqual(['64 KiB', '163 KiB', '99 KiB', '163 KiB', '99 KiB', '227 KiB']);
+      expect(cells(1)).toEqual(['64 KiB', '163 KiB', '99 KiB', '163 KiB', '99 KiB', '227 KiB', '227 KiB', '227 KiB', '327 KiB', '227 KiB', '99 KiB', '99 KiB']);
       const yes = prefix ? 'Available' : '具备';
       const no = prefix ? 'Not available' : '不具备';
-      expect(cells(8)).toEqual([no, yes, no, no, no, yes]);
-      expect(cells(9)).toEqual([no, yes, yes, yes, yes, yes]);
-      for (const row of [10, 11, 12]) expect(cells(row)).toEqual([no, no, no, no, no, yes]);
-      expect(visual.querySelectorAll('[data-capability] option')).toHaveLength(7);
+      expect(cells(8)).toEqual([no, yes, no, no, no, yes, yes, no, yes, no, no, no]);
+      expect(cells(9)).toEqual([no, yes, yes, yes, yes, yes, yes, yes, yes, yes, yes, yes]);
+      for (const row of [10, 11, 12]) expect(cells(row)).toEqual([no, no, no, no, no, yes, yes, yes, yes, yes, yes, yes]);
+      for (const row of [13, 14]) expect(cells(row)).toEqual([no, no, no, no, no, no, yes, yes, yes, yes, yes, yes]);
+      expect(visual.querySelectorAll('[data-capability] option')).toHaveLength(13);
       expect(visual.querySelector('[data-controls]')?.hasAttribute('hidden')).toBe(true);
       expect(visual.querySelector('.comparison')?.getAttribute('tabindex')).toBe('0');
       expect(visual.textContent).toContain('Hopper');
       expect(visual.textContent).toContain('Ada');
-      expect(visual.textContent).not.toMatch(/Blackwell|Coming soon/);
+      expect(visual.textContent).toContain('Blackwell');
+      expect(visual.textContent).not.toMatch(/Coming soon/);
     }
   });
   it('keeps exact new prerequisites and current counts separate from frozen R6 and GPU evidence', () => {
@@ -58,18 +60,20 @@ describe('issues #59/#60 complete architecture publication', () => {
     expect(PUBLISHED_DESTINATIONS.H02.prerequisites).toEqual(['H01', 'M13', 'L08']);
     expect(PUBLISHED_DESTINATIONS.H03.prerequisites).toEqual(['H02', 'M02', 'Q10']);
     expect(PUBLISHED_DESTINATIONS.H04.prerequisites).toEqual(['H02', 'M12', 'M13']);
-    expect(PUBLISHED_DESTINATIONS.VIS15.prerequisites).toEqual(['H01', 'H02', 'H03', 'H04']);
-    expect(current.scope).toMatchObject({ publicationPairs: 389, sourceRoutes: 778, exerciseSetPublicationPairs: 107,
-      solutionSetPublicationPairs: 107, practiceBankEntries: 119, sourceRecords: 121 });
-    expect(current.scope.learningUnits).toHaveLength(108);
+    expect(PUBLISHED_DESTINATIONS.H05.prerequisites).toEqual(['H04', 'M17', 'L08']);
+    expect(PUBLISHED_DESTINATIONS.H06.prerequisites).toEqual(['H01', 'H02', 'H04', 'H05']);
+    expect(PUBLISHED_DESTINATIONS.VIS15.prerequisites).toEqual(['H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
+    expect(current.scope).toMatchObject({ publicationPairs: 398, sourceRoutes: 796, exerciseSetPublicationPairs: 109,
+      solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 123 });
+    expect(current.scope.learningUnits).toHaveLength(110);
     expect(current.scope.visualExplainers).toHaveLength(22);
-    expect(RESOURCE_INDEX_RECORDS).toHaveLength(487);
+    expect(RESOURCE_INDEX_RECORDS).toHaveLength(493);
     expect(r6.scope.publicationPairs).toBe(376);
-    expect(current.evidence.pendingHardwareVerification).toEqual(r6.evidence.pendingHardwareVerification);
+    expect(current.evidence.pendingHardwareVerification).toEqual(['EX25', 'LAB19', 'LAB20', ...r6.evidence.pendingHardwareVerification]);
     expect(current.evidence.runtimeVerified).toEqual([]);
-    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB19');
-    expect(RESOURCE_INDEX_RECORDS.some(record => record.planningId === 'LAB19')).toBe(false);
-    for (const id of ['PB-R7-001', 'PB-R7-002', 'PB-R7-003', 'PB-R7-004', 'SRC-CUDA-103', 'SRC-CUDA-104', 'SRC-CUDA-105', 'SRC-CUDA-106']) {
+    expect(PUBLISHED_DESTINATIONS.LAB19.prerequisites).toEqual(['H04', 'H06']);
+    expect(PUBLISHED_DESTINATIONS.LAB20.prerequisites).toEqual(['H05', 'H06']);
+    for (const id of ['PB-R7-001', 'PB-R7-002', 'PB-R7-003', 'PB-R7-004', 'PB-R7-005', 'PB-R7-006', 'SRC-CUDA-103', 'SRC-CUDA-104', 'SRC-CUDA-105', 'SRC-CUDA-106', 'SRC-CUDA-107', 'SRC-CUDA-108']) {
       expect(RESOURCE_INDEX_RECORDS.filter(record => record.planningId === id)).toHaveLength(1);
     }
   });

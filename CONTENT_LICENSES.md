@@ -1,6 +1,20 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## H03/H04/VIS15 source rights — 2026-09-22
+## H05/H06/EX25/LAB19/LAB20/VIS15 source rights — 2026-10-04
+
+Issue #61 adds nine complete Publication Pairs, two original Practice Bank entries,
+and an original Blackwell extension of VIS15. Prose, exercises, comparison tables
+and blank result templates use CC BY 4.0. EX25 source, host tests, visual code and
+quality checks use Apache-2.0. SRC-CUDA-107/108 identify reference-only NVIDIA
+Programming Guide 13.4.2, Blackwell Tuning Guide 13.4, and exact Toolkit 13.3.1
+NVCC/PTX archives (PTX 9.3). Their proprietary Notices and copyright remain in
+force; no owner sample, figure, table or source file is copied/adapted or distributed.
+PTX instruction names/syntax are used in independently authored code. No new
+third-party asset or dependency is added. Exact license and attribution gates
+remain required. Current inventory: 398 pairs / 796 routes / 110 units /
+109 Exercise/solution sets / 493 catalog records. No GPU runtime evidence is added.
+
+## Historical H03/H04/VIS15 source rights — 2026-09-22
 
 Issue #60 adds twelve original Markdown pages (H03/H04 Publication Pairs and
 their Exercises/separate solutions), PB-R7-003/004 and the Ada/Hopper extension

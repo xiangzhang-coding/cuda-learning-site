@@ -1,6 +1,22 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-## H03/H04/VIS15 source review — 2026-09-22
+## H05/H06/EX25/LAB19/LAB20/VIS15 source review — 2026-10-04
+
+Current Context7 discovery covered Blackwell family sets, a/f target scopes and
+bulk-copy/mbarrier semantics. Exact owner review: Programming Guide 13.4.2 §5.1,
+Blackwell Tuning Guide 13.4 §1.4, Toolkit 13.3.1 NVCC §§5.2/5.5 and PTX 9.3
+cp.async.bulk, mbarrier and async-proxy fence sections. SRC-CUDA-107/108 retain
+URLs and disposition. Current 10.7 documentation is separated from the pinned
+compiler target list and excluded from EX25 specialization. Capability tables
+govern the selected per-block memory and native FP64 ledger where broader tuning
+summaries differ. No owner sample/table/asset is copied or adapted.
+EX25 uses an original one-stage integer copy protocol, not family-exclusive
+arithmetic; each target has an independent compile gate and no retained status.
+Current inventory: 398 pairs / 796 routes / 110 units / 109 Exercise/solution
+sets / 493 catalog records. EX25/LAB19/LAB20 remain Pending Hardware Verification.
+LAB19 is now published; earlier withholding notes are historical. R7 is pending.
+
+## Historical H03/H04/VIS15 source review — 2026-09-22
 
 Issue #60: current Context7 `/websites/nvidia_cuda` discovery covered Ada L2,
 Hopper clusters/DSM/TMA and compiler targets. Direct owner review used Ada/Hopper

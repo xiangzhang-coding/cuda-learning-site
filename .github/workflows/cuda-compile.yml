@@ -19,6 +19,59 @@ env:
   NODE_VERSION: 24.19.0
 
 jobs:
+  ex25-build:
+    name: EX25 ${{ matrix.lane }} target-specific build gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: cuda-11.8
+            targets: 'portable'
+            image: nvidia/cuda:11.8.0-devel-ubuntu22.04@sha256:94fd755736cb58979173d491504f0b573247b1745250249415b07fefc738e41f
+          - lane: cuda-12.9
+            targets: 'portable'
+            image: nvidia/cuda:12.9.2-devel-ubuntu24.04@sha256:16656a1ef115bca9e1f820c6349876f1486d2b3c9a0e615773799fe402960dc5
+          - lane: cuda-13.3
+            targets: 'portable 90 100f 103f 110f 120f 121f'
+            image: nvidia/cuda:13.3.1-devel-ubuntu24.04@sha256:4ff859525f99de5782aa73607ce24219b07dddd48d12b97c1c301d7e1cfb0a87
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Compile each target without GPU execution or automatic Evidence Status
+        env:
+          TARGETS: ${{ matrix.targets }}
+          IMAGE: ${{ matrix.image }}
+          LANE: ${{ matrix.lane }}
+        run: |
+          set -euo pipefail
+          mkdir -p "artifacts/cuda-ex25/$LANE"
+          docker pull --platform linux/amd64 "$IMAGE"
+          for target in $TARGETS; do
+            docker run --platform linux/amd64 --rm --network none \
+              --user "$(id -u):$(id -g)" --env HOME=/tmp \
+              --volume "$GITHUB_WORKSPACE:/workspace" \
+              --workdir /workspace/examples/ex25-feature-gated-copy "$IMAGE" \
+              bash scripts/compile-check.sh "$target" \
+              > "artifacts/cuda-ex25/$LANE/$target.log" 2>&1
+          done
+      - name: Scan target-specific logs
+        if: always()
+        run: node scripts/check-artifacts.mjs "artifacts/cuda-ex25/${{ matrix.lane }}"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: ex25-build-${{ matrix.lane }}
+          path: artifacts/cuda-ex25/${{ matrix.lane }}
+          if-no-files-found: error
+          retention-days: 7
+
   cuda-compile:
     name: ${{ matrix.lane }}
     runs-on: ubuntu-24.04

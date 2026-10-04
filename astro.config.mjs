@@ -227,6 +227,8 @@ export default defineConfig({
             { slug: 'architecture/ampere-pipelines-tensor-cores' },
             { slug: 'architecture/ada-working-sets' },
             { slug: 'architecture/hopper-clusters-tma' },
+            { slug: 'architecture/blackwell-families' },
+            { slug: 'architecture/portable-specialization' },
           ],
         },
         {
@@ -237,6 +239,7 @@ export default defineConfig({
             { slug: 'examples/vector-addition' },
             { slug: 'examples/triton-vector-add' },
             { slug: 'examples/nccl-all-reduce' },
+            { slug: 'examples/feature-gated-copy' },
             { slug: 'examples/multidimensional-indexing' },
             { slug: 'examples/error-handling-lifecycle' },
             { slug: 'examples/coalesced-strided-access' },
@@ -265,6 +268,8 @@ export default defineConfig({
           items: [
             { slug: 'labs' },
             { slug: 'labs/nccl-all-reduce' },
+            { slug: 'labs/hopper-portable-comparison' },
+            { slug: 'labs/blackwell-portable-comparison' },
             { slug: 'labs/record-cuda-environment' },
             { slug: 'labs/vector-addition' },
             { slug: 'labs/break-and-repair-indexing' },

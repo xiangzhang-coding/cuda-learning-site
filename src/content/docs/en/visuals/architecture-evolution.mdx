@@ -1,32 +1,33 @@
 ---
-title: 'VIS15: Compare Turing, Ampere, Ada and Hopper Contracts'
+title: 'VIS15: Compare Turing through Blackwell Contracts'
 description: Filter exact compute capabilities and features while retaining a complete original static comparison.
 pairId: vis15
 counterpart: /visuals/architecture-evolution/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure: [purpose, controls, model, fallback, evidence, sources]
 resourceKind: visual-explainer
 unitId: VIS15
-prerequisites: [H01, H02, H03, H04]
+prerequisites: [H01, H02, H03, H04, H05, H06]
 relatedUnits: [F06, M13, L08]
 hardwareGate: none
 evidence: { compilation: [], runtime: [], expectedObservations: [], recordedObservations: [] }
 sources:
-  - { title: 'CUDA Compute Capabilities', url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html', version: '13.4.2', platform: 'Source-reviewed comparison, not device detection', accessDate: '2026-09-22' }
+  - { title: 'CUDA Compute Capabilities', url: 'https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html', version: '13.4.2', platform: 'Source-reviewed comparison, not device detection', accessDate: '2026-10-04' }
+  - { title: 'Blackwell Tuning Guide', url: 'https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html', version: '13.4', platform: 'Exact capability and target gates', accessDate: '2026-10-04' }
   - { title: 'Turing Tuning Guide', url: 'https://docs.nvidia.com/cuda/turing-tuning-guide/index.html', version: '13.4', platform: 'CC 7.5 contracts', accessDate: '2026-09-22' }
   - { title: 'Ampere Tuning Guide', url: 'https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html', version: '13.4', platform: 'CC 8.x contracts', accessDate: '2026-09-22' }
   - { title: 'Ada Tuning Guide', url: 'https://docs.nvidia.com/cuda/ada-tuning-guide/index.html', version: '13.4', platform: 'CC 8.9 contracts', accessDate: '2026-09-22' }
   - { title: 'Hopper Tuning Guide', url: 'https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html', version: '13.4', platform: 'CC 9.0 contracts', accessDate: '2026-09-22' }
 head:
   - { tag: meta, attrs: { name: 'cuda:pair-id', content: vis15 } }
-  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' } }
+  - { tag: meta, attrs: { name: 'cuda:fact-check-date', content: '2026-10-04' } }
   - { tag: meta, attrs: { name: 'cuda:license', content: CC-BY-4.0 } }
   - { tag: meta, attrs: { name: 'cuda:structure', content: 'purpose,controls,model,fallback,evidence,sources' } }
   - { tag: meta, attrs: { name: 'cuda:resource-kind', content: visual-explainer } }
   - { tag: meta, attrs: { name: 'cuda:unit-id', content: VIS15 } }
-  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'H01,H02,H03,H04' } }
+  - { tag: meta, attrs: { name: 'cuda:prerequisites', content: 'H01,H02,H03,H04,H05,H06' } }
   - { tag: meta, attrs: { name: 'cuda:hardware-gate', content: none } }
   - { tag: meta, attrs: { name: 'cuda:evidence-compilation', content: none } }
   - { tag: meta, attrs: { name: 'cuda:evidence-runtime', content: none } }
@@ -39,25 +40,25 @@ import ArchitectureEvolutionExplorer from '../../../../components/ArchitectureEv
 
 ## Purpose and prerequisites
 
-Exact ordered prerequisites: [H01](/en/architecture/turing-warp-safety/), [H02](/en/architecture/ampere-pipelines-tensor-cores/), [H03](/en/architecture/ada-working-sets/), [H04](/en/architecture/hopper-clusters-tma/). Compare a portable explicit-synchronization baseline with documented additions. Turing inherited independent thread scheduling from Volta; Ampere adds hardware copy and split-barrier paths. Ada adds implementation-specific cache capacity, while Hopper introduces clusters, DSM and TMA. Read each capability contract, not a product ranking.
+Exact ordered prerequisites: [H01](/en/architecture/turing-warp-safety/), [H02](/en/architecture/ampere-pipelines-tensor-cores/), [H03](/en/architecture/ada-working-sets/), [H04](/en/architecture/hopper-clusters-tma/), [H05](/en/architecture/blackwell-families/), [H06](/en/architecture/portable-specialization/). Turing inherits independent thread scheduling, Ampere adds copy/barrier hardware, Ada changes implementation-specific cache capacity, Hopper adds clusters/DSM/TMA, and Blackwell adds family-scoped targets with distinct resource/precision contracts. Read contracts rather than product rankings.
 
 <ArchitectureEvolutionExplorer locale="en" />
 
 ## Controls
 
-Select an **exact compute capability** and a **required feature**. Filters intersect; CC 8.6 with native FP64 Tensor Cores, or CC 8.9 with TMA, produces an explained empty result without silently changing CC. Reset returns both filters to all reviewed states and focuses the CC select. Native select/button keyboard behavior applies; results are announced politely. There is no animation, autoplay, timer, randomness, persistence or GPU query. Reload starts with all six states. An unknown filter is rejected and the previous selection is retained.
+Select an **exact compute capability** and a **required feature**. Filters intersect; 8.9 with TMA or 12.1 with native FP64 Tensor Cores gives an explained empty result without changing CC. Reset restores all twelve states and focuses the CC select. Native keyboard controls and polite announcements apply. No animation, autoplay, timer, randomness, persistence or GPU query. Unknown filters are rejected while preserving the previous selection.
 
 ## Model contract
 
-Order is fixed: Turing 7.5, Ampere 8.0, 8.6, 8.7, Ada 8.9, Hopper 9.0. Every row has a target, shared-memory limit and all eleven feature decisions. Future architectures have no options, rows or placeholders. FP64 means **native Tensor Core inputs**, not ordinary double arithmetic: among these rows, 8.0 and 9.0 qualify. FP16/BF16/TF32/FP64 still require H02's precise WMMA types, shapes, layout, participation and caller-approved precision. Hardware availability does not establish selected instructions.
+Fixed order: 7.5, 8.0, 8.6, 8.7, 8.9, 9.0, then Blackwell 10.0, 10.3, 10.7, 11.0, 12.0, 12.1. Each state has targets, a per-block memory ceiling and thirteen feature decisions. FP64 means **native Tensor Core inputs**, not ordinary double arithmetic: 8.0, 9.0, 10.0 and 10.7 qualify. FP4 and family-target filters select the six Blackwell states. Precision, API, shape/layout, participation and target gates still apply; hardware availability does not prove selected instructions.
 
-The 64/163/99/163/99/227 KiB values are per-block maxima; more than 48 KiB requires dynamic shared memory and opt-in. They are not measured occupancy or device memory capacity. The portable site scope is CC 7.5+ with a problem fitting within 8 GB; the Modern Single-GPU Capability Tier requires CC 8.0+ and at least 8 GB. An 8.7 row does not select or verify a platform environment.
+Per-block ceilings are 64/163/99/163/99/227/227/227/327/227/99/99 KiB. Above 48 KiB requires dynamic allocation and opt-in; 10.7's oversized configuration requires its additional mode. These are not occupancy or VRAM measurements. Site baseline remains CC 7.5+ and problems fitting within 8 GB; Modern Single-GPU requires CC 8.0+ and at least 8 GB. A row selects no runtime platform. Documented 10.7 is outside EX25's fixed 13.3.1 build profile.
 
-L2-policy eligibility starts at 8.0; actual cache capacity is queried per device, not inferred from CC. MIG/MPS and window/set-aside constraints remain gates. Cluster/DSM/TMA filters select only 9.0 among these rows. A cluster must pass actual dimension/resource queries; DSM needs initialization and exit synchronization. Single-block TMA needs no cluster, but does need H04's descriptor/alignment, transaction wait, proxy visibility and direction-specific store completion. H03/H04 specify exact memory, targets, profiler permission and ordinary-copy/global-scratch fallbacks.
+L2 policy starts at 8.0; query actual capacity and MIG/MPS/window/set-aside limits. Cluster/DSM/TMA select Hopper and the reviewed Blackwell rows. Resource, lifetime, alignment, transaction wait and proxy-visibility gates still apply. The text beneath the matrix gives exact `a`/`f` scopes; they do not authorize every Blackwell device. H05/H06 define compiler/device admission and ordinary fallback; EX25/LAB19/LAB20 supply the executable comparison contract.
 
 ## Original static comparison
 
-The complete comparison is server-rendered and always visible, including when JavaScript is unavailable. Enhancement reveals controls only after the required elements and initial result are ready. On narrow screens, result cards stack and the comparison table scrolls inside a keyboard-focusable region. Text describes each decision without relying on color. Reduced motion requires no alternate progression; print retains the complete table while hiding controls and duplicate results.
+The complete comparison is server-rendered and always visible, including when JavaScript is unavailable. Enhancement reveals controls only after the required elements and initial result are ready. On narrow screens, result cards stack and the comparison table scrolls inside a keyboard-focusable region. Text describes each decision without relying on color. Reduced motion requires no alternate progression. Print replaces the wide matrix with twelve two-column, per-architecture tables containing every feature decision, while hiding controls and duplicate interactive results.
 
 ## Evidence boundary
 
@@ -65,4 +66,4 @@ The browser executes no CUDA and grants no Compile-Checked, Community-Observed o
 
 ## Sources and licensing
 
-Reviewed **2026-09-22** against [CUDA capabilities](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [Turing](https://docs.nvidia.com/cuda/turing-tuning-guide/index.html), [Ampere](https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html), [Ada](https://docs.nvidia.com/cuda/ada-tuning-guide/index.html) and [Hopper](https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html) tuning. [SRC-CUDA-103](/en/sources-and-versions/#src-cuda-103), [104](/en/sources-and-versions/#src-cuda-104), [105](/en/sources-and-versions/#src-cuda-105) and [106](/en/sources-and-versions/#src-cuda-106) record current Context7 discovery, exact owner sections and dated versions. Layout, comparison, explanations and filters are original; prose is CC BY 4.0 and implementation Apache-2.0. No owner diagram or table was copied or adapted; owner material retains its notices.
+Capability matrix and Blackwell extension reviewed **2026-10-04**: [SRC-CUDA-107](/en/sources-and-versions/#src-cuda-107) and [108](/en/sources-and-versions/#src-cuda-108) record Context7 discovery, current guide 13.4.2, Blackwell tuning 13.4 and exact 13.3.1 compiler/PTX archives. Earlier Turing-through-Hopper tuning reviews remain dated 2026-09-22 in SRC-CUDA-103–106. Original prose/comparison: CC BY 4.0; implementation/tests: Apache-2.0. No owner figure/table is copied or adapted; owner material retains its notices.

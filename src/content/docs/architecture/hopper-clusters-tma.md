@@ -118,7 +118,7 @@ Hopper **每块最多 227 KiB 共享内存**，来自每 SM 228 KiB 的共享资
 
 四个证据数组为空。架构行为、DSM 生命周期结果、TMA 指令选择与性能均**待硬件验证（Pending Hardware Verification）**。合格的基准环境（Reference Environment）运行需要完整环境清单、精确构建／产物、正确性、带错误检查的完成点及保留报告。原生 Linux 是唯一受支持环境（Supported Environment）；浏览器不执行 CUDA。
 
-**LAB19 保持未发布**，直到 H06 提供可移植比较契约。这些有界纸面对照不发布实验（Lab）、可运行项目或执行证据。不提供空的 LAB19 路由、导航项或目录记录。
+**发布更新，2026-10-04：**[H06](/architecture/portable-specialization/)现提供比较契约，[LAB19](/labs/hopper-portable-comparison/)使用 EX25 的有界单阶段拷贝。H04 的 DSM 与张量映射纸面设计仍无执行证据。
 
 ## 快速回忆
 

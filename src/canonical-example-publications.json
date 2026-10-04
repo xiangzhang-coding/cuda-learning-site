@@ -2,6 +2,11 @@
   "SPDX-License-Identifier": "Apache-2.0",
   "schemaVersion": 1,
   "examples": {
+    "EX25": {
+      "sourceCommit": "c6b85ed1b178cedb5302605687d0e6e6b33a36dd",
+      "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/c6b85ed1b178cedb5302605687d0e6e6b33a36dd/examples/ex25-feature-gated-copy",
+      "downloadUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/archive/c6b85ed1b178cedb5302605687d0e6e6b33a36dd.zip"
+    },
     "EX24": {
       "sourceCommit": "9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b",
       "sourceUrl": "https://github.com/xiangzhang-coding/cuda-learning-site/tree/9883cbb2aa1a0f843881b3a3e9ce0584ca95ba2b/examples/ex24-nccl-all-reduce",

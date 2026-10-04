@@ -118,7 +118,7 @@ Instruction/resource inspection and a separately recorded Nsight Compute pass he
 
 All four evidence arrays remain empty. Architecture behavior, DSM lifetime outcomes, TMA instruction selection and performance remain **Pending Hardware Verification**. A qualifying Reference Environment run needs a complete Environment Manifest, exact build/artifacts, correctness, error-checked completion and retained reports. Native Linux is the sole Supported Environment; the browser executes no CUDA.
 
-**LAB19 remains unpublished** until H06 supplies its portable comparison contract. These bounded paper comparisons do not publish a Lab, a runnable project, or execution evidence. No empty LAB19 route, navigation item or catalog record is offered.
+**Publication update, 2026-10-04:** [H06](/en/architecture/portable-specialization/) now supplies the comparison contract and [LAB19](/en/labs/hopper-portable-comparison/) uses EX25's bounded single-stage copy. H04's DSM and tensor-map paper designs still carry no execution evidence.
 
 ## Retrieval check
 

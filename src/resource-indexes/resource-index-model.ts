@@ -121,9 +121,45 @@ export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestinatio
     href: { 'zh-CN': '/architecture/hopper-clusters-tma/solutions/', en: '/en/architecture/hopper-clusters-tma/solutions/' },
     title: { 'zh-CN': 'H04 解答：远端所有权与方向相关等待', en: 'H04 Solutions: Remote Ownership and Directional Waits' }, prerequisites: ['H04-EXERCISES'],
   },
+  H05: {
+    href: { 'zh-CN': '/architecture/blackwell-families/', en: '/en/architecture/blackwell-families/' },
+    title: { 'zh-CN': 'H05：Blackwell 家族与编译目标范围', en: 'H05: Blackwell Families and Compiler Target Scopes' }, prerequisites: ['H04', 'M17', 'L08'],
+  },
+  'H05-EXERCISES': {
+    href: { 'zh-CN': '/architecture/blackwell-families/exercises/', en: '/en/architecture/blackwell-families/exercises/' },
+    title: { 'zh-CN': 'H05 练习：目标集合与安全回退', en: 'H05 Exercises: Target Sets and Safe Fallback' }, prerequisites: ['H05'],
+  },
+  'H05-SOLUTIONS': {
+    href: { 'zh-CN': '/architecture/blackwell-families/solutions/', en: '/en/architecture/blackwell-families/solutions/' },
+    title: { 'zh-CN': 'H05 解答：分开目标契约与数值契约', en: 'H05 Solutions: Keep Target and Numerical Contracts Separate' }, prerequisites: ['H05-EXERCISES'],
+  },
+  H06: {
+    href: { 'zh-CN': '/architecture/portable-specialization/', en: '/en/architecture/portable-specialization/' },
+    title: { 'zh-CN': 'H06：可移植基线与特化路径', en: 'H06: A Portable Baseline with Specialized Paths' }, prerequisites: ['H01', 'H02', 'H04', 'H05'],
+  },
+  'H06-EXERCISES': {
+    href: { 'zh-CN': '/architecture/portable-specialization/exercises/', en: '/en/architecture/portable-specialization/exercises/' },
+    title: { 'zh-CN': 'H06 练习：分派与比较边界', en: 'H06 Exercises: Dispatch and Comparison Boundaries' }, prerequisites: ['H06'],
+  },
+  'H06-SOLUTIONS': {
+    href: { 'zh-CN': '/architecture/portable-specialization/solutions/', en: '/en/architecture/portable-specialization/solutions/' },
+    title: { 'zh-CN': 'H06 解答：准入、完成，再比较', en: 'H06 Solutions: Admit, Complete, Then Compare' }, prerequisites: ['H06-EXERCISES'],
+  },
+  EX25: {
+    href: { 'zh-CN': '/examples/feature-gated-copy/', en: '/en/examples/feature-gated-copy/' },
+    title: { 'zh-CN': 'EX25：功能门槛控制的架构路径', en: 'EX25: Feature-gated Architecture Paths' }, prerequisites: ['H06'],
+  },
+  LAB19: {
+    href: { 'zh-CN': '/labs/hopper-portable-comparison/', en: '/en/labs/hopper-portable-comparison/' },
+    title: { 'zh-CN': 'LAB19：比较可移植与 Hopper 流水线', en: 'LAB19: Compare Portable and Hopper Pipelines' }, prerequisites: ['H04', 'H06'], indexGroup: 'labs',
+  },
+  LAB20: {
+    href: { 'zh-CN': '/labs/blackwell-portable-comparison/', en: '/en/labs/blackwell-portable-comparison/' },
+    title: { 'zh-CN': 'LAB20：比较可移植与精确 Blackwell 家族路径', en: 'LAB20: Compare Portable and Exact Blackwell-family Paths' }, prerequisites: ['H05', 'H06'], indexGroup: 'labs',
+  },
   VIS15: {
     href: { 'zh-CN': '/visuals/architecture-evolution/', en: '/en/visuals/architecture-evolution/' },
-    title: { 'zh-CN': 'VIS15：比较 Turing、Ampere、Ada 与 Hopper 契约', en: 'VIS15: Compare Turing, Ampere, Ada and Hopper Contracts' }, prerequisites: ['H01', 'H02', 'H03', 'H04'], indexGroup: 'visuals',
+    title: { 'zh-CN': 'VIS15：比较 Turing 至 Blackwell 契约', en: 'VIS15: Compare Turing through Blackwell Contracts' }, prerequisites: ['H01', 'H02', 'H03', 'H04', 'H05', 'H06'], indexGroup: 'visuals',
   },
   G09: {
     href: { 'zh-CN': '/multi-gpu/multi-node-transport-failures/', en: '/en/multi-gpu/multi-node-transport-failures/' },

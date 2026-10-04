@@ -32,7 +32,20 @@ const features = ARCHITECTURE_FEATURES.filter(feature => feature !== 'all');
       </tbody>
     </table>
   </div>
-  <p>{copy.memory}</p><p>{copy.fallback}</p>
+   <div class="print-comparison">
+     {ARCHITECTURE_CONTRACTS.map(row => <section data-print-cc={row.cc}>
+       <h4>{row.architecture} · CC {row.cc}</h4>
+       <table>
+         <caption>{copy.static} · CC {row.cc}</caption>
+         <tbody>
+           <tr><th scope="row">{copy.target}</th><td><code>{row.target}</code></td></tr>
+           <tr><th scope="row">{copy.shared}</th><td>{row.sharedKiB} KiB</td></tr>
+           {features.map(feature => <tr><th scope="row">{copy.labels[feature]}</th><td>{row.features.includes(feature) ? copy.yes : copy.no}</td></tr>)}
+         </tbody>
+       </table>
+     </section>)}
+   </div>
+   <p>{copy.memory}</p><p>{copy.scopes}</p><p>{copy.fallback}</p>
 </architecture-evolution>
 <script>
   import { filterArchitectures } from '../visuals/architecture-evolution-model';
@@ -95,5 +108,13 @@ const features = ARCHITECTURE_FEATURES.filter(feature => feature !== 'all');
   @media (max-width: 42rem) { .contracts { grid-template-columns: 1fr; } fieldset { flex-direction: column; } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   @media (forced-colors: active) { .baseline, .contracts :global(section) { border-color: CanvasText; } }
-  @media print { fieldset, [data-interactive] { display: none !important; } .comparison { overflow: visible; } table { font-size: .7rem; } }
+  .print-comparison { display: none; }
+  @media print {
+    fieldset, [data-interactive], .comparison { display: none !important; }
+    .print-comparison { display: block; }
+    .print-comparison section { break-inside: avoid; margin-block: 1rem; }
+    .print-comparison table { table-layout: fixed; width: 100%; font-size: .85rem; }
+    .print-comparison :is(th, td, code) { overflow-wrap: anywhere; white-space: normal; }
+    .print-comparison th { width: 60%; }
+  }
 </style>

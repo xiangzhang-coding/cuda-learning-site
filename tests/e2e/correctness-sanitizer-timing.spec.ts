@@ -132,6 +132,7 @@ const issue19MemorySlugs = [
 ] as const;
 const issue19MemorySlugSet = new Set<string>(issue19MemorySlugs);
 const exampleSlugs = [
+  'feature-gated-copy',
   'nccl-all-reduce',
   'triton-vector-add',
   'adjacent-energy',
@@ -158,6 +159,8 @@ const exampleSlugs = [
   'cuda-python-launch',
 ] as const;
 const labSlugs = [
+  'hopper-portable-comparison',
+  'blackwell-portable-comparison',
   'pipeline-nccl-computation',
   'nccl-all-reduce',
   'verify-fused-softmax',
@@ -183,8 +186,8 @@ const sortedRoutes = (routes: readonly string[]) =>
 
 test('current publication, Runnable Example, and Lab route scope is exact', async () => {
   const publishedRoutes = await discoverPublishedRoutes();
-  expect(publishedRoutes).toHaveLength(778);
-  expect(publishedRoutes.length / 2).toBe(389);
+  expect(publishedRoutes).toHaveLength(796);
+  expect(publishedRoutes.length / 2).toBe(398);
 
   const expectedIssue19MemoryRoutes = issue19MemorySlugs.flatMap((slug) =>
     ['', 'exercises', 'solutions'].flatMap((child) => {

@@ -95,8 +95,8 @@ describe('issue #57 multi-node publication and redacted diagnostic contract', ()
     }
     expect(current.scope.learningUnits).toContain('G09');
     expect(current.evidence.runtimeVerified).toEqual([]);
-    expect(current.evidence.pendingHardwareVerification).toHaveLength(41);
-    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB19');
+    expect(current.evidence.pendingHardwareVerification).toHaveLength(44);
+    expect(PUBLISHED_DESTINATIONS).not.toHaveProperty('LAB21');
   });
 
   it('aligns immutable owner references, hashes and separate source licenses', async () => {

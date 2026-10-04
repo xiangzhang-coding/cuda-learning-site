@@ -33,7 +33,7 @@ head:
 
 ## 先修与交付物
 
-精确先修：[H04](/architecture/hopper-clusters-tma/)。提交两份修正账本和明确的可移植回退。原创纸面练习（Exercise）无需 GPU。核对日期 **2026-09-22**，[SRC-CUDA-106](/sources-and-versions/#src-cuda-106)。执行仍**待硬件验证（Pending Hardware Verification）**；LAB19 等待 H06，保持未发布。
+精确先修：[H04](/architecture/hopper-clusters-tma/)。提交两份修正账本和明确的可移植回退。原创纸面练习（Exercise）无需 GPU。核对日期 **2026-09-22**，[SRC-CUDA-106](/sources-and-versions/#src-cuda-106)。执行仍**待硬件验证（Pending Hardware Verification）**。发布更新 2026-10-04：[LAB19](/labs/hopper-portable-comparison/)现承接 H06。
 
 ## 练习 1：指针活得比所有者久
 

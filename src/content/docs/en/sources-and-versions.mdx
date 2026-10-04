@@ -1046,6 +1046,28 @@ The [Driver tensor-map API **13.4**, §6.41](https://docs.nvidia.com/cuda/cuda-d
 
 **#60 current increment:** 108 Learning Units, 24 Runnable Examples, 18 Labs, 22 Visual Explainers, 107 Exercise sets and 107 separate solution sets; 389 Publication Pairs / 778 source routes and 487 catalog records (119 Practice Bank entries, 207 terms, 121 sources, 18 Labs, 22 visuals). R6 remains frozen, R7 pending; the same 41 Example/Lab subjects remain Pending Hardware Verification. H03/H04/VIS15 add no GPU evidence. The #59 counts below are historical.
 
+<span id="src-cuda-107" class="resource-target"></span>
+
+### SRC-CUDA-107 — Blackwell families and target scopes
+
+Related: [H05](/en/architecture/blackwell-families/), [VIS15](/en/visuals/architecture-evolution/), [LAB20](/en/labs/blackwell-portable-comparison/). Reviewed/accessed **2026-10-04**. Current Context7 `/websites/nvidia_cuda` discovery was checked against [Programming Guide **13.4.2**, §5.1 and Tables 28–33](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html), [Blackwell Tuning Guide **13.4**, §1.4](https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html), and exact [Toolkit **13.3.1** NVCC archive, §§5.2/5.5](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html#gpu-feature-list). The short archive path `/nvcc/` returned 404; the compiler-driver path above resolved.
+
+The current family sets include 10.7: 100f serves 10.0/10.3/10.7, 103f serves 10.3/10.7, 107f serves 10.7; 110f serves 11.0; 120f serves 12.0/12.1; 121f serves 12.1. `a` remains exact-CC only. The selected 13.3.1 archive lists 100/103/110/120/121, not 107, so EX25 excludes 10.7 specialization. Current capability tables govern VIS15's per-block memory and native FP64 decisions; tuning-guide per-SM summaries are not substituted where they differ. Native FP64 Tensor Core inputs are present for 10.0/10.7 but absent for 10.3/11.0/12.x. Owner facts are paraphrased into an original teaching comparison, not copied tables.
+
+<span id="src-cuda-108" class="resource-target"></span>
+
+### SRC-CUDA-108 — Portable fallback and bulk-copy contracts
+
+Related: [H06](/en/architecture/portable-specialization/), [EX25](/en/examples/feature-gated-copy/), [LAB19](/en/labs/hopper-portable-comparison/), [LAB20](/en/labs/blackwell-portable-comparison/). Reviewed/accessed **2026-10-04**. Context7 discovery of bulk-copy and mbarrier semantics was checked against exact [Toolkit 13.3.1 PTX **9.3**, cp.async.bulk §9.7.9.26.4.1](https://docs.nvidia.com/cuda/archive/13.3.1/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-cp-async-bulk), mbarrier initialization/arrive/try-wait/invalidation and async-proxy fence sections, and the [NVCC target and separate-compilation contract](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-compiler-driver-nvcc/index.html).
+
+The selected instruction requires sm_90+, 16 B aligned source/destination and byte count divisible by 16. The CTA destination spelling entered PTX 8.6. EX25 uses the unqualified bulk-copy form, not new optional semantic qualifiers, multicast or TMA stores. One issuer accounts one arrival and 1024 transaction bytes; phase wait plus block publication precedes consumption, and final block synchronization protects invalidation. Pinned full profile: 13.3.1/NVCC 13.3.73/GCC 13.3.0/C++17; 11.8 and 12.9 are portable-only project profiles. Each build target is checked independently, without inferring runtime or another target's evidence. Profiler conditions retain [Nsight Compute cache/replay guidance](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#cache-control) and [authorized counter access](https://developer.nvidia.com/ERR_NVGPUCTRPERM); Labs select 2026.2.1.5 independently of source documentation labels.
+
+**Host-platform review:** the [13.3.1 Linux installation guide](https://docs.nvidia.com/cuda/archive/13.3.1/cuda-installation-guide-linux/index.html) distinguishes x86-64, Arm64-SBSA and Jetson profiles. The [owner GPU/CC mapping](https://developer.nvidia.com/cuda-gpus) associates 11.0 with Jetson and 12.1 with GB10/DGX Spark. EX25 retains their GPU compile targets but withholds native Arm runtime admission pending platform/software/driver/profiler review. LAB20 currently admits 10.0/10.3/12.0 on the selected x86-64 host; an x86 executable is not an Arm runtime artifact.
+
+**Rights for SRC-CUDA-107/108:** NVIDIA documentation is proprietary reference material under its Notices, not relicensed. No owner source/sample/table/figure is copied or adapted. Original teaching prose/ledgers/templates use CC BY 4.0; original EX25 and website/test code use Apache-2.0. No new dependency or third-party asset is added. Architecture behavior and performance remain Pending Hardware Verification.
+
+**#61 current scope:** 110 Learning Units, 25 Runnable Examples, 20 Labs, 22 visuals, 109 Exercise/solution sets, 398 Publication Pairs / 796 routes, 493 catalog records (121 Practice Bank entries, 207 terms, 123 sources, 20 Labs, 22 visuals). EX25/LAB19/LAB20 bring pending subjects to 44. LAB19 is now published with H06; older #59/#60 inventories and withholding notes above are historical. R6 is frozen; R7 remains pending.
+
 <span id="src-cuda-103" class="resource-target"></span>
 
 ### SRC-CUDA-103 — Turing scheduling, targets and version boundaries

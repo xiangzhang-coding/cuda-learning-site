@@ -59,4 +59,4 @@ head:
 
 ## 证据与许可
 
-执行、拷贝行为与性能仍**待硬件验证（Pending Hardware Verification）**。未来声明需精确构建／目标产物、环境清单（Environment Manifest）、合格基准环境（Reference Environment）、正确性／完成检查及保留的性能分析报告。计数器权限失败时计数器证据缺失。LAB19 等待 H06，保持隐藏。原创 CC BY 4.0；权利方资料保留原声明。
+执行、拷贝行为与性能仍**待硬件验证（Pending Hardware Verification）**。未来声明需精确构建／目标产物、环境清单（Environment Manifest）、合格基准环境（Reference Environment）、正确性／完成检查及保留的性能分析报告。计数器权限失败时计数器证据缺失。发布更新 2026-10-04：[LAB19](/labs/hopper-portable-comparison/)现承接 H06。原创 CC BY 4.0；权利方资料保留原声明。

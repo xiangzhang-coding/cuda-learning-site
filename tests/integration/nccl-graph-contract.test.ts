@@ -67,8 +67,8 @@ describe('issue #56 collective graph publication contract', () => {
     }
     expect(current.scope.learningUnits).toContain('G08');
     expect(current.evidence.runtimeVerified).toEqual([]);
-    expect(current.evidence.pendingHardwareVerification).toHaveLength(41);
-    for (const id of ['EX25', 'LAB19']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
+    expect(current.evidence.pendingHardwareVerification).toHaveLength(44);
+    for (const id of ['W01', 'LAB21']) expect(PUBLISHED_DESTINATIONS).not.toHaveProperty(id);
   });
 
   it('binds inspected owner files to distinct licenses and bilingual immutable coordinates', async () => {

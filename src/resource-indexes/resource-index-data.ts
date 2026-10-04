@@ -435,6 +435,22 @@ const labs: readonly ResourceIndexRecord[] = [
     evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-09-14',
   },
   {
+    planningId: 'LAB19', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB19.title,
+    href: PUBLISHED_DESTINATIONS.LAB19.href, resourceType: 'guided-lab', difficulty: 'advanced',
+    prerequisites: ['H04', 'H06'], relatedUnits: ['EX25'],
+    hardwareGate: localized('原生 Linux；一张 CC 9.0 GPU，总显存 8 GB、可用 512 MiB。', 'Native Linux; one CC 9.0 GPU, 8 GB total and 512 MiB free.'),
+    versionGate: same('CUDA 13.3.1; NVCC 13.3.73; GCC 13.3.0; C++17; driver 610.43.02; Nsight Compute 2026.2.1.5'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-10-04',
+  },
+  {
+    planningId: 'LAB20', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB20.title,
+    href: PUBLISHED_DESTINATIONS.LAB20.href, resourceType: 'guided-lab', difficulty: 'advanced',
+    prerequisites: ['H05', 'H06'], relatedUnits: ['EX25'],
+    hardwareGate: localized('原生 Linux x86-64；一张精确 CC 10.0/10.3/12.0 GPU，总显存 8 GB、可用 512 MiB。11.0/12.1 仅覆盖编译目标，Arm 运行配置待核对。', 'Native Linux x86-64; one exact CC 10.0/10.3/12.0 GPU, 8 GB total and 512 MiB free. 11.0/12.1 are compile-target coverage only; Arm runtime profiles await review.'),
+    versionGate: same('CUDA 13.3.1; NVCC 13.3.73; GCC 13.3.0; C++17; driver 610.43.02; Nsight Compute 2026.2.1.5'),
+    evidence: { compilation: [], runtime: ['Pending Hardware Verification'] }, reviewedOn: '2026-10-04',
+  },
+  {
     planningId: 'LAB18', group: 'labs', title: PUBLISHED_DESTINATIONS.LAB18.title,
     href: PUBLISHED_DESTINATIONS.LAB18.href, resourceType: 'guided-lab', difficulty: 'advanced',
     prerequisites: ['G05', 'Q05', 'Q07'], relatedUnits: ['G06', 'EX24', 'VIS16', 'VIS14'],
@@ -557,6 +573,18 @@ const practice: readonly ResourceIndexRecord[] = [
     href: localized('/practice/#pb-r7-004', '/en/practice/#pb-r7-004'),
     resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['H04'], relatedUnits: ['H04'],
     hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Hopper guide 13.4'), reviewedOn: '2026-09-22',
+  },
+  {
+    planningId: 'PB-R7-005', group: 'practice', title: localized('家族范围不能跨主能力外推', 'Family scope cannot be extrapolated across major capabilities'),
+    href: localized('/practice/#pb-r7-005', '/en/practice/#pb-r7-005'),
+    resourceType: 'evidence-review', difficulty: 'advanced', prerequisites: ['H05'], relatedUnits: ['H05'],
+    hardwareGate: noHardware, versionGate: same('CUDA Programming Guide 13.4.2; Toolkit 13.3.1'), reviewedOn: '2026-10-04',
+  },
+  {
+    planningId: 'PB-R7-006', group: 'practice', title: localized('回退成功不能改写路径身份', 'Successful fallback cannot rewrite path identity'),
+    href: localized('/practice/#pb-r7-006', '/en/practice/#pb-r7-006'),
+    resourceType: 'correctness-debugging', difficulty: 'advanced', prerequisites: ['H06'], relatedUnits: ['H06'],
+    hardwareGate: noHardware, versionGate: same('CUDA 13.3.1; EX25 target contract'), reviewedOn: '2026-10-04',
   },
   {
     planningId: 'PB-R0-001',
@@ -1995,9 +2023,9 @@ const visuals: readonly ResourceIndexRecord[] = [
   {
     planningId: 'VIS15', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS15.title,
     href: PUBLISHED_DESTINATIONS.VIS15.href, resourceType: 'execution-model', difficulty: 'advanced',
-    prerequisites: ['H01', 'H02', 'H03', 'H04'], relatedUnits: ['F06', 'M13', 'L08'], hardwareGate: noCudaHardware,
-    versionGate: localized('指南 13.4.2；Turing 7.5、Ampere 8.0/8.6/8.7、Ada 8.9、Hopper 9.0。', 'Guide 13.4.2; Turing 7.5, Ampere 8.0/8.6/8.7, Ada 8.9, Hopper 9.0.'),
-    reviewedOn: '2026-09-22',
+    prerequisites: ['H01', 'H02', 'H03', 'H04', 'H05', 'H06'], relatedUnits: ['F06', 'M13', 'L08'], hardwareGate: noCudaHardware,
+    versionGate: localized('指南 13.4.2；Turing 至 Blackwell；10.7 不属于 EX25 构建配置。', 'Guide 13.4.2; Turing through Blackwell; 10.7 outside EX25 build profile.'),
+    reviewedOn: '2026-10-04',
   },
   {
     planningId: 'VIS16', group: 'visuals', title: PUBLISHED_DESTINATIONS.VIS16.title,
@@ -2533,6 +2561,8 @@ const multiGpuAndArchitectureSources: readonly ResourceIndexRecord[] = [
   sourceRecord('SRC-CUDA-100', localized('DDP、ProcessGroupNCCL 与有界诊断', 'DDP, ProcessGroupNCCL and bounded diagnosis'), 'cuda-version-record', ['G07'], same('PyTorch 2.11.0+cu128; packaged CUDA runtime 12.8.90; NCCL 2.28.9'), '2026-09-20', '2026-09-20'),
   sourceRecord('SRC-CUDA-105', localized('Ada 缓存、工作集与测量边界', 'Ada caches, working sets and measurement boundaries'), 'architecture-record', ['H03', 'VIS15'], same('Programming Guide 13.4.2; Ada 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-106', localized('Hopper 集群、DSM 与 TMA 完成', 'Hopper clusters, DSM and TMA completion'), 'architecture-record', ['H04', 'VIS15'], same('Programming Guide 13.4.2; Hopper 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
+  sourceRecord('SRC-CUDA-107', localized('Blackwell 家族与目标范围', 'Blackwell families and target scopes'), 'architecture-record', ['H05', 'VIS15', 'LAB20'], same('Programming Guide 13.4.2; NVCC 13.3.1 archive; Blackwell 13.4'), '2026-10-04', '2026-10-04'),
+  sourceRecord('SRC-CUDA-108', localized('可移植回退与批量拷贝契约', 'Portable fallback and bulk-copy contracts'), 'architecture-record', ['H06', 'EX25', 'LAB19', 'LAB20'], same('Toolkit 13.3.1; NVCC 13.3.73; PTX 9.3'), '2026-10-04', '2026-10-04'),
   sourceRecord('SRC-CUDA-103', localized('Turing 调度、目标与版本边界', 'Turing scheduling, targets and version boundaries'), 'architecture-record', ['H01', 'VIS15'], same('Programming Guide 13.4.2; Turing 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-104', localized('Ampere 拷贝、屏障与 Tensor Core', 'Ampere copies, barriers and Tensor Cores'), 'architecture-record', ['H02', 'VIS15'], same('Programming Guide 13.4.2; Ampere 13.4; release notes 13.4 Update 1'), '2026-09-22', '2026-09-22'),
   sourceRecord('SRC-CUDA-102', localized('NCCL 多节点传输、日志与故障', 'NCCL multi-node transport, logging and failures'), 'cuda-version-record', ['G09'], same('NCCL 2.31.2; nccl-tests b4d5beeb'), '2026-09-21', '2026-09-21'),
