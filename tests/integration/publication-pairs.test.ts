@@ -47,6 +47,17 @@ type PublicationPair = {
 };
 
 const publicationPairFixtures: readonly PublicationPair[] = [
+  { pairId: 'emerging-feature-watch', factCheckDate: '2026-10-04', zh: '/watch/', en: '/en/watch/' },
+  ...[
+    { id: 'W01', slug: 'cuda-tile-cpp', prerequisites: 'M03,M17,M19' },
+    { id: 'W02', slug: 'cutile-python-tile-ir', prerequisites: 'P03,T01,T04' },
+    { id: 'W03', slug: 'developer-preview', prerequisites: 'O03,M17' },
+    { id: 'W04', slug: 'nccl-device-fabric', prerequisites: 'G03,G08,G09' },
+    { id: 'W05', slug: 'cccl-experimental-python', prerequisites: 'L03,L05,P01' },
+    { id: 'W06', slug: 'cutlass-python-dsls', prerequisites: 'L09,T04,T05' },
+  ].map(({ id, slug, prerequisites }) => ({ pairId: id.toLowerCase(), unitId: id,
+    resourceKind: 'emerging-feature-watch', prerequisites, factCheckDate: '2026-10-04',
+    zh: `/watch/${slug}/`, en: `/en/watch/${slug}/` })),
   ...[
     { id: 'H05', slug: 'architecture/blackwell-families', prerequisites: 'H04,M17,L08' },
     { id: 'H06', slug: 'architecture/portable-specialization', prerequisites: 'H01,H02,H04,H05' },
@@ -4346,14 +4357,14 @@ describe('Publication Pairs', () => {
 
     expect(builtRoutes).toEqual(sourceRoutes);
     expect(fixtureRoutes).toEqual(sourceRoutes);
-    expect(publicationPairs).toHaveLength(398);
-    expect(sourceRoutes.size).toBe(796);
+    expect(publicationPairs).toHaveLength(405);
+    expect(sourceRoutes.size).toBe(810);
     expect(sourceRoutes.size).toBe(publicationPairs.length * 2);
     const publishedUnitIds = publicationPairs.flatMap(({ unitId }) => (unitId ? [unitId] : []));
     for (const publishedUnitId of ['L03', 'L04', 'L05', 'L06', 'L07', 'L08', 'L09', 'L10', 'L11', 'L12', 'L13', 'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'EX17', 'EX18', 'EX19', 'EX20', 'EX21', 'LAB11', 'LAB12']) {
       expect(publishedUnitIds, publishedUnitId).toContain(publishedUnitId);
     }
-    for (const absentUnitId of ['W01', 'LAB21']) {
+    for (const absentUnitId of ['LAB21']) {
       expect(publishedUnitIds, absentUnitId).not.toContain(absentUnitId);
     }
   });

@@ -1045,6 +1045,25 @@ NCCL 标签 `v2.28.9-1` 解析到 `dbc86fd06e8b0c4517b95d8958a09ccacf9520c9`：[
 
 **#60 当前增量：**108 个学习单元、24 个可运行示例、18 个实验、22 项可视化讲解、107 组练习及 107 组独立解答；389 个双语发布对／778 条源路由、487 条目录记录（119 个练习题库条目、207 个词条、121 条来源、18 个实验、22 项可视化）。R6 冻结、R7 待复核；同样的 41 个示例／实验主体待硬件验证，H03／H04／VIS15 不增加 GPU 证据。下方 #59 统计为历史记录。
 
+<span id="src-cuda-109" class="resource-target"></span>
+
+### SRC-CUDA-109 — 新接口状态与许可
+
+相关 ID：W01、W02、W03、W04、W05、W06。核对／访问日期 **2026-10-04**。[W01](/watch/cuda-tile-cpp/)、[W02](/watch/cutile-python-tile-ir/)、[W03](/watch/developer-preview/)、[W04](/watch/nccl-device-fabric/)、[W05](/watch/cccl-experimental-python/)、[W06](/watch/cutlass-python-dsls/)。Context7 检索使用 `/websites/nvidia_cuda`、`/nvidia/cccl`、`/websites/nvidia_cutlass`；下列区分以精确维护方来源为准。
+
+| 接口 | 维护方坐标与评审结论 |
+| --- | --- |
+| Tile C++ | 当前 13.4 的 [NVCC tile 编译](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html)：从 13.3 引入，要求 C++20+、显式启用和明确受支持目标；不自动进入稳定课程 |
+| cuTile / Tile IR | [1.6.0 发布说明](https://docs.nvidia.com/cuda/cutile-python/generated/release_notes.html)与 [quickstart](https://docs.nvidia.com/cuda/cutile-python/quickstart.html)：调用约定与编译器版本分别约束，Hopper 来自 CTK 13.3。[5cf2361 的 README](https://github.com/NVIDIA/cutile-python/blob/5cf2361e1527b136dff68af1f70ce402fd0c1231/README.md)仍描述 13.2 限制，其中预览命名空间另行标记 |
+| Preview | [维护方归档](https://developer.nvidia.com/cuda-toolkit-archive)：13.4.0 Developer Preview 已是历史记录，当前下载为 13.4.2。[发布说明](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html)区分小版本兼容与新功能的 R615 要求 |
+| NCCL | [2.32.3 指南](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/deviceapi.html)、[v2.32.3-1 CFT 源文档](https://github.com/NVIDIA/nccl/blob/v2.32.3-1/docs/userguide/source/usage/cft.rst)、[发布说明](https://github.com/NVIDIA/nccl/releases/tag/v2.32.3-1)：后端门槛、GIN 重编译与 CFT 能力分别核对；socket GIN 需要显式启用 GDRCopy |
+| CCCL | [v3.4.3 cudax](https://github.com/NVIDIA/cccl/blob/v3.4.3/docs/cudax/index.rst)、[Python beta API](https://github.com/NVIDIA/cccl/blob/v3.4.3/docs/python/compute_api.rst)、[包元数据](https://github.com/NVIDIA/cccl/blob/v3.4.3/python/cuda_cccl/pyproject.toml)：实验 API/ABI、public beta、精确 extras 与依赖排除项 |
+| CUTLASS DSL | [v4.8.0 quickstart](https://github.com/NVIDIA/cutlass/blob/v4.8.0/media/docs/pythonDSL/quick_start.rst)、[发布说明](https://github.com/NVIDIA/cutlass/releases/tag/v4.8.0)、[弃用策略](https://github.com/NVIDIA/cutlass/blob/v4.8.0/media/docs/pythonDSL/deprecation.rst)：区分已发布、实验和预览路径，wheel 必须匹配源码 |
+
+**许可：**cuTile README 声明 Apache-2.0；检查的 CCCL Python 元数据文件使用 Apache-2.0 WITH LLVM-exception。[NCCL v2.32.3-1 LICENSE](https://github.com/NVIDIA/nccl/blob/v2.32.3-1/LICENSE.txt)组合 Apache-2.0 与保留的 BSD／逐文件声明。[CUTLASS 编译器 LICENSE](https://github.com/NVIDIA/cutlass/blob/v4.8.0/cutlass_compiler/LICENSE.txt)明确将 `python/CuTeDSL` 排除于通用 BSD 授权之外，指向 [2025-05-08 DSL 协议](https://github.com/NVIDIA/cutlass/blob/v4.8.0/media/docs/pythonDSL/license.rst)。CUDA 组件保留各自 [EULA](https://docs.nvidia.com/cuda/eula/index.html)。文档仍属维护方资料。本站只发布原创转述与链接，不复制示例、二进制、私有资料或实测结果。
+
+**#62 当前范围：**405 个双语发布对／810 条路由；110 个稳定课程学习单元与六个观察条目；494 条目录记录，含 124 条来源。其余 #59–#61 计数为历史记录。没有新增证据、工具包通道、自动晋升或未来实现承诺；R7 待复核。
+
 <span id="src-cuda-107" class="resource-target"></span>
 
 ### SRC-CUDA-107 — Blackwell 家族与目标范围

@@ -23,11 +23,12 @@ const cache = () => ({
 });
 
 describe('dependency audit release gate', () => {
-  it('requires the exact reviewed static configuration and installed Astro caller', async () => {
+  it('disables the historical waiver after the cache dependency and site configuration change', async () => {
     const files = Object.fromEntries(await Promise.all([
       'astro.config.mjs', 'wrangler.jsonc', 'package-lock.json', 'node_modules/astro/dist/assets/build/remote.js',
     ].map(async file => [file, await readFile(file, 'utf8')])));
-    expect(reviewedCacheBoundaryMatches(files, '7.2.8')).toBe(true);
+    expect(JSON.parse(files['package-lock.json']).packages['node_modules/http-cache-semantics'].version).toBe('4.3.0');
+    expect(reviewedCacheBoundaryMatches(files, '7.2.8')).toBe(false);
     expect(reviewedCacheBoundaryMatches(files, '7.2.9')).toBe(false);
     expect(reviewedCacheBoundaryMatches({}, '7.2.8')).toBe(false);
     for (const file of Object.keys(files)) {

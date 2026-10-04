@@ -621,7 +621,7 @@ describe('R4 release review', () => {
       expect(catalogIds.filter((id) => /^PB-R6-/.test(id)).sort()).toEqual(['PB-R6-001', 'PB-R6-002', 'PB-R6-003', 'PB-R6-004', 'PB-R6-005', 'PB-R6-006', 'PB-R6-007', 'PB-R6-008', 'PB-R6-009', 'PB-R6-010', 'PB-R6-011', 'PB-R6-012', 'PB-R6-013']);
       expect([...units.keys()].filter(id => /^H\d{2}$/.test(id)).sort()).toEqual(['H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
       expect(catalogIds.filter(id => /^PB-R7-/.test(id)).sort()).toEqual(['PB-R7-001', 'PB-R7-002', 'PB-R7-003', 'PB-R7-004', 'PB-R7-005', 'PB-R7-006']);
-      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[8-9]-|^(?:W01|LAB21)$/.test(id))).toBe(false);
+      expect([...units.keys(), ...catalogIds].some((id) => /^T09|^PB-R[8-9]-|^LAB21$/.test(id))).toBe(false);
     }
     expect(routes.some((route) => /\/framework(?:\/|$)/i.test(route))).toBe(false);
     expect(routes.filter((route) => /\/triton\//.test(route)).sort()).toEqual(

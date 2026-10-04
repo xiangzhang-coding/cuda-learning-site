@@ -168,13 +168,13 @@ describe('Cloudflare assets-only deployment contract', () => {
       reviewDate: '2026-10-04',
       releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
       scope: {
-        publicationPairs: 398,
-        sourceRoutes: 796,
+        publicationPairs: 405,
+        sourceRoutes: 810,
         exerciseSetPublicationPairs: 109,
         solutionSetPublicationPairs: 109,
         practiceBankEntries: 121,
         glossaryTerms: 207,
-        sourceRecords: 123,
+        sourceRecords: 124,
       },
       compatibility: {
         componentBoundaries: {
@@ -259,7 +259,7 @@ describe('Cloudflare assets-only deployment contract', () => {
     expect(publication.scope.visualExplainers).toHaveLength(22);
     expect(publication.scope.visualExplainers).toEqual(expect.arrayContaining(['VIS13', 'VIS14', 'VIS18']));
     expect(publication.scope.labs.length + publication.scope.practiceBankEntries + publication.scope.visualExplainers.length
-      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(493);
+      + publication.scope.glossaryTerms + publication.scope.sourceRecords).toBe(494);
     expect(publication.evidence.pendingHardwareVerification).toHaveLength(44);
     expect(publication.knownLimitations).toEqual(expect.arrayContaining([
       'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',

@@ -10,6 +10,8 @@ import {
   evidenceMetadataSchema,
   resourceKindSchema,
   sourceReferenceSchema,
+  toolkitLaneSchema,
+  watchBoundaryIssues,
 } from './content-metadata';
 
 export const publicationMetadata = z
@@ -30,7 +32,7 @@ export const publicationMetadata = z
     hardwareGate: z.string().min(1).optional(),
     estimatedMinutes: z.number().int().positive().optional(),
     difficulty: z.enum(['introductory', 'intermediate', 'advanced']).optional(),
-    toolkitLanes: z.array(z.string().regex(/^cuda-\d+\.\d+$/)).optional(),
+    toolkitLanes: z.array(toolkitLaneSchema).optional(),
     extensionProfile: z.literal('ex22-torch211-cu128-cp312').optional(),
     tritonProfile: z.literal('cpython-3-14-7-triton-3-7-1').optional(),
     minimumComputeCapability: z.string().regex(/^\d+\.\d+$/).optional(),
@@ -41,6 +43,17 @@ export const publicationMetadata = z
     sources: z.array(sourceReferenceSchema).optional(),
   })
   .superRefine((metadata, context) => {
+    for (const message of watchBoundaryIssues(metadata)) {
+      context.addIssue({ code: 'custom', message });
+    }
+    if (metadata.resourceKind === 'emerging-feature-watch') {
+      for (const field of ['prerequisites', 'hardwareGate', 'sources', 'evidence'] as const) {
+        const value = metadata[field];
+        if (value === undefined || (Array.isArray(value) && value.length === 0)) {
+          context.addIssue({ code: 'custom', path: [field], message: `Watch metadata requires ${field}.` });
+        }
+      }
+    }
     for (const field of ['structure', 'prerequisites', 'relatedUnits', 'exampleIds', 'canonicalRanges'] as const) {
       const values = metadata[field];
       if (values && new Set(values).size !== values.length) {

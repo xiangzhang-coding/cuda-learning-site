@@ -73,6 +73,30 @@ export type PublishedDestination = Readonly<{
 }>;
 
 export const PUBLISHED_DESTINATIONS: Readonly<Record<string, PublishedDestination>> = {
+  W01: {
+    href: { 'zh-CN': '/watch/cuda-tile-cpp/', en: '/en/watch/cuda-tile-cpp/' },
+    title: { 'zh-CN': 'W01：CUDA Tile C++', en: 'W01: CUDA Tile C++' }, prerequisites: ['M03', 'M17', 'M19'],
+  },
+  W02: {
+    href: { 'zh-CN': '/watch/cutile-python-tile-ir/', en: '/en/watch/cutile-python-tile-ir/' },
+    title: { 'zh-CN': 'W02：cuTile Python 与 CUDA Tile IR', en: 'W02: cuTile Python and CUDA Tile IR' }, prerequisites: ['P03', 'T01', 'T04'],
+  },
+  W03: {
+    href: { 'zh-CN': '/watch/developer-preview/', en: '/en/watch/developer-preview/' },
+    title: { 'zh-CN': 'W03：Developer Preview 与工具包通道边界', en: 'W03: Developer Preview and Toolkit Lane Boundaries' }, prerequisites: ['O03', 'M17'],
+  },
+  W04: {
+    href: { 'zh-CN': '/watch/nccl-device-fabric/', en: '/en/watch/nccl-device-fabric/' },
+    title: { 'zh-CN': 'W04：NCCL 设备端与 fabric 新功能', en: 'W04: NCCL Device-Side and Fabric Features' }, prerequisites: ['G03', 'G08', 'G09'],
+  },
+  W05: {
+    href: { 'zh-CN': '/watch/cccl-experimental-python/', en: '/en/watch/cccl-experimental-python/' },
+    title: { 'zh-CN': 'W05：CCCL 实验命名空间与 Python', en: 'W05: CCCL Experimental Namespaces and Python' }, prerequisites: ['L03', 'L05', 'P01'],
+  },
+  W06: {
+    href: { 'zh-CN': '/watch/cutlass-python-dsls/', en: '/en/watch/cutlass-python-dsls/' },
+    title: { 'zh-CN': 'W06：CUTLASS Python DSL', en: 'W06: CUTLASS Python DSLs' }, prerequisites: ['L09', 'T04', 'T05'],
+  },
   H01: {
     href: { 'zh-CN': '/architecture/turing-warp-safety/', en: '/en/architecture/turing-warp-safety/' },
     title: { 'zh-CN': 'H01：Turing 与显式线程束安全', en: 'H01: Turing and Explicit Warp Safety' }, prerequisites: ['F06', 'M06'],

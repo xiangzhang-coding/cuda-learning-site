@@ -203,7 +203,7 @@ const currentCatalogCounts = [
   { suffix: 'practice/', count: 121 },
   { suffix: 'visuals/', count: 22 },
   { suffix: 'glossary/', count: currentPublicationManifest.scope.glossaryTerms },
-  { suffix: 'sources-and-versions/', count: 123 },
+  { suffix: 'sources-and-versions/', count: 124 },
 ] as const;
 const exampleRouteSlugs = [
   'feature-gated-copy',
@@ -545,8 +545,8 @@ test('serves the exact R6 release and current publication with production canoni
     expect(publication.scope[key], key).toEqual(expect.arrayContaining(release.scope[key]));
   }
   expect(publication.scope).toEqual({
-    publicationPairs: 398,
-    sourceRoutes: 796,
+    publicationPairs: 405,
+    sourceRoutes: 810,
     exerciseSetPublicationPairs: 109,
     solutionSetPublicationPairs: 109,
     learningUnits: currentLearningUnits,
@@ -559,7 +559,7 @@ test('serves the exact R6 release and current publication with production canoni
     pytorchAndTritonPracticeEntries: Array.from({ length: 17 }, (_, index) => `PB-R5-${String(index + 4).padStart(3, '0')}`),
     multiGpuAndNcclPracticeEntries: Array.from({ length: 13 }, (_, index) => `PB-R6-${String(index + 1).padStart(3, '0')}`),
     glossaryTerms: currentPublicationManifest.scope.glossaryTerms,
-    sourceRecords: 123,
+    sourceRecords: 124,
   });
   for (const key of ['compileChecked', 'runtimeNotApplicable', 'communityObserved', 'runtimeVerified',
     'referenceEnvironments', 'performanceObservations', 'expectedOnlyProfilerReportPlans', 'capturedProfilerReports', 'retainedCompileRuns']) {
@@ -692,8 +692,8 @@ test('serves the exact R6 release and current publication with production canoni
 
   for (const prefix of ['', '/en']) {
     await page.goto(`${prefix}/about/`);
-    await expect(page.locator('main')).toContainText(prefix ? '398 Publication Pairs' : '398 个双语发布对');
-    await expect(page.locator('main')).toContainText(prefix ? '796 source routes' : '796 条源路由');
+    await expect(page.locator('main')).toContainText(prefix ? '405 Publication Pairs' : '405 个双语发布对');
+    await expect(page.locator('main')).toContainText(prefix ? '810 source routes' : '810 条源路由');
     const examplePrefix = `${prefix}/examples/`;
     const navigation = page.getByRole('navigation', { name: prefix ? 'Main' : '主要' });
     expect(
@@ -727,7 +727,7 @@ test('serves the exact R6 release and current publication with production canoni
     }
   }
 
-  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(493);
+  expect(currentCatalogCounts.reduce((total, { count }) => total + count, 0)).toBe(494);
   for (const { suffix, count } of currentCatalogCounts) {
     for (const route of localizedRoutes(suffix)) {
       await page.goto(route);
@@ -1101,13 +1101,13 @@ test.describe('published route batches', () => {
 
   test.beforeAll(async () => {
     const routes = routeBatches.flatMap((batch) => batch.routes);
-    expect(routes).toHaveLength(796);
-    expect(new Set(routes).size).toBe(796);
+    expect(routes).toHaveLength(810);
+    expect(new Set(routes).size).toBe(810);
     expect([...routes].sort()).toEqual((await discoverPublishedRoutes()).sort());
     expect(routeBatches).toHaveLength(68);
     for (const locale of ['zh', 'en']) {
       const localized = routeBatches.filter((batch) => batch.locale === locale).flatMap((batch) => batch.routes);
-      expect(localized).toHaveLength(398);
+      expect(localized).toHaveLength(405);
       expect(localized.every((route) => route.startsWith('/en/') === (locale === 'en'))).toBe(true);
       expect(localized).toEqual([...localized].sort((left, right) => left.localeCompare(right, 'en')));
     }

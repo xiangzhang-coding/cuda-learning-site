@@ -2,6 +2,23 @@
 
 # Dependency Review
 
+## Security disposition — 2026-10-04, issue #62
+
+The live release audit blocked the existing `http-cache-semantics@4.2.0`
+installation. Updated only that transitive lock entry to **4.3.0**, within
+Astro 7.2.8's declared `^4.2.0` range, using npm 11.17.0 with install scripts
+disabled. Registry metadata identifies owner commit
+[`b1d4bd682fbab0252985de45219f4e7497c0067c`](https://github.com/kornelski/http-cache-semantics/commit/b1d4bd682fbab0252985de45219f4e7497c0067c).
+The package retains **BSD-2-Clause**, has no install script, and its exact tarball
+and SHA-512 integrity are retained in `package-lock.json`.
+
+The live npm audit now reports **zero vulnerabilities**. The advisory webpage
+still lists no first patched version, so this is the registry audit's observed
+result, not an independent security certification. The historical 4.2.0 waiver
+below is not applied to this installation; no exception boundary or audit
+threshold was relaxed. Direct dependencies and deployed static-asset architecture
+remain unchanged.
+
 ## Security disposition — 2026-10-03, issue #60
 
 The existing CI audit began blocking PR #147 on newly reported advisories.
