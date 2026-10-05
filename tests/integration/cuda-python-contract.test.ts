@@ -30,7 +30,7 @@ describe('issue #42 CUDA Python publication contract', () => {
       JSON.parse(await readFile(path.join(root, `src/${name}-manifest.json`), 'utf8'))));
     expect(current).toMatchObject({
       reviewDate: '2026-10-04',
-      releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
+      releaseReview: { latestCompleted: 'R7', next: null, status: 'complete' },
       scope: { publicationPairs: 405, sourceRoutes: 810, exerciseSetPublicationPairs: 109,
         solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 124 },
     });

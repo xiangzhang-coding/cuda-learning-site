@@ -16,7 +16,7 @@ const metadata = (doc: Document, key: string) => doc.querySelector(`meta[name="c
 describe('R5 aggregate release review', () => {
   it('freezes the complete R5 scope without expanding historical R4 or future destinations', () => {
     expect(release).toMatchObject({ releaseId: 'R5', schemaVersion: 6, reviewDate: '2026-09-19' });
-    expect(current.releaseReview).toEqual({ latestCompleted: 'R6', next: 'R7', status: 'pending' });
+    expect(current.releaseReview).toEqual({ latestCompleted: 'R7', next: null, status: 'complete' });
     expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09', 'H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
     expect(current.scope).toMatchObject({ publicationPairs: 405, sourceRoutes: 810,
       exerciseSetPublicationPairs: 109, solutionSetPublicationPairs: 109, practiceBankEntries: 121, sourceRecords: 124 });
@@ -63,7 +63,7 @@ describe('R5 aggregate release review', () => {
     const locale = prefix ? 'en' : 'zh-CN';
     for (const slug of ['', 'about/', 'start/using-the-learning-site/', 'labs/', 'sources-and-versions/']) {
       const { document } = parseHTML(await read(`dist/${prefix}${slug}index.html`));
-      expect(metadata(document, 'fact-check-date'), `${prefix}${slug}`).toBe('2026-09-22');
+      expect(metadata(document, 'fact-check-date'), `${prefix}${slug}`).toBe('2026-10-04');
       expect(document.body.textContent, `${prefix}${slug}`).not.toMatch(/(?:further Triton units remain unpublished|Triton destinations remain absent|更后续 Triton 单元尚未发布|Triton 目的地仍不存在|All 19 Visual Explainers|19 项可视化讲解仍)/i);
     }
     for (const id of [...ids('P', 12), ...ids('T', 8)]) {

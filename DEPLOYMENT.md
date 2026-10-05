@@ -1,5 +1,39 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R7 release acceptance
+
+Static review: **2026-10-04 UTC**, issue #63. Schema 8
+`src/r7-release-manifest.json` supplies `/release.json`; the rolling publication
+records `{ latestCompleted: R7, next: null, status: complete }`. This is static
+review state, not pre-certification of dynamic acceptance. Both outputs bind the
+exact Git source commit. All dated R1–R6/increment instructions below are
+historical; this section supersedes their active release selection and counts.
+
+Scope: 110 O–H Learning Units, 25 Runnable Examples, 20 Labs, 22 visuals,
+109 Exercise and separate solution sets, 405 Publication Pairs / 810 routes,
+494 catalog records (121 practice, 207 glossary, 124 sources, 20 Labs, 22 visuals).
+The explicit first-100 study order meets the eight disjoint category floors.
+W01–W06 remain separately gated; no preview promotion or new infrastructure.
+R7 references the unchanged frozen R6 component/profiler compatibility record
+and the independent EX25 target profile. No ordinary lane or runtime changes.
+
+Retain same-commit Web Quality, CUDA Compile Evidence, PyTorch Operator, Triton
+Example and NCCL Example results and scanned artifacts in
+[issue #63](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63).
+Run the complete strict remote smoke on Preview before production promotion,
+then on production: all 810 routes, direct locale links, both-locale search,
+themes/print, mobile, keyboard, reduced motion, static fallbacks, downloads,
+H01–H06, W01–W06 and the first-100 order. Record source SHA, URLs, version IDs,
+deployment ID/date and exact smoke results. The pinned clean-source/main guard
+and existing commands below apply, now comparing R7 and current manifests.
+
+Only EX02/EX10/LAB02 retain Compile-Checked evidence. EX10 remains
+Runtime-Not-Applicable; 44 runtime-dependent Example/Lab subjects remain Pending
+Hardware Verification. No Reference Environment, Community-Observed or
+Runtime-Verified result exists. Successful compiler/host/browser gates never
+establish GPU correctness, backend, transport, architecture or performance
+observations. Source/license checks and artifact scans remain mandatory.
+
 ## Current architecture increment — 2026-09-22
 
 Issue #60 extends `/publication.json` to 389 Publication Pairs / 778 routes,

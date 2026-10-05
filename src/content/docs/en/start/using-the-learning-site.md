@@ -3,7 +3,7 @@ title: 'O01: Using the Learning Site'
 description: Understand the resource types, the route available today, and the site boundaries.
 pairId: o01
 counterpart: /start/using-the-learning-site/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -38,7 +38,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-22'
+      content: '2026-10-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -95,6 +95,12 @@ The **Glossary** keeps the site's Chinese and English technical vocabulary consi
 Every public page also belongs to a **Publication Pair**. Its Chinese and English counterparts share facts, structure, metadata, and source dates while using natural prose in each language.
 
 ## The published route
+
+**R7 full-curriculum static review completed on 2026-10-04 (UTC).** The 110 Learning Units from O01–O08 through H01–H06 form a closure: 25 examples, 20 Labs, 22 Visual Explainers and 109 Exercise/separate solution sets, totaling 405 Publication Pairs / 810 routes and 494 catalog records. The 121 original questions include a [first-100 study order](/en/practice/#r7-first-100) meeting eight category floors independently. W01–W06 cannot become Stable Curriculum prerequisites; 44 Example/Lab subjects remain Pending Hardware Verification. The [full-curriculum review](/en/sources-and-versions/#r7-full-curriculum-review) explains sources, compatibility and evidence; [issue #63](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63) records same-commit dynamic acceptance and the actual deployment date.
+
+### Historical route records
+
+“Current” and R7-pending statements below are historical records with original counts and dates; R7 above governs current scope.
 
 **Current publication increment, 2026-10-04 (#62):** [Emerging Feature Watch](/en/watch/) adds six optional W01–W06 entries without adding Stable Curriculum prerequisites or promoting an interface. [H05](/en/architecture/blackwell-families/) requires `[H04,M17,L08]`; [H06](/en/architecture/portable-specialization/) requires `[H01,H02,H04,H05]`. Both have separate Exercises/solutions. Continue to EX25, LAB19 and LAB20; [VIS15](/en/visuals/architecture-evolution/) covers Turing through Blackwell. Current scope: 110 Learning Units, 25 Runnable Examples, 20 Labs, 22 Visual Explainers, 109 Exercise sets, 109 separate solution sets, 405 Publication Pairs, 810 source routes and 494 catalog records (121 Practice Bank entries, 207 Glossary terms, 124 source records, plus Labs/visuals). All 44 pending subjects remain Pending Hardware Verification; architecture execution/performance is unobserved. R6 below is frozen; R7 remains pending.
 

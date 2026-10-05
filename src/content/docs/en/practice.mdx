@@ -1,9 +1,9 @@
 ---
 title: Practice Bank
-description: 119 published original cross-unit practice entries with prerequisite links, layered hints, and reviewed solutions.
+description: 121 original cross-unit practice entries, including a categorized first-100 study order, prerequisites, layered hints, and reviewed solutions.
 pairId: practice-bank
 counterpart: /practice/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -330,7 +330,7 @@ head:
   - tag: meta
     attrs: { name: 'cuda:pair-id', content: practice-bank }
   - tag: meta
-    attrs: { name: 'cuda:fact-check-date', content: '2026-09-22' }
+    attrs: { name: 'cuda:fact-check-date', content: '2026-10-04' }
   - tag: meta
     attrs: { name: 'cuda:license', content: CC-BY-4.0 }
   - tag: meta
@@ -354,6 +354,9 @@ head:
 ---
 
 import ResourceIndex from '../../../components/ResourceIndex.astro';
+import PracticeReleaseOrder from '../../../components/PracticeReleaseOrder.astro';
+
+<PracticeReleaseOrder locale="en" />
 
 <a class="locale-pair" data-locale-counterpart href="/practice/" lang="zh-CN">阅读中文对应页</a>
 
@@ -670,6 +673,8 @@ The **2026-09-10 R4 aggregate static review** qualifies eight library-and-algori
 
 ## PB-R1-001: Repair lifetime, build, and error boundaries
 
+**R7 implementation requirement — 2026-10-04:** Submit original CUDA C++ host and kernel source implementing the lifecycle repair below, not only a diagram. Acceptance requires checked allocation/copy/launch/completion calls, cleanup on partial failure, and an independent result checker. Supply empty-input, ordinary-input and failure-path test cases without inventing execution. The reviewed solution below is the source-review rubric: every resource is released only after its final user completes; immediate and deferred errors remain distinct. Source delivery requires no GPU and grants no build or runtime evidence.
+
 - **ID and Publication Pair:** PB-R1-001 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Debugging and correctness; intermediate.
 - **Direct prerequisite:** [O04: C++17 Refresher for CUDA Learners](/en/start/cpp17-for-cuda/).
@@ -912,6 +917,8 @@ The **2026-09-10 R4 aggregate static review** qualifies eight library-and-algori
 <span id="pb-r1-007" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R1-007: Repair a 3D bounds defect that flattens too early
+
+**R7 implementation requirement — 2026-10-04:** Submit the corrected CUDA C++ indexing kernel and launch code. Acceptance requires checking x/y/z independently before flattening, one writer per valid cell, and a representable allocation/index calculation. Include non-cubic dimensions and partial blocks in the test plan. Apply the reviewed solution's axis bounds and ownership proof to every source access; a flat-index check alone fails acceptance. No execution is required or claimed.
 
 - **ID and Publication Pair:** PB-R1-007 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Debugging and multidimensional correctness; intermediate.
@@ -1256,6 +1263,8 @@ Per-axis ceiling division gives `gridDim = (ceil(13 / 5), ceil(6 / 4), ceil(5 / 
 
 ## PB-R1-015: Repair an edge-tile early return and missing reuse barrier
 
+**R7 implementation requirement — 2026-10-04:** Write the CUDA C++ shared-tile kernel with guarded loads/stores and uniform publication/reuse barriers. Acceptance requires zero/identity padding as appropriate and participation by edge threads through the last required barrier. Include a matrix smaller than one tile and dimensions just beyond a tile. Use the reviewed solution's write–publish–read–release phases to inspect the source; an early return before a required barrier fails. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R1-015 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Shared-memory correctness debugging; intermediate.
 - **Direct prerequisite:** [M03: Shared-memory tiling](/en/memory/shared-memory-tiling/).
@@ -1406,6 +1415,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R1-018: Repair an unsafe warp collective
 
+**R7 implementation requirement — 2026-10-04:** Submit CUDA C++ implementing the corrected collective with explicit participation and valid source-lane handling. Acceptance includes a full warp, partial warp and sparse participant test plan, with defined behavior when a requested partner is absent. Review against the solution's mask and source-lane proof; a mask does not manufacture a partner or synchronize nonparticipants. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R1-018 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Warp correctness debugging; intermediate.
 - **Direct prerequisite:** [M06: Divergence, reconvergence, and warp-safe reasoning](/en/memory/warp-divergence-reconvergence/).
@@ -1445,6 +1456,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <span id="pb-r1-019" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R1-019: Repair a two-stream partial order and lifetime
+
+**R7 implementation requirement — 2026-10-04:** Write CUDA C++ host orchestration and the minimal producer/consumer kernels for the two-stream dependency graph. Acceptance requires recording an event after production, waiting in the consumer stream, and retaining allocation/event lifetimes through final completion. Include repeated reuse and injected API failure test cases. The reviewed solution's dependency edges, not host enqueue order, determine correctness. No execution is required or claimed.
 
 - **ID and Publication Pair:** PB-R1-019 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Stream-order and lifetime correctness debugging; intermediate.
@@ -1820,6 +1833,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-004: Repair group-participant and cooperative-launch defects
 
+**R7 implementation requirement — 2026-10-04:** Submit CUDA C++ showing valid group construction/participation and a host cooperative-launch admission check. If the required grid synchronization cannot be admitted, provide the explicit multi-kernel alternative rather than spinning between ordinary blocks. Acceptance includes partial-group and unsupported-cooperative-launch cases. Inspect against the reviewed solution's group membership and launch obligations. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R2-004 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Cooperative-group correctness debugging; advanced.
 - **Direct prerequisite:** [M12: Cooperative Groups and Composable Synchronization](/en/memory/cooperative-groups/).
@@ -1861,6 +1876,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <span id="pb-r2-005" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-005: Audit staged asynchronous-copy participants and evidence
+
+**R7 implementation requirement — 2026-10-04:** Write CUDA C++ for a bounded staged copy with an explicit synchronous fallback for unsupported size/alignment/capability. Acceptance requires acquire/commit/wait/release ownership and reader publication before use; reuse follows the last consumer. Include a tail and a misaligned input in the test plan. The reviewed solution's phase ledger is the source rubric, not proof of overlap or a lowered instruction. No execution is required or claimed.
 
 - **ID and Publication Pair:** PB-R2-005 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Pipeline contract and evidence review; advanced.
@@ -2075,6 +2092,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-010: Repair a separate-compilation device-link graph
 
+**R7 implementation requirement — 2026-10-04:** Submit two CUDA translation units and exact compile/device-link/host-link commands for the repaired dependency graph. Acceptance requires a declared device function, one definition, consistent target/dialect options and final device-link participation. Include a deliberately missing definition as a negative build case. The reviewed solution explains which stage resolves which symbol; listing commands without source is insufficient. Build execution is optional and separately evidenced.
+
 - **ID and Publication Pair:** PB-R2-010 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Device-link correctness debugging; advanced.
 - **Direct prerequisite:** [M18: Separate Compilation and Device Linking](/en/toolchain/separate-compilation-device-linking/).
@@ -2161,6 +2180,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-012: Repair elementwise-map ownership and data-movement accounting
 
+**R7 implementation requirement — 2026-10-04:** Submit the bounds-safe CUDA C++ binary-map kernel and checked host launch alongside the ledger below. Acceptance requires one output owner, an explicit no-alias contract and a zero-length launch policy. Include n=0, n=1 and a nonmultiple of block size; expected values come from an independent CPU transform. The reviewed solution's one-write/two-read mapping is the source rubric. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R2-012 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Ownership and memory-movement contract review; intermediate.
 - **Direct prerequisite:** [A01: Elementwise Map and One Element per Owner](/en/algorithms/elementwise-map/).
@@ -2204,6 +2225,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-013: Repair reduction stages, barriers, and operation order
 
+**R7 implementation requirement — 2026-10-04:** Implement the corrected CUDA C++ block reduction and host loop over partial arrays. Acceptance requires identity-filled tail slots, uniform barriers and kernel boundaries between global stages. Include empty, singleton and multi-block non-power-of-two inputs; specify a floating-point tolerance before any run. Use the reviewed solution's shrinking stage DAG and operand tree to check source, without demanding serial-fold bitwise equality. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R2-013 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Parallel-stage correctness debugging; advanced.
 - **Direct prerequisite:** [A02: Multi-stage Reduction, Barriers, and Operation Order](/en/algorithms/multi-stage-reduction/).
@@ -2246,6 +2269,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <span id="pb-r2-014" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-014: Repair scan dependencies, block sums, and offset propagation
+
+**R7 implementation requirement — 2026-10-04:** Submit CUDA C++ local scan, block-total scan and offset-propagation source. Acceptance requires stable prior-stage reads, correct inclusive/exclusive conversion and operand order. Test plans include [3,1,4,2], a partial block and an order-sensitive associative operator. The reviewed solution's exclusive block offsets and kernel-stage boundaries govern source review; a single ordinary-grid barrier is invalid. No execution is required or claimed.
 
 - **ID and Publication Pair:** PB-R2-014 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Prefix-dependency and hierarchy debugging; advanced.
@@ -2376,6 +2401,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-017: Prove rectangular-transpose tile and padding contracts
 
+**R7 implementation requirement — 2026-10-04:** Write the rectangular CUDA C++ transpose kernel with independently guarded source and destination coordinates. Acceptance includes a uniform staging barrier, declared shared stride/padding and valid output ownership. Include 1×N, M×1 and both dimensions nonmultiples of the tile. Use the reviewed solution's swapped coordinate/stride equations as the rubric; padding alone is not a performance result. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R2-017 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Transpose correctness debugging; advanced.
 - **Direct prerequisite:** [A05: Matrix Transpose, Coalescing, and Shared-Memory Layout](/en/algorithms/matrix-transpose-layout/).
@@ -2418,6 +2445,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <span id="pb-r2-018" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-018: Repair a stencil boundary, halo, and barrier ledger
+
+**R7 implementation requirement — 2026-10-04:** Submit a CUDA C++ stencil with explicit halo loading and the prompt's boundary rule. Acceptance requires all shared locations read to be initialized and all required threads to reach publication/reuse barriers. Include an input shorter than the stencil diameter and a partial final tile. Compare the source against the reviewed solution's halo/owner ledger and an independent scalar boundary implementation. No execution is required or claimed.
 
 - **ID and Publication Pair:** PB-R2-018 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Stencil correctness debugging; advanced.
@@ -2462,6 +2491,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-019: Audit direct convolution and a production-library decision
 
+**R7 implementation requirement — 2026-10-04:** Implement the prompt's bounded direct convolution in original CUDA C++, including explicit stride, padding and filter-index conventions. Acceptance requires one output owner and a CPU reference with the same convolution/correlation definition. Include an edge output and a non-symmetric filter that distinguishes reversal conventions. Use the reviewed solution's domain and address derivation; the library-choice discussion does not replace source delivery. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R2-019 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Convolution and library evidence review; advanced.
 - **Direct prerequisite:** [A07: Direct 2D Convolution, Neighborhood Reuse, and Layout Contracts](/en/algorithms/convolution-reuse-layout/).
@@ -2505,6 +2536,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R2-020: Prove tiled-GEMM partial-tile and numerical contracts
 
+**R7 implementation requirement — 2026-10-04:** Submit CUDA C++ tiled GEMM source with a complete K loop, predicated zero-filled loads and guarded output stores. Acceptance requires uniform barriers and the declared numerical equation applied once per output. Include M/N/K tails and a nonzero initial output where the contract uses beta. Review the source with the solution's ownership, K-coverage and tolerance rules; a remembered tile size is insufficient. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R2-020 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** GEMM correctness and debugging; advanced.
 - **Direct prerequisite:** [A08: From Correct Naive GEMM to Shared-Memory Tiling](/en/algorithms/tiled-gemm-correctness/).
@@ -2538,6 +2571,8 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <span id="pb-r2-021" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R2-021: Compose stable selection, compaction, and bounded-key sorting
+
+**R7 implementation requirement — 2026-10-04:** Write CUDA C++ predicate, exclusive-prefix, stable scatter and bounded-key pass source with explicit stage boundaries. Acceptance requires stable destinations and no conflicting writes; reject keys outside the declared range. Include all-false/all-true predicates and repeated equal keys with original positions. Use the reviewed solution's prefix/rank equations as the rubric; atomically reserving arbitrary output positions does not prove stability. No execution is required or claimed.
 
 - **ID and Publication Pair:** PB-R2-021 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Concepts and implementation decision; advanced.
@@ -2618,6 +2653,22 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 
 ## PB-R3-002: Choose timeline-first evidence from application symptoms
 
+**Required R7 report analysis — reviewed 2026-10-04.** Analyze this original, **synthetic Nsight Systems-style report excerpt** before repairing the real collection plan below. It is a constructed teaching fixture, not an exported `.nsys-rep`, Environment Manifest or observed GPU result. Within the fixture, process P0/device D0/stream S0 has one request with a common millisecond origin:
+
+| Synthetic interval | Start (ms) | End (ms) |
+| --- | --- | --- |
+| CPU request submission | 0 | 2 |
+| H2D on S0 | 2 | 6 |
+| Kernel K, occurrence 1, on S0 | 6 | 7 |
+| D2H on S0 | 7 | 11 |
+| CPU completion wait | 2 | 11 |
+
+**Analysis task and acceptance:** Calculate request span, the union of device intervals, total copy duration and kernel duration. Determine whether this fixture shows copy/kernel overlap. Explain why adding the CPU wait to device intervals double-counts time, and name two missing coordinates preventing a real bottleneck or bandwidth claim. Include these interpretations in the expected evidence; a collection plan alone is insufficient.
+
+<details><summary>Report hint</summary>Intervals on the same timeline may overlap in accounting even when work on S0 is serialized. Intersect copy and kernel intervals rather than adding lane widths.</details>
+
+<details><summary>Reviewed synthetic-report solution</summary>The request span is 11 ms, device union 9 ms, copies 8 ms and kernel 1 ms. Copy/kernel intersections have zero duration, so this fixture shows no such overlap. The 9 ms CPU wait covers the same device work and must not be added to it. The largest visible subtotal does not prove a causal bottleneck or predict a speedup. Missing bytes/workload, real version/hardware, correctness and original report custody prohibit a real bandwidth or performance conclusion. The subsequent real collection plan still leaves observed intervals blank.</details>
+
 - **ID and Publication Pair:** PB-R3-002 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Evidence review; advanced.
 - **Direct prerequisite:** [Q07: Read the Application Timeline First with Nsight Systems](/en/correctness/timeline-first-nsight-systems/).
@@ -2662,6 +2713,23 @@ In iteration zero, all 32 lanes load valid input. In iteration one, 13 lanes loa
 <span id="pb-r3-003" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R3-003: Design a minimal metric and replay plan for a selected kernel
+
+**Required R7 report analysis — reviewed 2026-10-04.** Analyze this original, **synthetic Nsight Compute-style summary** before repairing the real collection plan below. These rows are constructed report inputs, not queried metric spellings, `.ncu-rep` captures or runtime evidence. Assume the same toy workload and kernel name, but separate profiler runs:
+
+| Synthetic field | Report A | Report B |
+| --- | --- | --- |
+| Matching kernel occurrence | 3 | 4 |
+| Duration, microseconds | 200 | 160 |
+| Achieved active-warps / maximum supported warps | 40% | 25% |
+| Counter collection state | permitted | denied |
+| Reported DRAM byte field | 4096 | 0 (exporter's denial sentinel) |
+| Replay passes | 2 | not recorded |
+
+**Analysis task and acceptance:** Compute the nominal duration ratio, then decide whether it qualifies as a speedup. Interpret the occupancy and DRAM rows without equating denial with zero traffic. Identify every comparison blocker shown in the table and write a bounded next collection request. Include the annotated report comparison in expected evidence; a future query plan alone is insufficient.
+
+<details><summary>Report hint</summary>Compare occurrence, permission and replay coordinates before arithmetic. A populated numeric cell can encode a missing observation.</details>
+
+<details><summary>Reviewed synthetic-report solution</summary>200/160 is nominally 1.25, but it is not a qualified speedup: occurrences 3 and 4 differ, B lacks permission and replay disclosure, and no correctness-qualified unprofiled control exists. Occupancy falls by 15 percentage points; that neither explains duration nor proves worse latency hiding. B's zero is unavailable data, not zero DRAM traffic. Re-establish the same occurrence/workload, authorized counters, queried definitions and replay/custody records, then collect only the request-shape evidence needed for the declared question. All real metric names and observations in the plan below remain unfilled.</details>
 
 - **ID and Publication Pair:** PB-R3-003 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Evidence review; advanced.
@@ -3453,6 +3521,8 @@ For the repeated-use variant, ready and acknowledgement identify the same genera
 
 ## PB-R4-007: Repair a GEMM submatrix address, scalar, and completion contract
 
+**R7 implementation requirement — 2026-10-04:** Submit CUDA C++ host code for the corrected cuBLAS call, including submatrix offsets, leading dimensions, pointer mode, stream, statuses and completion before reuse. Acceptance includes the prompt's padded parent matrices and nonzero beta, with a CPU reference over only the logical submatrix. Apply the reviewed solution's layout/scalar/lifetime contract; a correct equation with incorrect physical strides fails. No execution is required or claimed.
+
 - **ID and Publication Pair:** PB-R4-007 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Correctness and debugging; advanced.
 - **Direct prerequisite:** [L06](/en/libraries/cublas-gemm/).
@@ -3607,6 +3677,8 @@ One valid design direction explicitly pads the logical problem to `32x32x32` for
 <span id="pb-r4-010" class="resource-target" aria-hidden="true"></span>
 
 ## PB-R4-010: Rebuild hierarchy, layout, and stage-reuse proofs for an uneven GEMM
+
+**R7 implementation requirement — 2026-10-04:** Alongside the CUTLASS reading exercise, implement an original scalar CUDA C++ teaching kernel for the specified padded M=130,N=70,K=33 equation. This source task does not instantiate CUTLASS or promise an MMA instruction. Acceptance requires nine output tiles, all three K slices per tile, FP32 accumulation/epilogue over the declared FP16 inputs, bounds-safe staging and safe two-slot reuse. Supply a CPU reference/test plan for the bottom-right 2×6 tile and final K element. The reviewed solution's offsets, publication/reuse order and single epilogue are the source rubric. Source delivery is required; compilation and execution remain optional, separate evidence.
 
 - **ID and Publication Pair:** PB-R4-010 in the `practice-bank` Publication Pair.
 - **Type and difficulty:** Concepts and implementation; advanced.

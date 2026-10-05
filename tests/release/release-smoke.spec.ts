@@ -29,6 +29,7 @@ import currentPublicationManifest from '../../src/current-publication-manifest.j
 import r3ReleaseManifest from '../../src/r3-release-manifest.json' with { type: 'json' };
 import r4ReleaseManifest from '../../src/r4-release-manifest.json' with { type: 'json' };
 import r6ReleaseManifest from '../../src/r6-release-manifest.json' with { type: 'json' };
+import r7ReleaseManifest from '../../src/r7-release-manifest.json' with { type: 'json' };
 import { PUBLISHED_DESTINATIONS } from '../../src/resource-indexes/resource-index-model';
 import { hashCanonicalBuildContract, readCanonicalRange } from '../../scripts/lib/canonical-examples.mjs';
 import { validateProfilerReportFixture } from '../../scripts/lib/profiler-report-fixture-policy.mjs';
@@ -287,7 +288,7 @@ for (const locale of ['zh-CN', 'en'] as const) {
     const prefix = locale === 'en' ? '/en' : '';
     await page.goto(`${prefix}/sources-and-versions/#r6-aggregate-review`, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#r6-aggregate-review')).toHaveCount(1);
-    await expect(page.locator('meta[name="cuda:fact-check-date"]')).toHaveAttribute('content', '2026-09-22');
+    await expect(page.locator('meta[name="cuda:fact-check-date"]')).toHaveAttribute('content', '2026-10-04');
     for (const term of ['2.31.2', '2.28.9', '2026.5', 'PB-R6-013']) await expect(page.locator('main')).toContainText(term);
     await settlePublicationPage(page);
     await page.goto(`${prefix}/practice/`, { waitUntil: 'domcontentloaded' });
@@ -304,7 +305,36 @@ for (const locale of ['zh-CN', 'en'] as const) {
   });
 }
 
-test('serves the exact R6 release and current publication with production canonicals', async ({ page, request }) => {
+for (const locale of ['zh-CN', 'en'] as const) {
+  const prefix = locale === 'en' ? '/en' : '';
+  test(`${locale} R7 full-curriculum review and first-100 study order`, async ({ page }) => {
+    const failures = collectBrowserFailures(page, releaseOrigin);
+    await page.goto(`${prefix}/sources-and-versions/#r7-full-curriculum-review`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#r7-full-curriculum-review')).toHaveCount(1);
+    await expect(page.locator('main')).toContainText('810');
+    await page.goto(`${prefix}/practice/#r7-first-100`, { waitUntil: 'domcontentloaded' });
+    const order = page.locator('[data-practice-release-order]');
+    await expect(order.locator('[data-practice-position]')).toHaveCount(100);
+    expect(await order.locator('[data-practice-position]').evaluateAll(items => items.map(item => item.getAttribute('data-practice-position'))))
+      .toEqual(r7ReleaseManifest.practiceFirst100.flatMap(group => group.entries));
+    const link = order.locator('[data-practice-position="PB-R6-005"] a');
+    await link.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#pb-r6-005$/);
+    await expect(page.locator('#pb-r6-005')).toHaveCount(1);
+    await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' });
+    await expect(order).toBeVisible();
+    for (const id of [...r7ReleaseManifest.scope.learningUnits.filter(id => id.startsWith('H')), ...r7ReleaseManifest.scope.emergingFeatureWatch]) {
+      await page.goto(PUBLISHED_DESTINATIONS[id].href[locale], { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('[data-locale-counterpart]')).toHaveAttribute('href', PUBLISHED_DESTINATIONS[id].href[locale === 'en' ? 'zh-CN' : 'en']);
+      await expect(page.locator('meta[name="cuda:evidence-runtime"]')).toHaveAttribute('content', 'none');
+    }
+    await settlePublicationPage(page);
+    expect(failures).toEqual([]);
+  });
+}
+
+test('serves the exact R7 release and current publication with production canonicals', async ({ page, request }) => {
   test.setTimeout(600_000);
   const failures = collectBrowserFailures(page, releaseOrigin);
   const releaseResponse = await request.get('/release.json');
@@ -314,7 +344,7 @@ test('serves the exact R6 release and current publication with production canoni
   const release = JSON.parse(releaseBody.toString('utf8'));
   const r4Bytes = await readFile(path.join(projectRoot, 'src/r4-release-manifest.json'));
   expect(createHash('sha256').update(r4Bytes).digest('hex')).toBe('26b0897efbfed9d697570f475e25fd88dbd3442b13357581f9ff96b87c098df7');
-  expect(release).toEqual({ ...r6ReleaseManifest, sourceCommit: expectedSourceCommit });
+  expect(release).toEqual({ ...r7ReleaseManifest, sourceCommit: expectedSourceCommit });
   expect(r4ReleaseManifest.scope).toEqual({
     publicationPairs: 277, sourceRoutes: 554, exerciseSetPublicationPairs: 74, solutionSetPublicationPairs: 74,
     learningUnits: r4LearningUnits, runnableExamples: r4RunnableExampleIds, labs: r4Labs,
@@ -323,9 +353,9 @@ test('serves the exact R6 release and current publication with production canoni
     libraryAlgorithmChoicePracticeEntries: libraryAlgorithmChoicePracticeIds, glossaryTerms: 196, sourceRecords: 92,
   });
   expect(release).toMatchObject({
-    schemaVersion: 7,
-    releaseId: 'R6',
-    reviewDate: '2026-09-22',
+    schemaVersion: 8,
+    releaseId: 'R7',
+    reviewDate: '2026-10-04',
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
@@ -361,12 +391,7 @@ test('serves the exact R6 release and current publication with production canoni
       expectedOnlyProfilerReportPlans: currentProfilerReportPlans,
       capturedProfilerReports: [],
     },
-    knownLimitations: expect.arrayContaining([
-      'No Reference Environment, Community-Observed subject, or Runtime-Verified R4 subject is declared.',
-      'Q06-Q13 and A10-A14 are Learning Units with all four evidence arrays empty and grant no Evidence Status.',
-      'R4 records no sanitizer or profiler execution, numerical output, timing, overlap, migration, contention, performance, throughput, bandwidth, bottleneck, winner, or speedup observation.',
-      'R6 completes static dependency closure through G01-G09 and all prior scope. Issue #58 separately records source-bound CI, Preview and production acceptance. R7 and deferred destinations are outside this release.',
-    ]),
+    knownLimitations: r7ReleaseManifest.knownLimitations,
   });
   // R4 advances the active contract without rewriting the completed R3 snapshot.
   expect(r3ReleaseManifest).toMatchObject({
@@ -415,7 +440,7 @@ test('serves the exact R6 release and current publication with production canoni
     sourceCommit: expectedSourceCommit,
     artifactType: 'static-assets',
     canonicalOrigin,
-    releaseReview: { latestCompleted: 'R6', next: 'R7', status: 'pending' },
+    releaseReview: { latestCompleted: 'R7', next: null, status: 'complete' },
     compatibility: {
       componentBoundaries: {
         cudnn: {

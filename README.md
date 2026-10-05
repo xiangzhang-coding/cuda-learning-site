@@ -1,5 +1,26 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
+## R7 full-curriculum release review
+
+Static review: **2026-10-04 UTC**. The complete 110-unit Stable Curriculum
+through H01–H06 closes its published prerequisites, with 25 Runnable Examples,
+20 Labs, 22 visuals, 109 Exercise/separate solution sets and 405 Publication
+Pairs / 810 routes. The 494 catalog records include 121 original practice
+entries, 207 terms and 124 sources. The bilingual Practice Bank publishes an
+explicit first-100 order with disjoint category floors 18/18/15/18/10/8/8/5.
+W01–W06 remain independent Emerging Feature Watch entries.
+
+Schema 8 `src/r7-release-manifest.json` supplies `/release.json`; current
+publication records R7 complete, with no next aggregate release scheduled.
+The [source disposition](MAINTENANCE_SOURCES.md#r7-full-curriculum-source-disposition)
+and [deployment contract](DEPLOYMENT.md#r7-release-acceptance) govern this review.
+[Issue #63](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63)
+retains actual source-bound CI, Preview, production and smoke acceptance.
+Only EX02/EX10/LAB02 retain Compile-Checked evidence; EX10 is
+Runtime-Not-Applicable and 44 subjects remain Pending Hardware Verification.
+Earlier dated release/increment summaries below are historical, including
+their then-current active release and counts.
+
 ## Current architecture increment — issue #61, 2026-10-04
 
 H05 `[H04,M17,L08]` and H06 `[H01,H02,H04,H05]` complete the architecture path

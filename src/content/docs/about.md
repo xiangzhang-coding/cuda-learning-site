@@ -3,7 +3,7 @@ title: 关于本站
 description: CUDA 学习站的目的、范围、作者和反馈渠道。
 pairId: about
 counterpart: /en/about/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-22'
+      content: '2026-10-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -37,6 +37,12 @@ head:
 CUDA 学习站（Learning Site）是一套公开、双语的 CUDA 与 GPU 编程自学课程。它优先服务作者自己的系统学习，也希望让其他认真学习 CUDA 的读者获得一条清楚、可核对的路线。
 
 ## 当前范围
+
+**2026-10-04（UTC）R7 已完成聚合静态复核。** 当前完整稳定课程（Stable Curriculum）有 110 个学习单元（Learning Unit）、25 个可运行示例（Runnable Example）、20 个实验（Lab）、22 项可视化讲解（Visual Explainer）、109 组练习（Exercise）及独立解答，共 405 个双语发布对（Publication Pair）／810 条路由；494 条目录记录包括 121 道原创题、207 个词条与 124 条来源。[前 100 题](/practice/#r7-first-100)按八类独立计数。W01–W06 保持独立，44 个示例／实验仍待硬件验证（Pending Hardware Verification）。参见[全课程复核](/sources-and-versions/#r7-full-curriculum-review)与 [issue #63 动态验收](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63)。
+
+### 历史范围与证据记录
+
+下列数量、“当前”和 R7 待复核的表述描述当时的增量；R7 当前范围以上段为准。
 
 **2026-10-04 发布增量（#62）：**[新特性观察（Emerging Feature Watch）](/watch/)新增稳定课程（Stable Curriculum）依赖图之外的 W01–W06，分别声明版本与许可门槛。[H05](/architecture/blackwell-families/) `[H04,M17,L08]` 和 [H06](/architecture/portable-specialization/) `[H01,H02,H04,H05]` 补全架构路径。EX25/LAB19/LAB20 提供目标／回退比较；[VIS15](/visuals/architecture-evolution/)覆盖 Turing 至 Blackwell。当前有 110 个学习单元（Learning Unit）、25 个可运行示例（Runnable Example）、20 个实验（Lab）、22 项可视化讲解（Visual Explainer）、109 组练习（Exercise）、109 组独立解答、405 个双语发布对（Publication Pair）、810 条源路由及 494 条目录记录：121 个练习题库（Practice Bank）条目、207 个术语表（Glossary）词条、124 条来源，加上实验／可视化。44 个待验证主体仍待硬件验证（Pending Hardware Verification）；架构／性能尚未观察。下方 R6 冻结，R7 待复核。
 

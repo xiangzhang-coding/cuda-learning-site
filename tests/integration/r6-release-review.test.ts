@@ -18,7 +18,7 @@ const metadata = (doc: Document, key: string) => doc.querySelector(`meta[name="c
 describe('R6 aggregate release review', () => {
   it('freezes all prior scope and G01-G09 with closed public dependencies and real catalog counts', () => {
     expect(release).toMatchObject({ releaseId: 'R6', schemaVersion: 7, reviewDate: '2026-09-22' });
-    expect(current.releaseReview).toEqual({ latestCompleted: 'R6', next: 'R7', status: 'pending' });
+    expect(current.releaseReview).toEqual({ latestCompleted: 'R7', next: null, status: 'complete' });
     expect(current.scope.learningUnits).toEqual([...release.scope.learningUnits, 'H01', 'H02', 'H03', 'H04', 'H05', 'H06']);
     expect(current.scope.visualExplainers).toEqual([...release.scope.visualExplainers, 'VIS15'].sort());
     expect(current.compatibility).toEqual(release.compatibility);
@@ -107,7 +107,7 @@ describe('R6 aggregate release review', () => {
     expect(titles.size).toBe(qualified.length);
     for (const slug of ['', 'about/', 'start/using-the-learning-site/', 'labs/', 'sources-and-versions/']) {
       const page = parseHTML(await read(`dist/${prefix}${slug}index.html`)).document;
-      expect(metadata(page, 'fact-check-date'), slug).toBe('2026-09-22');
+      expect(metadata(page, 'fact-check-date'), slug).toBe('2026-10-04');
       expect(page.querySelector(`a[href="/${prefix}sources-and-versions/#r6-aggregate-review"], #r6-aggregate-review`), slug).not.toBeNull();
     }
     const source = parseHTML(await read(`dist/${prefix}sources-and-versions/index.html`)).document;

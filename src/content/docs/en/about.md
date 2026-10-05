@@ -3,7 +3,7 @@ title: About
 description: The purpose, scope, author, and feedback path for CUDA Learning Site.
 pairId: about
 counterpart: /about/
-factCheckDate: '2026-09-22'
+factCheckDate: '2026-10-04'
 license: CC-BY-4.0
 provenance: original
 structure:
@@ -19,7 +19,7 @@ head:
   - tag: meta
     attrs:
       name: 'cuda:fact-check-date'
-      content: '2026-09-22'
+      content: '2026-10-04'
   - tag: meta
     attrs:
       name: 'cuda:license'
@@ -37,6 +37,12 @@ head:
 CUDA Learning Site is a public, bilingual self-study curriculum for CUDA and GPU programming. It is optimized for the author's own systematic learning while giving other serious learners a route they can inspect and verify.
 
 ## Current scope
+
+**R7 completed aggregate static review on 2026-10-04 (UTC).** The complete Stable Curriculum has 110 Learning Units, 25 examples, 20 Labs, 22 Visual Explainers and 109 Exercise/separate solution sets: 405 Publication Pairs / 810 routes. Its 494 catalog records include 121 original questions, 207 terms and 124 sources. The [first 100](/en/practice/#r7-first-100) are counted independently in eight categories. W01–W06 remain separate; 44 Example/Lab subjects remain Pending Hardware Verification. See the [full-curriculum review](/en/sources-and-versions/#r7-full-curriculum-review) and [issue #63 dynamic acceptance](https://github.com/xiangzhang-coding/cuda-learning-site/issues/63).
+
+### Historical scope and evidence records
+
+Counts, “current” and R7-pending statements below describe their then-current increments; the paragraph above governs R7 scope.
 
 **2026-10-04 publication increment (#62):** [Emerging Feature Watch](/en/watch/) adds W01–W06 outside the Stable Curriculum dependency graph, with separate version and license gates. [H05](/en/architecture/blackwell-families/) `[H04,M17,L08]` and [H06](/en/architecture/portable-specialization/) `[H01,H02,H04,H05]` complete the architecture path. EX25/LAB19/LAB20 provide target/fallback comparisons; [VIS15](/en/visuals/architecture-evolution/) covers Turing through Blackwell. Current scope: 110 Learning Units, 25 Runnable Examples, 20 Labs, 22 Visual Explainers, 109 Exercise sets, 109 separate solution sets, 405 Publication Pairs, 810 source routes and 494 catalog records: 121 Practice Bank entries, 207 Glossary terms, 124 source records, plus Labs/visuals. All 44 pending subjects remain Pending Hardware Verification. Architecture/performance remains unobserved. R6 below is frozen; R7 remains pending.
 
